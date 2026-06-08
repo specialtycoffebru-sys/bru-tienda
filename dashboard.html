@@ -1244,18 +1244,21 @@ body{display:flex;flex-direction:column;min-height:100vh}
             </select>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:1rem;padding:.75rem;background:var(--paper);border-radius:4px;border:0.5px solid var(--paper3);margin-bottom:.75rem">
-          <div onclick="document.getElementById('cat-img-file').click()" style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100px;height:80px;border:1.5px dashed var(--paper3);border-radius:4px;cursor:pointer;background:#fff;gap:5px;transition:border-color .15s" id="cat-img-dropzone">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink4)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            <span style="font-size:10px;color:var(--ink4);text-align:center">Foto producto</span>
-          </div>
-          <input type="file" id="cat-img-file" accept="image/*" style="display:none" onchange="previewCatImg(this)" />
-          <div id="cat-img-preview" style="width:80px;height:80px;border-radius:4px;overflow:hidden;background:var(--paper2);display:none;flex-shrink:0">
-            <img id="cat-img-preview-img" style="width:100%;height:100%;object-fit:cover" />
-          </div>
-          <div style="flex:1;font-size:12px;color:var(--ink3)">
-            La foto aparecera en la tarjeta del producto del catalogo.<br>
-            <span style="font-size:11px;color:var(--ink4)">Recomendado: foto cuadrada del empaque terminado.</span>
+        <div style="border:0.5px solid var(--paper3);border-radius:4px;padding:.75rem;background:var(--paper);margin-bottom:.75rem">
+          <div style="font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);margin-bottom:.5rem">Foto del producto (opcional)</div>
+          <div style="display:flex;gap:.75rem;align-items:center">
+            <div id="cat-img-preview" style="width:72px;height:72px;border-radius:4px;border:0.5px solid var(--paper3);background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ink4)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+            <div style="flex:1">
+              <input type="text" id="cat-img-url-field" placeholder="Pega URL de imagen (imgbb.com, Google Drive...)"
+                oninput="catImgFromUrl2()"
+                style="width:100%;padding:.45rem .6rem;border:0.5px solid var(--paper3);border-radius:3px;font-family:Poppins,sans-serif;font-size:12px;color:var(--ink);background:#fff;outline:none;margin-bottom:4px"/>
+              <div style="font-size:10px;color:var(--ink4)">
+                O presiona <kbd style="background:var(--paper2);border:0.5px solid var(--paper3);border-radius:2px;padding:1px 4px;font-size:10px">Ctrl+V</kbd> para pegar imagen copiada
+                <button onclick="clearCatImg()" style="margin-left:.5rem;background:none;border:none;font-size:10px;color:var(--ink4);cursor:pointer;text-decoration:underline">Quitar</button>
+              </div>
+            </div>
           </div>
         </div>
         <div style="display:flex;justify-content:flex-end">
@@ -1589,10 +1592,16 @@ function saveData(){
         inventario:   data.inventario||[],
         tienda_config: d2.tiendaConfig||{}
       };
-      const ok = await sbUpdate('bru_store', payload, {id:'main'});
+      const res = await fetch(SB_URL+'/rest/v1/bru_store?id=eq.main',{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','Accept':'application/json',
+                 'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+        body:JSON.stringify(payload)
+      });
+      const ok = res.ok;
       const ind = document.getElementById('save-indicator');
       if(ind){
-        ind.textContent = ok ? '✓ Guardado en nube' : '✓ Local';
+        ind.textContent = ok ? '✓ Guardado en nube' : '⚠ Solo local';
         ind.style.color = ok ? 'var(--green)' : 'var(--gold)';
         ind.style.opacity='1';
         clearTimeout(ind._t2);
@@ -1600,6 +1609,8 @@ function saveData(){
       }
     }catch(e){
       console.warn('cloud save error',e);
+      const ind = document.getElementById('save-indicator');
+      if(ind){ ind.textContent='✓ Local'; ind.style.opacity='1'; }
     }
   }, 800);
 }
@@ -4646,6 +4657,7 @@ function limpiarCatForm(){
   const skuEl = document.getElementById('cat-from-sku');
   if(skuEl) delete skuEl.dataset.invIdx;
   clearCatImg();
+  const catUrlF = document.getElementById('cat-img-url-field'); if(catUrlF) catUrlF.value='';
 }
 
 // ── CATALOG IMAGE ─────────────────────────────────────────────────────────
@@ -4659,6 +4671,8 @@ function setCatImg(dataUrl){
 
 function clearCatImg(){
   _catImgData = null;
+  const urlF = document.getElementById('cat-img-url-field');
+  if(urlF) urlF.value='';
   const prev = document.getElementById('cat-img-preview');
   if(prev) prev.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ink4)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
   const urlEl = document.getElementById('cat-img-url');
