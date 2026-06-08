@@ -1811,6 +1811,39 @@ try{actualizarSelectorCompraMP();}catch(e){}
 try{actualizarCatInvDatalist();}catch(e){}
 renderBlendsGuardados();
 renderCatalogo();
+
+// ── SYNC FROM SUPABASE ON LOAD ────────────────────────────────────────────────
+(async function syncFromCloud(){
+  try{
+    const res = await fetch(SB_URL+'/rest/v1/bru_store?id=eq.main&select=catalogo,inventario,tienda_config',{
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Accept':'application/json'},
+      cache:'no-store'
+    });
+    if(!res.ok) return;
+    const rows = await res.json();
+    if(!rows||!rows[0]) return;
+    const r = rows[0];
+    let changed = false;
+    if(r.catalogo){ data.catalogo = r.catalogo; changed = true; }
+    if(r.inventario){ data.inventario = r.inventario; changed = true; }
+    if(changed){
+      const local = JSON.parse(localStorage.getItem('bru_data')||'{}');
+      local.catalogo = data.catalogo;
+      local.inventario = data.inventario;
+      if(r.tienda_config) local.tiendaConfig = r.tienda_config;
+      localStorage.setItem('bru_data', JSON.stringify(local));
+      renderAll();
+      renderCatalogo();
+      renderInventario();
+      actualizarSelectorProductos();
+      actualizarCatInvDatalist();
+      const ind = document.getElementById('save-indicator');
+      if(ind){ ind.textContent='☁ Sincronizado'; ind.style.opacity='1'; ind.style.color='var(--green)';
+        setTimeout(()=>{ ind.style.opacity='0'; },2000); }
+    }
+  }catch(e){ console.warn('cloud sync error',e); }
+})();
+
 actualizarSelectorRecetas();
 setPeriod('mes',document.querySelector('.rep-period-btn'));
   renderList('ing-list',data.ingresos);
