@@ -1536,6 +1536,108 @@ body{display:flex;flex-direction:column;min-height:100vh}
     </div>
   </div>
 </div>
+<!-- MODAL EDITAR PRODUCTO CATÁLOGO -->
+<div id="modal-edit-cat" style="display:none;position:fixed;inset:0;background:rgba(26,23,20,.6);z-index:1010;align-items:center;justify-content:center;overflow-y:auto;padding:1rem">
+  <div style="background:#fff;border-radius:4px;width:600px;max-width:96vw;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.2)">
+    <div style="background:var(--espresso);padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:16px;font-weight:600;color:#fff">Editar producto</span>
+      <button onclick="cerrarEditCat()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:20px;cursor:pointer">&#215;</button>
+    </div>
+    <div style="padding:1.5rem">
+      <input type="hidden" id="ec-idx"/>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem">
+        <div style="grid-column:1/-1">
+          <div style="font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">Nombre</div>
+          <input type="text" id="ec-nombre" style="width:100%;padding:.5rem .75rem;border:0.5px solid var(--paper3);border-radius:3px;font-family:Poppins,sans-serif;font-size:13px;color:var(--ink);background:#fff;outline:none"/>
+        </div>
+        <div>
+          <div style="font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">Precio (COP)</div>
+          <input type="number" id="ec-precio" min="0" style="width:100%;padding:.5rem .75rem;border:0.5px solid var(--paper3);border-radius:3px;font-family:Poppins,sans-serif;font-size:13px;color:var(--ink);background:#fff;outline:none"/>
+        </div>
+        <div>
+          <div style="font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">Presentacion</div>
+          <select id="ec-bolsa" style="width:100%;padding:.5rem .75rem;border:0.5px solid var(--paper3);border-radius:3px;font-family:Poppins,sans-serif;font-size:13px;color:var(--ink);background:#fff;outline:none">
+            <option value="125">125 g</option><option value="250">250 g</option>
+            <option value="340">340 g</option><option value="500">500 g</option><option value="1000">1 kg</option>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">Notas de cata</div>
+          <input type="text" id="ec-desc" placeholder="Frutos rojos, chocolate..." style="width:100%;padding:.45rem .6rem;border:0.5px solid var(--paper3);border-radius:3px;font-family:Poppins,sans-serif;font-size:13px;color:var(--ink);background:#fff;outline:none"/>
+        </div>
+        <div>
+          <div style="font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">Origen</div>
+          <input type="text" id="ec-origen" placeholder="Pitalito, Huila..." style="width:100%;padding:.45rem .6rem;border:0.5px solid var(--paper3);border-radius:3px;font-family:Poppins,sans-serif;font-size:13px;color:var(--ink);background:#fff;outline:none"/>
+        </div>
+        <div>
+          <div style="font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">Productor</div>
+          <input type="text" id="ec-productor" style="width:100%;padding:.45rem .6rem;border:0.5px solid var(--paper3);border-radius:3px;font-family:Poppins,sans-serif;font-size:13px;color:var(--ink);background:#fff;outline:none"/>
+        </div>
+        <div>
+          <div style="font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">Variedad</div>
+          <input type="text" id="ec-variedad" style="width:100%;padding:.45rem .6rem;border:0.5px solid var(--paper3);border-radius:3px;font-family:Poppins,sans-serif;font-size:13px;color:var(--ink);background:#fff;outline:none"/>
+        </div>
+        <div>
+          <div style="font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">Proceso</div>
+          <select id="ec-proceso" style="width:100%;padding:.45rem .6rem;border:0.5px solid var(--paper3);border-radius:3px;font-family:Poppins,sans-serif;font-size:13px;color:var(--ink);background:#fff;outline:none">
+            <option value="">--</option><option>Natural</option><option>Washed</option>
+            <option>Honey</option><option>Anaeróbico Natural</option><option>Anaeróbico Washed</option>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">Tueste</div>
+          <select id="ec-tueste" style="width:100%;padding:.45rem .6rem;border:0.5px solid var(--paper3);border-radius:3px;font-family:Poppins,sans-serif;font-size:13px;color:var(--ink);background:#fff;outline:none">
+            <option value="">--</option><option>Ligero</option><option>Medio ligero</option>
+            <option>Medio</option><option>Medio oscuro</option><option>Oscuro</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Editor imagen -->
+      <div style="margin-bottom:1rem">
+        <div style="font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);margin-bottom:.5rem">Imagen del empaque</div>
+        <div style="display:flex;gap:.75rem;align-items:flex-start">
+          <div id="ec-img-preview" style="width:120px;height:120px;border-radius:4px;border:0.5px solid var(--paper3);background:var(--paper);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;transition:height .2s">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ink4)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
+          <div style="flex:1">
+            <input type="text" id="ec-img-url" placeholder="Pega URL (imgbb.com, Google Drive...)"
+              oninput="ecImgFromUrl()"
+              style="width:100%;padding:.45rem .6rem;border:0.5px solid var(--paper3);border-radius:3px;font-family:Poppins,sans-serif;font-size:12px;color:var(--ink);background:#fff;outline:none;margin-bottom:4px"/>
+            <div style="font-size:10px;color:var(--ink4);margin-bottom:.5rem">
+              O presiona <kbd style="background:var(--paper2);border:0.5px solid var(--paper3);border-radius:2px;padding:1px 4px;font-size:10px">Ctrl+V</kbd> para pegar imagen
+              <button onclick="ecClearImg()" style="margin-left:.5rem;background:none;border:none;font-size:10px;color:var(--red);cursor:pointer;text-decoration:underline">Quitar</button>
+            </div>
+            <div id="ec-pos-wrap" style="display:none;background:var(--paper);border-radius:4px;padding:.6rem;border:0.5px solid var(--paper3)">
+              <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--ink3);margin-bottom:.5rem;font-weight:600">Ajustar imagen</div>
+              <div style="font-size:10px;color:var(--ink3);margin-bottom:2px">↕ Posición vertical</div>
+              <input type="range" id="ec-img-pos" min="0" max="100" value="50" oninput="ecUpdateImgPos()" style="width:100%;accent-color:var(--espresso);margin-bottom:.4rem"/>
+              <div style="font-size:10px;color:var(--ink3);margin-bottom:2px">↔ Posición horizontal</div>
+              <input type="range" id="ec-img-pos-x" min="0" max="100" value="50" oninput="ecUpdateImgPos()" style="width:100%;accent-color:var(--espresso);margin-bottom:.4rem"/>
+              <div style="font-size:10px;color:var(--ink3);margin-bottom:2px">🔍 Zoom</div>
+              <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem">
+                <input type="range" id="ec-img-zoom" min="100" max="220" value="100" step="5" oninput="ecUpdateImgZoom()" style="flex:1;accent-color:var(--espresso)"/>
+                <span id="ec-img-zoom-val" style="font-size:11px;color:var(--ink3);min-width:36px;text-align:right">100%</span>
+              </div>
+              <div style="font-size:10px;color:var(--ink3);margin-bottom:2px">📐 Alto en tarjeta</div>
+              <div style="display:flex;align-items:center;gap:.5rem">
+                <input type="range" id="ec-img-height" min="80" max="400" value="260" step="10" oninput="ecUpdateImgHeight()" style="flex:1;accent-color:var(--espresso)"/>
+                <span id="ec-img-height-val" style="font-size:11px;color:var(--ink3);min-width:36px;text-align:right">260px</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:.75rem;justify-content:flex-end">
+        <button onclick="cerrarEditCat()" style="padding:.5rem 1.25rem;border:0.5px solid var(--paper3);border-radius:3px;font-family:Poppins,sans-serif;font-size:13px;cursor:pointer;background:#fff;color:var(--ink)">Cancelar</button>
+        <button onclick="guardarEditCat()" style="padding:.5rem 1.5rem;background:var(--espresso);color:#fff;border:none;border-radius:3px;font-family:Poppins,sans-serif;font-size:13px;cursor:pointer;font-weight:500">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 <script>
 const data={ingresos:[],gastos:[],inversiones:[],inventario:[],ventas:[],inversionistas:[],facturas:[]};
