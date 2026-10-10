@@ -779,6 +779,17 @@ function verCompra(id){
 function cargarDash(){
   return sb('bru_store?id=eq.main&select=finanzas').then(function(r){ S.dash = (r && r[0] && r[0].finanzas) || {}; return S.dash; }).catch(function(){ S.dash = {}; return S.dash; });
 }
+// gastos que el dashboard crea solo como reflejo de otra operación (ya entran por otro lado): no se contabilizan de nuevo
+function gastoEspejo(v, f){
+  if (!v || !v.auto) return null;
+  if (v.cat === 'Comision' && v.id && (f.venExt || []).some(function(x){ return x.gastoRef === v.id && Number(x.comision); })) return 'comisión ya descontada en la venta externa';
+  if (v.cat === 'Insumos') {
+    var m = /Insumos\s*[—-]\s*(.+?)\s*x\s*(\d+)\s*$/i.exec(v.desc || '');
+    var fe = String(v.date || '').slice(0, 10);
+    if (m && (f.insumosCompras || []).some(function(c){ return norm(c.nombre) === norm(m[1]) && String(c.fecha || '').slice(0, 10) === fe; })) return 'duplica la compra de insumos';
+  }
+  return null;
+}
 function opsDash(){
   var f = S.dash || {}, out = [], desde = S.cfg.empresa.fechaInicio || '2000-01-01', hechas = origenesContabilizados(), m = S.cfg.map, e = S.cfg.empresa;
   function fechaDe(x){ return String(x.date || x.fecha || '').slice(0, 10); }
@@ -802,6 +813,7 @@ function opsDash(){
       lineas: function(t){ return [{c: m.caja, d: Number(v.amt)}, {c: m.ing, h: Number(v.amt)}]; }, comp: 'RC'});
   });
   (f.gas || []).forEach(function(v){
+    if (gastoEspejo(v, f)) return;
     var fe = fechaDe(v); if (!fe || fe < desde || !Number(v.amt)) return; var cta = m.gas[v.cat] || m.gas.Otro || '519595'; if (cta === 'skip') return;
     var key = 'dash:gas:' + hash([fe, v.desc, v.cat, v.amt].join('|'));
     out.push({key: key, hecho: hechas[key], fecha: fe, tipo: 'Gasto', desc: (v.desc || '') + ' · ' + (v.cat || ''), valor: Number(v.amt), tercero: '', cta: cta,
@@ -1939,7 +1951,7 @@ document.addEventListener('drop', function(e){ if (!e.dataTransfer || !e.dataTra
 // =============== AGENTE CONTABLE IA ===============
 // El servidor (api/conta → 'agente') habla con la IA; las herramientas se ejecutan aquí, sobre los datos de la página.
 S.ag = { msgs: [], vista: [], ocupado: false, adj: [], auto: !!lsGet('bru_conta_ag_auto', false) };
-var AG_ESCRIBE = { actualizar_empresa: 1, registrar_compra: 1, registrar_venta_emitida: 1, crear_comprobante: 1, contabilizar_dashboard: 1, crear_tercero: 1 };
+var AG_ESCRIBE = { anular_comprobante: 1, actualizar_empresa: 1, registrar_compra: 1, registrar_venta_emitida: 1, crear_comprobante: 1, contabilizar_dashboard: 1, crear_tercero: 1 };
 var EMP_CAMPOS = { razon:'Razón social', nit:'NIT', persona:'Tipo de persona', regimen:'Régimen', simpleGrupo:'Grupo SIMPLE', ciiu:'CIIU', ciudad:'Ciudad', direccion:'Dirección', email:'Correo', tel:'Teléfono', respIVA:'Responsable de IVA', ivaPeriodo:'Periodo de IVA', agenteRet:'Agente de retención', autoret:'Autorretenedor', fechaInicio:'Contabilidad desde' };
 
 function agContexto(){
@@ -2027,6 +2039,36 @@ var AG_TOOLS = {
       return sig();
     });
   },
+  datos_dashboard: function(){
+    return sb('bru_store?id=eq.main&select=inventario,catalogo,finanzas').then(function(r){
+      var row = (r && r[0]) || {}, f = row.finanzas || {}; S.dash = f;
+      var hechas = origenesContabilizados();
+      function asi(key){ var id = hechas[key]; if (!id) return null; var a = S.byId[id]; return a ? COMP[a.data.comp] + ' ' + a.data.num + ' (' + a.data.comp + ')' : 'sí'; }
+      var ops = opsDash(), porKey = {}; ops.forEach(function(o){ porKey[o.key] = o; });
+      var espejos = (f.gas || []).map(function(v){ var mot = gastoEspejo(v, f); if (!mot) return null; var key = 'dash:gas:' + hash([String(v.date || '').slice(0, 10), v.desc, v.cat, v.amt].join('|')); return {fecha: v.date, desc: v.desc, valor: v.amt, motivo: mot, contabilizado_en: asi(key)}; }).filter(Boolean);
+      return {
+        cafe_verde_inventario: (row.inventario || []).map(function(x){ return {sku: x.sku, nombre: x.nombre, kg: x.qty}; }),
+        productos: (row.catalogo || []).map(function(p){ return {nombre: p.nombre, variedad: p.variedad, proceso: p.proceso, precio: p.precio, precios: p.precios, stock: p.stock, cantidad: p.cantidad}; }),
+        compras_cafe_verde: (f.compras || []).map(function(c){ return {fecha: c.fecha, sku: c.sku, variedad: c.variedad, kg: c.kg, precio_kg: c.precioKg, total: c.total, proveedor: c.proveedor, factura: c.facNum, pagado: c.pagado}; }),
+        insumos_stock: (f.insumos || []).map(function(x){ return {nombre: x.nombre, tipo: x.tipo, cantidad: x.qty, costo_unit: x.costoUnit}; }),
+        compras_insumos: (f.insumosCompras || []).map(function(c){ return {fecha: c.fecha, nombre: c.nombre, cantidad: c.cantidad, costo_unit: c.costoUnit, total: c.costoTotal}; }),
+        ventas: (f.ven || []).map(function(v){ return {fecha: v.date, producto: v.prod, presentacion: v.pres || v.presentacion || v.size || '', cantidad: v.qty, precio: v.precio, total: v.total, cliente: v.cliente, canal: v.canal, estado: v.est}; }),
+        ventas_externas: (f.venExt || []).map(function(v){ return {fecha: v.date, producto: v.prod, presentacion: v.pres || v.presentacion || v.size || '', cantidad: v.qty, precio: v.precio, bruto: v.bruto, comision: v.comision, cliente: v.cliente, vendedor: v.vendedor}; }),
+        gastos: (f.gas || []).map(function(v){ return {fecha: v.date, desc: v.desc, cat: v.cat, valor: v.amt, automatico: !!v.auto}; }),
+        gastos_espejo_duplicados: espejos,
+        pendientes_por_contabilizar: ops.filter(function(o){ return !o.hecho; }).length
+      };
+    });
+  },
+  listar_comprobantes: function(i){ var q = norm(i.texto || ''), n = i.limite || 40;
+    var L = asientos(!!i.incluir_anulados).filter(function(a){ if (i.desde && a.fecha < i.desde) return false; if (i.hasta && a.fecha > i.hasta) return false; if (i.comp && a.data.comp !== i.comp) return false; return !q || norm(a.data.desc + ' ' + (a.data.origen || '')).indexOf(q) >= 0; });
+    return {total: L.length, comprobantes: L.slice(-n).map(function(a){ return {comp: a.data.comp, num: a.data.num, fecha: a.fecha, desc: a.data.desc, origen: a.data.origen, anulado: !!a.data.anulado, lineas: a.data.lineas.map(function(l){ return l.c + (l.d ? ' D ' + l.d : '') + (l.h ? ' C ' + l.h : ''); })}; })}; },
+  anular_comprobante: function(i){
+    var a = asientos().filter(function(x){ return x.data.comp === i.comp && Number(x.data.num) === Number(i.num); })[0];
+    if (!a) return {ok: false, error: 'No existe el comprobante ' + i.comp + ' ' + i.num + ' (o ya está anulado)'};
+    if (/^(fac|com|nom|nc):/.test(a.data.origen || '')) return {ok: false, error: 'Ese comprobante pertenece a una factura, compra o nómina: se anula desde ese documento'};
+    return anularAsiento(a.id, i.motivo || 'Anulado por el agente').then(function(){ return {ok: true, anulado: i.comp + ' ' + i.num}; });
+  },
   crear_tercero: function(i){ return terDesde(i.tercero || {}, i.rol || 'proveedor', false).then(function(id){ return {ok: true, tercero: nomTer(id)}; }); }
 };
 function agDescribir(n, i){
@@ -2035,6 +2077,7 @@ function agDescribir(n, i){
   if (n === 'registrar_venta_emitida') return 'Registrar venta ' + esc(i.numero) + ' a <b>' + esc((i.cliente || {}).nombre || '') + '</b> por ' + fmt(i.total);
   if (n === 'crear_comprobante') return 'Comprobante manual: ' + esc(i.descripcion) + '<br>' + (i.lineas || []).map(function(l){ return '· ' + esc(l.cuenta) + ' ' + esc(nomCta(String(l.cuenta))) + (l.debito ? ' Db ' + fmt(l.debito) : '') + (l.credito ? ' Cr ' + fmt(l.credito) : ''); }).join('<br>');
   if (n === 'contabilizar_dashboard') return 'Contabilizar todas las operaciones pendientes del dashboard';
+  if (n === 'anular_comprobante') { var a0 = asientos().filter(function(x){ return x.data.comp === i.comp && Number(x.data.num) === Number(i.num); })[0]; return 'Anular comprobante ' + esc(i.comp + ' ' + i.num) + (a0 ? ' · ' + esc(a0.data.desc) + ' · ' + fFecha(a0.fecha) : '') + '<br><span class="dim">' + esc(i.motivo || '') + '</span>'; }
   if (n === 'crear_tercero') return 'Crear ' + esc(i.rol) + ': <b>' + esc((i.tercero || {}).nombre) + '</b>';
   return n;
 }
