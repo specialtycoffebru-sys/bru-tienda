@@ -191,4 +191,4 @@ module.exports = function(req, res){
     json(res, 400, { error: 'Acción desconocida' });
   }).catch(function(e){ json(res, 500, { error: e.message }); });
 };
-module.exports.config = { maxDuration: 300 };
+module.exports.config = { maxDuration: 60 };
