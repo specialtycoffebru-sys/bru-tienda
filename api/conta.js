@@ -126,6 +126,9 @@ var TOOLS = [
   { name: 'impuestos', description: 'Calcula IVA por periodo de un año, retención en la fuente de un mes o ICA de un rango.', input_schema: { type: 'object', properties: { impuesto: {type:'string', enum:['iva','retencion','ica']}, anio: {type:'number'}, mes: {type:'string', description:'YYYY-MM para retención'}, desde: {type:'string'}, hasta: {type:'string'} }, required: ['impuesto'] } },
   { name: 'vencimientos', description: 'Obligaciones DIAN, nómina y legales vencidas o próximas (60 días).', input_schema: { type: 'object', properties: {} } },
   { name: 'pendientes_dashboard', description: 'Operaciones registradas en el dashboard (ventas, gastos, compras de café) que aún no están contabilizadas.', input_schema: { type: 'object', properties: {} } },
+  { name: 'datos_dashboard', description: 'Lee el dashboard de la tienda: inventario de café verde, productos y precios por presentación, compras de café verde (kg y precio/kg), insumos (stock y costo unitario), compras de insumos, ventas y ventas externas (cantidades por producto), gastos, y los gastos automáticos que son espejo de otra operación (duplicados) con el comprobante donde quedaron contabilizados.', input_schema: { type: 'object', properties: {} } },
+  { name: 'listar_comprobantes', description: 'Busca comprobantes contables por texto, tipo (FV, FC, CE, RC, AJ, DS...) o fechas.', input_schema: { type: 'object', properties: { texto: {type:'string'}, comp: {type:'string'}, desde: {type:'string'}, hasta: {type:'string'}, incluir_anulados: {type:'boolean'}, limite: {type:'number'} } } },
+  { name: 'anular_comprobante', description: 'Anula un comprobante contable (por ejemplo un gasto duplicado). No borra: queda marcado como anulado y deja de contar.', input_schema: { type: 'object', properties: { comp: {type:'string'}, num: {type:'number'}, motivo: {type:'string'} }, required: ['comp','num','motivo'] } },
   { name: 'actualizar_empresa', description: 'Actualiza los datos de la empresa (por ejemplo, leídos del RUT). Solo envía los campos que cambian.', input_schema: { type: 'object', properties: { campos: { type: 'object', properties: {
       razon: {type:'string'}, nit: {type:'string', description:'sin DV'}, persona: {type:'string', enum:['J','N']}, regimen: {type:'string', enum:['ordinario','simple']}, simpleGrupo: {type:'number'},
       ciiu: {type:'string'}, ciudad: {type:'string'}, direccion: {type:'string'}, email: {type:'string'}, tel: {type:'string'},
@@ -151,6 +154,7 @@ var SISTEMA = 'Eres el agente contable de la empresa (café de especialidad en C
   '- Facturas o soportes: por cada documento verifica que esté a nombre de la empresa, extrae los datos y llama registrar_compra (o registrar_venta_emitida si el emisor es la propia empresa). Clasifica bien la categoría. Si el documento es una cuenta de cobro de persona no obligada a facturar, usa tipo_documento cuenta_cobro (genera documento soporte).\n' +
   '- Los valores de subtotal e IVA salen del documento; no los recalcules si el documento los trae.\n' +
   '- Al terminar, resume lo que hiciste y lo que queda pendiente (por ejemplo, vencimientos cercanos).\n' +
+  '- Organizar la contabilidad (cuando te lo pidan): 1) contabiliza lo pendiente del dashboard; 2) usa datos_dashboard y anula los gastos espejo que ya quedaron contabilizados (duplican compras de insumos o comisiones ya descontadas); 3) cruza compras de café verde, ventas por producto e insumos con el conteo físico que dé el usuario para calcular el costo de ventas (inventario periódico: inventario inicial + compras − inventario final), valorando el café tostado al costo del verde ajustado por la merma de tostión más el empaque y la etiqueta; si falta la merma u otro dato clave, propón un valor razonable (por ejemplo 16 % de merma) y pide confirmación antes de registrar; 4) registra el costo de ventas con crear_comprobante (débito 612001, créditos a 140505 café verde y 140510 insumos según corresponda; si queda café tostado, llévalo a 143005); 5) revisa IVA, retenciones y vencimientos y termina con un resumen claro de lo hecho y lo pendiente.\n' +
   '- No das asesoría legal definitiva: para decisiones de alto impacto recomienda validar con el contador.';
 function agente(d){
   var key = process.env.ANTHROPIC_API_KEY;
@@ -171,12 +175,12 @@ function agente(d){
 
 module.exports = function(req, res){
   if (req.method === 'OPTIONS') { res.setHeader('Allow', 'POST'); return json(res, 204, {}); }
-  if (req.method === 'GET') return json(res, 200, { ok: true, version: 3, alegra: alegraOK(), ia: !!process.env.ANTHROPIC_API_KEY, agente: true });
+  if (req.method === 'GET') return json(res, 200, { ok: true, version: 4, alegra: alegraOK(), ia: !!process.env.ANTHROPIC_API_KEY, agente: true });
   if (req.method !== 'POST') return json(res, 405, { error: 'Usa POST' });
   leerBody(req).then(function(b){
     if (process.env.CONTA_TOKEN && req.headers['x-conta-token'] !== process.env.CONTA_TOKEN) return json(res, 401, { error: 'Clave de acceso incorrecta (Configuración → Facturación electrónica)' });
     var a = b.accion, d = b.datos || {};
-    if (a === 'ping') return json(res, 200, { ok: true, version: 3, alegra: alegraOK(), ia: !!process.env.ANTHROPIC_API_KEY, protegido: !!process.env.CONTA_TOKEN });
+    if (a === 'ping') return json(res, 200, { ok: true, version: 4, alegra: alegraOK(), ia: !!process.env.ANTHROPIC_API_KEY, protegido: !!process.env.CONTA_TOKEN });
     if (a === 'alegra_test') {
       if (!alegraOK()) return json(res, 200, { error: 'Faltan ALEGRA_EMAIL y ALEGRA_TOKEN en Vercel' });
       return al('/company').then(function(c){ json(res, 200, { ok: true, empresa: (c && (c.name || c.identification)) || '' }); }).catch(function(e){ json(res, 200, { error: e.message }); });
