@@ -2162,7 +2162,12 @@ function agCiclo(n){
     r.content.forEach(function(c){ if (c.type === 'text' && c.text.trim()) S.ag.vista.push({t: 'ai', texto: c.text}); });
     agPintar();
     var usos = r.content.filter(function(c){ return c.type === 'tool_use'; });
-    if (r.stop_reason !== 'tool_use' || !usos.length) return;
+    if (r.stop_reason === 'max_tokens' && !usos.length) {
+      // la respuesta se cortó (se le acabó el espacio): se le pide que siga
+      S.ag.msgs.push({role: 'user', content: [{type: 'text', text: 'Tu respuesta se cortó. Continúa desde donde ibas, directo y breve.'}]});
+      return agCiclo(n + 1);
+    }
+    if (r.stop_reason !== 'tool_use' || !usos.length) { if (!r.content.some(function(c){ return c.type === 'text' && c.text.trim(); })) S.ag.vista.push({t: 'err', texto: 'El agente no devolvió texto. Escríbele «continúa».'}); return; }
     var res = [], k = 0;
     function sig(){
       if (k >= usos.length) { S.ag.msgs.push({role: 'user', content: res}); return agCiclo(n + 1); }
