@@ -2090,6 +2090,10 @@ function agEnviar(texto, files){
   agEnviar.reintento = false;
   if (!S.svc.ia) { var vs = S.svc.version ? '' : ' (Ojo: el servidor responde con una versión anterior: vuelve a subir api/conta.js a GitHub.)'; S.ag.vista.push({t: 'err', texto: 'El agente necesita la IA activa: crea una clave en console.anthropic.com → API Keys y agrégala en Vercel como ANTHROPIC_API_KEY (luego Redeploy). Puedes comprobarlo abriendo brucoffeeshop.online/api/conta: debe decir "ia":true.' + vs}); agPintar(); return; }
   if (!texto) texto = 'Revisa estos documentos y haz la contabilidad: si es el RUT actualiza los datos de la empresa; si son facturas o soportes, regístralos.';
+  // el contexto se fija para todo el turno (la IA exige el mismo "system" mientras usa herramientas)
+  // y el razonamiento interno de turnos anteriores se descarta, porque queda atado al contexto viejo
+  S.ag.ctx = agContexto();
+  S.ag.msgs.forEach(function(m){ if (m.role === 'assistant' && Array.isArray(m.content)) { m.content = m.content.filter(function(c){ return c.type !== 'thinking' && c.type !== 'redacted_thinking'; }); if (!m.content.length) m.content = [{type: 'text', text: '(listo)'}]; } });
   S.ag.ocupado = true; S.ag.vista.push({t: 'user', texto: texto, archivos: files.map(function(f){ return f.name; })}); agPintar();
   agPreparar(files).then(function(p){
     S.ag.msgs.push({role: 'user', content: p.bloques.concat([{type: 'text', text: texto}])});
@@ -2102,7 +2106,14 @@ function agEnviar(texto, files){
 }
 function agCiclo(n){
   if (n > 14) { S.ag.vista.push({t: 'err', texto: 'Me detuve para no dar demasiadas vueltas. Dime si sigo.'}); return Promise.resolve(); }
-  return api('agente', {messages: S.ag.msgs, contexto: agContexto()}).then(function(r){
+  return api('agente', {messages: S.ag.msgs, contexto: S.ag.ctx || agContexto()}).then(function(r){
+    if (r.error && /signature|thinking/i.test(r.error) && !agCiclo.limpio) {
+      agCiclo.limpio = true;
+      var ult = S.ag.msgs.filter(function(m){ return m.role === 'user' && Array.isArray(m.content) && m.content.some(function(c){ return c.type === 'text' || c.type === 'document' || c.type === 'image'; }); }).pop();
+      S.ag.msgs = ult ? [ult] : S.ag.msgs.slice(-1);
+      return agCiclo(n);
+    }
+    agCiclo.limpio = false;
     if (r.error) throw new Error(r.error);
     S.ag.msgs.push({role: 'assistant', content: r.content});
     r.content.forEach(function(c){ if (c.type === 'text' && c.text.trim()) S.ag.vista.push({t: 'ai', texto: c.text}); });
