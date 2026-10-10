@@ -165,7 +165,7 @@ function agente(d){
   return fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-    body: JSON.stringify({ model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: 4096, system: sys, tools: TOOLS, messages: msgs })
+    body: JSON.stringify({ model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: 16000, system: sys, tools: TOOLS, messages: msgs })
   }).then(function(r){ return r.text().then(function(t){
     var j = null; try { j = JSON.parse(t); } catch (e) {}
     if (!r.ok) throw new Error('IA: ' + ((j && j.error && j.error.message) || ('error ' + r.status)));
@@ -175,12 +175,12 @@ function agente(d){
 
 module.exports = function(req, res){
   if (req.method === 'OPTIONS') { res.setHeader('Allow', 'POST'); return json(res, 204, {}); }
-  if (req.method === 'GET') return json(res, 200, { ok: true, version: 4, alegra: alegraOK(), ia: !!process.env.ANTHROPIC_API_KEY, agente: true });
+  if (req.method === 'GET') return json(res, 200, { ok: true, version: 5, alegra: alegraOK(), ia: !!process.env.ANTHROPIC_API_KEY, agente: true });
   if (req.method !== 'POST') return json(res, 405, { error: 'Usa POST' });
   leerBody(req).then(function(b){
     if (process.env.CONTA_TOKEN && req.headers['x-conta-token'] !== process.env.CONTA_TOKEN) return json(res, 401, { error: 'Clave de acceso incorrecta (Configuración → Facturación electrónica)' });
     var a = b.accion, d = b.datos || {};
-    if (a === 'ping') return json(res, 200, { ok: true, version: 4, alegra: alegraOK(), ia: !!process.env.ANTHROPIC_API_KEY, protegido: !!process.env.CONTA_TOKEN });
+    if (a === 'ping') return json(res, 200, { ok: true, version: 5, alegra: alegraOK(), ia: !!process.env.ANTHROPIC_API_KEY, protegido: !!process.env.CONTA_TOKEN });
     if (a === 'alegra_test') {
       if (!alegraOK()) return json(res, 200, { error: 'Faltan ALEGRA_EMAIL y ALEGRA_TOKEN en Vercel' });
       return al('/company').then(function(c){ json(res, 200, { ok: true, empresa: (c && (c.name || c.identification)) || '' }); }).catch(function(e){ json(res, 200, { error: e.message }); });
@@ -191,4 +191,4 @@ module.exports = function(req, res){
     json(res, 400, { error: 'Acción desconocida' });
   }).catch(function(e){ json(res, 500, { error: e.message }); });
 };
-module.exports.config = { maxDuration: 60 };
+module.exports.config = { maxDuration: 300 };
