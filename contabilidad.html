@@ -1552,7 +1552,7 @@ function eventosCal(){
   var idx = dig === '' ? -1 : (dig === '0' ? 9 : Number(dig) - 1);
   function f(per){ return idx >= 0 ? RET2026[per][idx] : RET2026[per][9]; }
   var aprox = idx < 0;
-  if (e.agenteRet || e.regimen === 'ordinario') Object.keys(RET2026).forEach(function(m){ out.push({k:'ret:2026-' + m, fecha: f(m), n: 'Retención en la fuente de ' + MESES[Number(m) - 1] + ' (formulario 350)', tipo:'DIAN'}); });
+  if (e.agenteRet) Object.keys(RET2026).forEach(function(m){ out.push({k:'ret:2026-' + m, fecha: f(m), n: 'Retención en la fuente de ' + MESES[Number(m) - 1] + ' (formulario 350)', tipo:'DIAN'}); });
   if (e.respIVA) periodosIVA(2026).forEach(function(p){ var m = ('0' + p.mesFin).slice(-2); out.push({k:'iva:' + p.k, fecha: f(m), n: 'IVA ' + p.n + ' (formulario 300)', tipo:'DIAN'}); });
   if (e.regimen === 'ordinario' && e.persona === 'J') { out.push({k:'renta1:2026', fecha: f('04'), n: 'Renta año 2025 · declaración y primera cuota (formulario 110)', tipo:'DIAN'}); out.push({k:'renta2:2026', fecha: f('06'), n: 'Renta año 2025 · segunda cuota', tipo:'DIAN'}); }
   if (e.regimen === 'simple') out.push({k:'simple:2026', fecha:'2026-04-20', n:'Declaración anual SIMPLE (formulario 260) · 20 a 24 de abril según NIT', tipo:'DIAN'});
@@ -2067,8 +2067,9 @@ var AG_TOOLS = {
   anular_comprobante: function(i){
     var a = asientos().filter(function(x){ return x.data.comp === i.comp && Number(x.data.num) === Number(i.num); })[0];
     if (!a) return {ok: false, error: 'No existe el comprobante ' + i.comp + ' ' + i.num + ' (o ya está anulado)'};
-    if (/^(fac|com|nom|nc):/.test(a.data.origen || '')) return {ok: false, error: 'Ese comprobante pertenece a una factura, compra o nómina: se anula desde ese documento'};
-    return anularAsiento(a.id, i.motivo || 'Anulado por el agente').then(function(){ return {ok: true, anulado: i.comp + ' ' + i.num}; });
+    if (/^(fac|nom|nc):/.test(a.data.origen || '')) return {ok: false, error: 'Ese comprobante pertenece a una factura de venta o nómina: se anula desde ese documento'};
+    var doc = /^com:/.test(a.data.origen || '') ? S.byId[a.data.origen.slice(4)] : null;
+    return anularAsiento(a.id, i.motivo || 'Anulado por el agente').then(function(){ if (doc) { doc.data.anulada = true; doc.data.motivoAnulacion = i.motivo || ''; return guardar(doc); } }).then(function(){ return {ok: true, anulado: i.comp + ' ' + i.num, compra_anulada: !!doc}; });
   },
   crear_tercero: function(i){ return terDesde(i.tercero || {}, i.rol || 'proveedor', false).then(function(id){ return {ok: true, tercero: nomTer(id)}; }); }
 };
