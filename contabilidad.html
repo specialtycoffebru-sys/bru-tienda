@@ -139,6 +139,7 @@ table.t td.num,table.t th.num{text-align:right}
     <button data-t="resumen" class="on">Resumen</button>
     <button data-t="facturas">Facturación <span class="cnt" id="cnt-fac"></span></button>
     <button data-t="compras">Compras y gastos</button>
+    <button data-t="cobros">Cuentas de cobro</button>
     <button data-t="leer">Subir facturas <span class="cnt" id="cnt-leer"></span></button>
     <button data-t="importar">Del dashboard <span class="cnt" id="cnt-imp"></span></button>
     <button data-t="nomina">Nómina</button>
@@ -156,6 +157,7 @@ table.t td.num,table.t th.num{text-align:right}
   <section id="t-resumen"></section>
   <section id="t-facturas" class="hide"></section>
   <section id="t-compras" class="hide"></section>
+  <section id="t-cobros" class="hide"></section>
   <section id="t-leer" class="hide"></section>
   <section id="t-importar" class="hide"></section>
   <section id="t-nomina" class="hide"></section>
@@ -2285,6 +2287,232 @@ function enlazarCajaConfig(){
   agPintar();
 })();
 
+// =============== CUENTAS DE COBRO ===============
+// Emitida: yo le cobro a un cliente (persona natural no responsable de IVA → ingreso).
+// Recibida: un tercero me cobra (comisiones, servicios) → gasto con su soporte.
+COMP.CC = 'Cuenta de cobro';
+function cobros(){ return lista('cobro').sort(function(a, b){ return (b.fecha || '').localeCompare(a.fecha || '') || String(b.data.numero).localeCompare(String(a.data.numero)); }); }
+function numLetras(n){
+  n = Math.round(Number(n) || 0); if (!n) return 'CERO PESOS';
+  var U = ['', 'UN', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE', 'DIEZ', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISÉIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE', 'VEINTE', 'VEINTIÚN', 'VEINTIDÓS', 'VEINTITRÉS', 'VEINTICUATRO', 'VEINTICINCO', 'VEINTISÉIS', 'VEINTISIETE', 'VEINTIOCHO', 'VEINTINUEVE'];
+  var D = ['', '', '', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'];
+  var C = ['', 'CIENTO', 'DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'];
+  function cien(x){ if (x === 100) return 'CIEN'; var c = Math.floor(x / 100), r = x % 100, t = C[c]; if (r) { var s = r < 30 ? U[r] : D[Math.floor(r / 10)] + (r % 10 ? ' Y ' + U[r % 10] : ''); t = (t ? t + ' ' : '') + s; } return t; }
+  function mil(x){ var m = Math.floor(x / 1000), r = x % 1000, t = ''; if (m) t = m === 1 ? 'MIL' : cien(m) + ' MIL'; if (r) t = (t ? t + ' ' : '') + cien(r); return t; }
+  var mill = Math.floor(n / 1000000), resto = n % 1000000, out = '';
+  if (mill) out = mill === 1 ? 'UN MILLÓN' : mil(mill) + ' MILLONES';
+  if (resto) out = (out ? out + ' ' : '') + mil(resto); else if (mill) out += ' DE';
+  return out.replace(/\s+/g, ' ').trim() + ' PESOS M/CTE';
+}
+function renderCobros(){
+  var L = cobros(), h = hoy(), m = mesDe(h);
+  var emit = L.filter(function(d){ return d.data.tipo === 'emitida' && !d.data.anulada; }), rec = L.filter(function(d){ return d.data.tipo === 'recibida' && !d.data.anulada; });
+  var porCobrar = emit.filter(function(d){ return d.data.forma === 'credito' && !d.data.pagada; }).reduce(function(s, d){ return s + d.data.valor; }, 0);
+  var porPagar = rec.filter(function(d){ return d.data.forma === 'credito' && !d.data.pagada; }).reduce(function(s, d){ return s + d.data.neto; }, 0);
+  $('t-cobros').innerHTML =
+    '<div class="banner info">Como persona natural no responsable de IVA puedes cobrar con <b>cuenta de cobro</b> en lugar de factura. También sirve como soporte de lo que te cobran otros (comisiones, servicios): genérala aquí, imprímela y que el tercero la firme.</div>' +
+    '<div class="kpis"><div class="kpi"><b>' + emit.filter(function(d){ return mesDe(d.fecha) === m; }).length + '</b><span>emitidas este mes</span></div><div class="kpi"><b>' + fmt(porCobrar) + '</b><span>por cobrar</span></div><div class="kpi"><b>' + rec.filter(function(d){ return mesDe(d.fecha) === m; }).length + '</b><span>recibidas este mes</span></div><div class="kpi"><b>' + fmt(porPagar) + '</b><span>por pagar</span></div></div>' +
+    '<div class="row" style="margin-bottom:10px"><button class="btn pri" id="ccEmit">+ Cobrarle a un cliente</button><button class="btn" id="ccRec">+ Registrar lo que me cobran</button></div>' +
+    '<div class="tbl-w"><table class="t"><thead><tr><th>Número</th><th>Fecha</th><th>Tipo</th><th>Tercero</th><th>Concepto</th><th class="num">Valor</th><th>Estado</th><th></th></tr></thead><tbody>' +
+    (L.map(function(d){ var x = d.data; return '<tr class="click' + (x.anulada ? ' anul' : '') + '" data-cc="' + d.id + '"><td>' + esc(x.numero) + '</td><td>' + fFecha(d.fecha) + '</td><td>' + (x.tipo === 'emitida' ? 'Emitida' : 'Recibida') + '</td><td>' + esc(nomTer(x.tercero)) + '</td><td>' + esc(x.concepto).slice(0, 60) + '</td><td class="num">' + fmt(x.valor) + '</td><td>' + (x.anulada ? '<span class="st bad">Anulada</span>' : x.forma !== 'credito' || x.pagada ? '<span class="st ok">' + (x.tipo === 'emitida' ? 'Cobrada' : 'Pagada') + '</span>' : '<span class="st warn">' + (x.tipo === 'emitida' ? 'Por cobrar' : 'Por pagar') + '</span>') + '</td><td class="num"><button class="btn sm ghost" data-ccp="' + d.id + '">Imprimir</button></td></tr>'; }).join('') || '<tr><td colspan="8" class="empty">Aún no hay cuentas de cobro</td></tr>') + '</tbody></table></div>';
+  $('ccEmit').onclick = function(){ formCobro('emitida'); };
+  $('ccRec').onclick = function(){ formCobro('recibida'); };
+  $('t-cobros').querySelector('tbody').onclick = function(e){ var p = e.target.closest('[data-ccp]'); if (p) { e.stopPropagation(); imprimirCobro(S.byId[p.getAttribute('data-ccp')]); return; } var tr = e.target.closest('[data-cc]'); if (tr) verCobro(tr.getAttribute('data-cc')); };
+}
+function formCobro(tipo, pre){
+  var x = pre || {tercero: '', fecha: hoy(), concepto: '', valor: '', forma: tipo === 'emitida' ? 'credito' : 'caja', cta: tipo === 'emitida' ? S.cfg.map.ventas : '520518', tipoRet: 'ninguna', numero: '', banco: ''};
+  var rol = tipo === 'emitida' ? 'cliente' : 'proveedor', e = S.cfg.empresa;
+  var nSig = S.cfg.num.CC || {prefijo: 'CC', sig: 1};
+  abrirPanel(tipo === 'emitida' ? 'Cuenta de cobro a un cliente' : 'Cuenta de cobro que me hacen',
+    '<div class="grid g2"><div>' + fld(tipo === 'emitida' ? 'Cliente' : 'Quién cobra', '<select id="kTer">' + optTer(x.tercero, rol) + '</select>') + '<button class="btn sm ghost" id="kTerN" style="margin-top:4px">+ Nuevo</button></div>' +
+    fld('Fecha', inp('kF', x.fecha, 'date')) + '</div>' +
+    '<div class="grid g2" style="margin-top:8px">' + fld('Número', tipo === 'emitida' ? inp('kN', nSig.prefijo + '-' + ('000' + nSig.sig).slice(-4), 'text', ' readonly') : inp('kN', x.numero, 'text', ' placeholder="El que ponga quien cobra (opcional)"')) +
+    fld('Valor', inp('kV', x.valor, 'number', ' min="0"')) + '</div>' +
+    fld('Concepto', '<textarea id="kC" style="min-height:60px" placeholder="' + (tipo === 'emitida' ? 'Ej. Venta de 6 latas de café Chocomora 300 g' : 'Ej. Comisión por ventas de café de septiembre') + '">' + esc(x.concepto) + '</textarea>') +
+    '<div class="grid g3" style="margin-top:8px">' + fld(tipo === 'emitida' ? 'Cómo te pagan' : 'Cómo pagas', sel('kFo', [['credito', tipo === 'emitida' ? 'Queda por cobrar' : 'Queda por pagar'], ['banco', 'Banco / Nequi / transferencia'], ['caja', 'Efectivo']], x.forma)) +
+    fld('Cuenta contable', '<select id="kCta">' + optCtas(x.cta, tipo === 'emitida' ? ['41', '42'] : ['51', '52', '53', '61', '14']) + '</select>') +
+    (tipo === 'recibida' ? fld('Retención', sel('kRet', (S.cfg.params.ret || RET_DEF).map(function(r){ return [r.k, r.n]; }), x.tipoRet)) : '<div></div>') + '</div>' +
+    (tipo === 'emitida' ? fld('Cuenta para que te paguen (opcional, sale impresa)', inp('kB', x.banco || e.cuentaPago || '', 'text', ' placeholder="Ej. Nequi 304 492 7790"')) : '') +
+    '<div class="small muted" id="kRes" style="margin-top:8px"></div>',
+    '<button class="btn pri" id="kOk">Guardar y contabilizar</button>');
+  function calc(){ var v = Number(val('kV')) || 0, t = tercero(val('kTer')) || {}, rt = tipo === 'recibida' ? calcRet(val('kRet'), v, t) : {valor: 0}; $('kRes').innerHTML = v ? (tipo === 'recibida' ? 'Retención ' + fmt(rt.valor) + (rt.motivo ? ' · ' + esc(rt.motivo) : '') + ' · Neto a pagar <b>' + fmt(v - rt.valor) + '</b>' : 'Ingreso de <b>' + fmt(v) + '</b> · ' + esc(numLetras(v).toLowerCase())) : ''; return rt; }
+  ['kV', 'kTer', 'kRet'].forEach(function(i){ if ($(i)) { $(i).oninput = calc; $(i).onchange = calc; } }); calc();
+  $('kTerN').onclick = function(){ var keep = {tercero: '', fecha: val('kF'), concepto: val('kC'), valor: val('kV'), forma: val('kFo'), cta: val('kCta'), tipoRet: $('kRet') ? val('kRet') : 'ninguna', numero: tipo === 'recibida' ? val('kN') : '', banco: $('kB') ? val('kB') : ''}; formTercero(null, function(nid){ keep.tercero = nid; formCobro(tipo, keep); }, rol); };
+  $('kOk').onclick = function(){
+    var t = val('kTer'), v = r2(Number(val('kV')) || 0), conc = val('kC').trim();
+    if (!t) return toast(tipo === 'emitida' ? 'Elige el cliente' : 'Elige quién cobra', true);
+    if (!v) return toast('Escribe el valor', true); if (!conc) return toast('Escribe el concepto', true);
+    var rt = calc(), forma = val('kFo'), cta = val('kCta'), numero;
+    if (tipo === 'emitida') { S.cfg.num.CC = nSig; numero = nSig.prefijo + '-' + ('000' + nSig.sig).slice(-4); nSig.sig++; if ($('kB') && val('kB')) e.cuentaPago = val('kB'); } else numero = val('kN').trim() || ('REC-' + val('kF').replace(/-/g, '') + '-' + Math.random().toString(36).slice(2, 5).toUpperCase());
+    var doc = {id: uid('cc'), tipo: 'cobro', fecha: val('kF'), data: {tipo: tipo, numero: numero, tercero: t, concepto: conc, valor: v, forma: forma, cta: cta, retFte: rt.valor || 0, ctaRet: rt.cta || '', neto: r2(v - (rt.valor || 0)), banco: $('kB') ? val('kB') : '', pagada: forma !== 'credito', creado: new Date().toISOString()}};
+    var L;
+    if (tipo === 'emitida') L = [{c: forma === 'credito' ? '130505' : cuentaPago(forma), t: t, d: v}, {c: cta, t: t, h: v}];
+    else { L = [{c: cta, t: t, d: v}]; if (rt.valor) L.push({c: rt.cta, t: t, h: rt.valor, b: v}); L.push({c: forma === 'credito' ? '233595' : cuentaPago(forma), t: t, h: doc.data.neto}); }
+    $('kOk').disabled = true;
+    nuevoAsiento('CC', doc.fecha, 'Cuenta de cobro ' + numero + ' · ' + nomTer(t) + ' · ' + conc.slice(0, 60), L, 'cc:' + doc.id).then(function(a){ doc.data.asiento = a.id; return guardar(doc); })
+      .then(function(){ return guardarCfg(); }).then(function(){ toast('Cuenta de cobro ' + numero + ' guardada'); cerrarPanel(); render(); verCobro(doc.id); })
+      .catch(function(er){ $('kOk').disabled = false; toast(er.message, true); });
+  };
+}
+function verCobro(id){
+  var d = S.byId[id]; if (!d) return; var x = d.data;
+  abrirPanel('Cuenta de cobro ' + x.numero,
+    '<div class="row" style="margin-bottom:8px"><span class="st ' + (x.anulada ? 'bad' : 'info') + '">' + (x.anulada ? 'Anulada' : x.tipo === 'emitida' ? 'Emitida por mí' : 'Me la hicieron') + '</span><span class="muted small">' + fFecha(d.fecha) + ' · ' + esc(nomTer(x.tercero)) + '</span></div>' +
+    '<p>' + esc(x.concepto) + '</p><div class="kpis"><div class="kpi"><b>' + fmt(x.valor) + '</b><span>valor</span></div>' + (x.retFte ? '<div class="kpi"><b>' + fmt(x.retFte) + '</b><span>retención</span></div>' : '') + '<div class="kpi"><b>' + (x.forma === 'credito' && !x.pagada ? 'Pendiente' : 'Pagada') + '</b><span>estado</span></div></div>',
+    '<button class="btn" id="vkP">Imprimir / PDF</button>' + (!x.anulada && x.forma === 'credito' && !x.pagada ? sel('vkM', FORMAS.slice(0, 2), 'caja') + '<button class="btn pri" id="vkPag">' + (x.tipo === 'emitida' ? 'Registrar cobro' : 'Registrar pago') + '</button>' : '') + (!x.anulada ? '<button class="btn dang" id="vkA">Anular</button>' : ''));
+  $('vkP').onclick = function(){ imprimirCobro(d); };
+  if ($('vkPag')) $('vkPag').onclick = function(){
+    var cta = cuentaPago($('vkM') ? val('vkM') : 'caja') || S.cfg.map.caja;
+    var L = x.tipo === 'emitida' ? [{c: cta, t: x.tercero, d: x.valor}, {c: '130505', t: x.tercero, h: x.valor}] : [{c: '233595', t: x.tercero, d: x.neto}, {c: cta, t: x.tercero, h: x.neto}];
+    nuevoAsiento(x.tipo === 'emitida' ? 'RC' : 'CE', hoy(), (x.tipo === 'emitida' ? 'Cobro ' : 'Pago ') + 'cuenta de cobro ' + x.numero + ' · ' + nomTer(x.tercero), L, 'ccpago:' + d.id).then(function(){ x.pagada = true; x.pagadaEl = hoy(); return guardar(d); }).then(function(){ toast('Registrado'); cerrarPanel(); render(); }).catch(function(er){ toast(er.message, true); });
+  };
+  if ($('vkA')) $('vkA').onclick = function(){ if (!confirm('¿Anular la cuenta de cobro ' + x.numero + '?')) return; anularAsiento(x.asiento, 'Cuenta de cobro anulada').then(function(){ x.anulada = true; return guardar(d); }).then(function(){ toast('Anulada'); cerrarPanel(); render(); }); };
+}
+function imprimirCobro(d){
+  if (!d) return; var x = d.data, e = S.cfg.empresa, t = tercero(x.tercero) || {};
+  var yo = {nombre: e.razon, doc: (e.persona === 'N' ? 'C.C. ' : 'NIT ') + e.nit + (e.persona === 'N' ? '' : '-' + e.dv), dir: e.direccion, ciudad: e.ciudad, tel: e.tel, email: e.email};
+  var otro = {nombre: t.nombre, doc: (t.tipoDoc === 'NIT' ? 'NIT ' : 'C.C. ') + (t.num || '________') + (t.tipoDoc === 'NIT' && t.dv ? '-' + t.dv : ''), dir: t.dir, ciudad: t.ciudad, tel: t.tel, email: t.email};
+  var cobra = x.tipo === 'emitida' ? yo : otro, debe = x.tipo === 'emitida' ? otro : yo;
+  var w = window.open('', '_blank'); if (!w) return toast('Permite ventanas emergentes para imprimir', true);
+  var h = '<!doctype html><html><head><meta charset="utf-8"><title>Cuenta de cobro ' + esc(x.numero) + '</title><style>body{font-family:Arial,sans-serif;font-size:13px;color:#111;margin:40px;line-height:1.55}h1{font-size:20px;text-align:center;letter-spacing:2px;margin:0 0 4px}.c{text-align:center}.box{border:1px solid #bbb;border-radius:6px;padding:14px 16px;margin:16px 0}.v{font-size:22px;font-weight:bold}.s{font-size:11px;color:#555}.f{margin-top:70px;width:300px;border-top:1px solid #111;padding-top:6px}@media print{body{margin:18mm}}</style></head><body>' +
+    '<h1>CUENTA DE COBRO</h1><div class="c">No. ' + esc(x.numero) + '</div>' +
+    '<p>' + esc(cobra.ciudad || 'Bogotá') + ', ' + fechaLarga(d.fecha) + '</p>' +
+    '<p><b>' + esc(debe.nombre || '') + '</b><br>' + esc(debe.doc) + (debe.dir ? '<br>' + esc(debe.dir) : '') + '</p>' +
+    '<p class="c" style="font-weight:bold;letter-spacing:1px">DEBE A:</p>' +
+    '<p><b>' + esc(cobra.nombre || '') + '</b><br>' + esc(cobra.doc) + (cobra.dir ? '<br>' + esc(cobra.dir) : '') + (cobra.tel ? '<br>Tel. ' + esc(cobra.tel) : '') + (cobra.email ? ' · ' + esc(cobra.email) : '') + '</p>' +
+    '<div class="box"><div>LA SUMA DE:</div><div class="v">' + fmt(x.valor) + '</div><div>' + esc(numLetras(x.valor)) + '</div></div>' +
+    '<p><b>Por concepto de:</b> ' + esc(x.concepto) + '</p>' +
+    (x.retFte ? '<p>Retención en la fuente: ' + fmt(x.retFte) + ' · Neto a pagar: <b>' + fmt(x.neto) + '</b></p>' : '') +
+    (x.tipo === 'emitida' && x.banco ? '<p><b>Favor consignar a:</b> ' + esc(x.banco) + '</p>' : '') +
+    '<p class="s">Declaro que no soy responsable del impuesto sobre las ventas (IVA) y que no estoy obligado(a) a expedir factura de venta, de acuerdo con el Estatuto Tributario y el Decreto 1625 de 2016. Esta cuenta de cobro sirve como soporte de la operación.</p>' +
+    '<div class="f">Firma<br><b>' + esc(cobra.nombre || '') + '</b><br>' + esc(cobra.doc) + '</div>' +
+    '<script>setTimeout(function(){ window.print(); }, 300);<\/script></body></html>';
+  w.document.write(h); w.document.close();
+}
+function fechaLarga(f){ var p = String(f || hoy()).split('-'); return Number(p[2]) + ' de ' + MESES[Number(p[1]) - 1] + ' de ' + p[0]; }
+
+// =============== CORREO DE FACTURAS (bandeja) ===============
+// Un script de Google en el Gmail de facturación busca cada hora los ZIP/XML de factura electrónica,
+// los manda a /api/conta (accion factura_correo) y quedan como documentos 'bandeja' pendientes.
+// Al abrir la contabilidad, cada compra pendiente se lee y se registra sola (sin duplicar por CUFE).
+function bandeja(){ return lista('bandeja').sort(function(a, b){ return String(b.data.recibido || b.fecha || '').localeCompare(String(a.data.recibido || a.fecha || '')); }); }
+function claveCorreo(){ var s = '', a = 'abcdefghijkmnpqrstuvwxyz23456789'; for (var i = 0; i < 28; i++) s += a.charAt(Math.floor(Math.random() * a.length)); return s; }
+function scriptCorreo(clave){
+  var L = [
+    '// B.R.U · Facturas del correo a la contabilidad',
+    '// 1) Guarda (icono de disquete)  2) Elige la función instalar y pulsa Ejecutar  3) Acepta los permisos',
+    "var URL_BRU = 'https://www.brucoffeeshop.online/api/conta';",
+    "var CLAVE = '" + clave + "';",
+    "var BUSQUEDA = 'has:attachment (filename:zip OR filename:xml) -label:bru-registrada newer_than:120d';",
+    '',
+    'function revisarFacturas() {',
+    "  var etq = GmailApp.getUserLabelByName('bru-registrada') || GmailApp.createLabel('bru-registrada');",
+    '  var hilos = GmailApp.search(BUSQUEDA, 0, 40);',
+    '  hilos.forEach(function (h) {',
+    '    var todoOk = true;',
+    '    h.getMessages().forEach(function (m) {',
+    '      m.getAttachments().forEach(function (a) {',
+    '        var n = String(a.getName() || \'\').toLowerCase(), xmls = [];',
+    '        try {',
+    "          if (/\\.zip$/.test(n)) Utilities.unzip(a.copyBlob().setContentType('application/zip')).forEach(function (b) { if (/\\.xml$/i.test(b.getName())) xmls.push(b); });",
+    '          else if (/\\.xml$/.test(n)) xmls.push(a.copyBlob());',
+    '        } catch (e) { return; }',
+    '        xmls.forEach(function (b) {',
+    "          var txt = b.getDataAsString('UTF-8');",
+    '          if (!/Invoice|AttachedDocument/.test(txt)) return;',
+    '          var r = UrlFetchApp.fetch(URL_BRU, { method: \'post\', contentType: \'application/json\', muteHttpExceptions: true,',
+    "            payload: JSON.stringify({ accion: 'factura_correo', datos: { clave: CLAVE, nombre: b.getName(), xml: txt, de: m.getFrom(), asunto: m.getSubject(), fecha: m.getDate().toISOString() } }) });",
+    '          var j = {}; try { j = JSON.parse(r.getContentText()); } catch (e) {}',
+    '          if (r.getResponseCode() !== 200 || !j.ok) { todoOk = false; Logger.log(n + \': \' + (j.error || r.getResponseCode())); }',
+    '        });',
+    '      });',
+    '    });',
+    '    if (todoOk) h.addLabel(etq);',
+    '  });',
+    '}',
+    '',
+    'function instalar() {',
+    '  ScriptApp.getProjectTriggers().forEach(function (t) { ScriptApp.deleteTrigger(t); });',
+    "  ScriptApp.newTrigger('revisarFacturas').timeBased().everyHours(1).create();",
+    '  revisarFacturas();',
+    '}'
+  ];
+  return L.join('\n');
+}
+// procesa lo que llegó del correo: registra compras nuevas, marca repetidas y deja las ventas para revisión
+function procesarBandeja(){
+  if (S.modo !== 'nube' || procesarBandeja._run) return Promise.resolve(0);
+  var pend = bandeja().filter(function(d){ return d.data.estado === 'pendiente'; });
+  if (!pend.length) return Promise.resolve(0);
+  procesarBandeja._run = true;
+  var forma = (S.cfg.correo && S.cfg.correo.forma) || 'caja', ini = S.cfg.empresa.fechaInicio || '', nuevas = 0, i = 0;
+  function marcar(d, est, extra){ d.data.estado = est; d.data.procesado = new Date().toISOString(); for (var k in (extra || {})) d.data[k] = extra[k]; return guardar(d).catch(function(){}); }
+  function sig(){
+    if (i >= pend.length) return Promise.resolve();
+    var d = pend[i++], E;
+    try { E = parseUBL(d.data.xml); E.archivo = d.data.nombre || 'correo.xml'; } catch (e) { return marcar(d, 'error', {error: e.message}).then(sig); }
+    var it = {id: uid('c'), nombre: (d.data.nombre || 'factura') + ' · del correo', estado: 'listo', E: E, error: '', correo: true};
+    var resumen = {numero: E.numero || '', proveedor: (E.emisor && E.emisor.nombre) || '', total: E.total || 0, fechaDoc: E.fecha || ''};
+    var mio = String(S.cfg.empresa.nit || '').replace(/\D/g, ''), aMi = !mio || !E.receptor.nit || E.receptor.nit === mio;
+    if (E.dir !== 'compra' || !aMi) { it.estado = 'listo'; S.cola.unshift(it); return marcar(d, 'revisar', Object.assign(resumen, {error: E.dir === 'venta' ? 'Es una venta tuya: regístrala desde Subir facturas si no está' : 'No va dirigida a tu NIT'})).then(sig); }
+    if (E.tipoDoc === 'nc' || E.tipoDoc === 'nd') { it.estado = 'error'; it.error = 'Nota crédito/débito: aplícala sobre la compra original'; S.cola.unshift(it); return marcar(d, 'revisar', Object.assign(resumen, {error: it.error})).then(sig); }
+    if (ini && E.fecha && E.fecha < ini) return marcar(d, 'anterior', resumen).then(sig);
+    var dup = duplicado(E);
+    if (dup) return marcar(d, 'duplicado', Object.assign(resumen, {docId: dup})).then(sig);
+    return terDesde(E.emisor, 'proveedor', true).then(function(pid){
+      var o = datosCompra(E, pid); o.forma = E.forma === 'credito' ? 'credito' : forma; if (o.forma === 'credito') o.vence = E.vence || sumaDias(E.fecha, 30); else o.vence = E.fecha;
+      return registrarCompra(o);
+    }).then(function(doc){ nuevas++; it.estado = 'registrado'; it.docId = doc.id; S.cola.unshift(it); return marcar(d, 'registrada', Object.assign(resumen, {docId: doc.id})); })
+      .catch(function(e){ it.estado = 'error'; it.error = e.message; S.cola.unshift(it); return marcar(d, 'error', Object.assign(resumen, {error: e.message})); }).then(sig);
+  }
+  return sig().then(function(){
+    procesarBandeja._run = false;
+    if (nuevas) toast(nuevas + (nuevas === 1 ? ' compra llegó' : ' compras llegaron') + ' del correo y quedaron registradas');
+    try { contadores(); } catch (e) {}
+    if (nuevas || S.tab === 'leer' || S.tab === 'config') render();
+    return nuevas;
+  }, function(e){ procesarBandeja._run = false; console.error(e); return 0; });
+}
+// vuelve a leer la bandeja desde la nube (para no tener que recargar la página)
+function refrescarBandeja(){
+  if (S.modo !== 'nube') return Promise.resolve(0);
+  return sb(T + '?tipo=eq.bandeja&select=id,tipo,fecha,data,created_at').then(function(rows){
+    (rows || []).forEach(function(r){ if (!S.byId[r.id]) { r.data = r.data || {}; S.docs.push(r); S.byId[r.id] = r; } });
+    return procesarBandeja();
+  });
+}
+var BDJ_EST = {pendiente: ['', 'Por procesar'], registrada: ['ok', 'Registrada'], duplicado: ['', 'Ya estaba'], revisar: ['warn', 'Revisar'], error: ['bad', 'Error'], anterior: ['', 'Antes del inicio']};
+function renderCorreoCfg(c){
+  var cc = S.cfg.correo || {}, L = bandeja(), reg = L.filter(function(d){ return d.data.estado === 'registrada'; }).length;
+  var mail = S.cfg.empresa.email || 'tu correo de facturación';
+  c.innerHTML = '<div class="card"><div class="sec" style="margin-top:0">Facturas electrónicas que llegan a tu correo → contabilidad automática</div>' +
+    '<p class="small">Cada vez que compras con factura electrónica, el proveedor te manda un correo con un ZIP (PDF + XML). Con este enlace, un script de Google revisa <b>' + esc(mail) + '</b> cada hora, envía el XML aquí y la compra se registra sola: proveedor, IVA, total y CUFE, sin duplicar.</p>' +
+    (cc.clave ? '<div class="row"><span class="pill ok">● Enlace creado</span><span class="small muted">' + L.length + ' facturas recibidas · ' + reg + ' registradas' + (cc.creado ? ' · desde ' + fFecha(cc.creado.slice(0, 10)) : '') + '</span></div>' :
+      '<div class="row"><span class="pill">○ Aún no está enlazado</span></div>') +
+    '<div class="grid g3" style="margin-top:10px">' + fld('Las compras del correo se pagan con', sel('coForma', [['caja','Efectivo (caja)'],['banco','Banco / Nequi / tarjeta'],['credito','Quedan por pagar']], cc.forma || 'caja')) + '</div>' +
+    '<div class="row" style="margin-top:10px"><button class="btn pri" id="coGen">' + (cc.clave ? 'Guardar' : 'Crear enlace') + '</button>' + (cc.clave ? '<button class="btn ghost" id="coNueva">Cambiar clave</button><button class="btn" id="coRev">Revisar ahora</button>' : '') + '</div></div>' +
+    (cc.clave ? '<div class="card"><div class="sec" style="margin-top:0">Instalarlo en Gmail (una sola vez, 3 minutos)</div><ol class="small" style="padding-left:18px;line-height:1.7">' +
+      '<li>Abre <a href="https://script.google.com/home/projects/create" target="_blank" rel="noopener">script.google.com</a> con la cuenta <b>' + esc(mail) + '</b> (se crea un proyecto nuevo).</li>' +
+      '<li>Borra lo que aparece, pulsa <b>Copiar script</b> aquí abajo y pégalo. Ponle de nombre «BRU facturas» y guarda.</li>' +
+      '<li>Arriba, en el selector de funciones, elige <b>instalar</b> y pulsa <b>Ejecutar</b>. Google pide permisos: <i>Revisar permisos → tu cuenta → Configuración avanzada → Ir a BRU facturas → Permitir</i> (es tu propio script).</li>' +
+      '<li>Listo: revisa los últimos 4 meses y luego cada hora. Los correos procesados quedan con la etiqueta <b>bru-registrada</b>.</li></ol>' +
+      '<div class="row"><button class="btn pri" id="coCopy">Copiar script</button></div><textarea id="coTxt" readonly style="width:100%;height:180px;margin-top:8px;font:11px/1.4 ui-monospace,monospace">' + esc(scriptCorreo(cc.clave)) + '</textarea></div>' : '') +
+    (L.length ? '<div class="card"><div class="sec" style="margin-top:0">Últimas facturas recibidas por correo</div><div class="tbl-w"><table class="t"><thead><tr><th>Llegó</th><th>Proveedor</th><th>Factura</th><th class="num">Total</th><th>Estado</th></tr></thead><tbody>' +
+      L.slice(0, 40).map(function(d){ var x = d.data, e = BDJ_EST[x.estado] || ['', x.estado];
+        return '<tr' + (x.docId ? ' class="click" data-bdj="' + esc(x.docId) + '"' : '') + '><td>' + fFecha(String(x.recibido || d.fecha || '').slice(0, 10)) + '</td><td>' + esc(x.proveedor || x.de || '') + '</td><td>' + esc(x.numero || x.nombre || '') + '</td><td class="num">' + (x.total ? fmt(x.total) : '') + '</td><td><span class="st ' + e[0] + '">' + esc(e[1]) + '</span>' + (x.error ? '<div class="small muted">' + esc(x.error) + '</div>' : '') + '</td></tr>'; }).join('') +
+      '</tbody></table></div></div>' : '');
+  function guardarCo(nueva){
+    var o = S.cfg.correo || {}; if (!o.clave || nueva) { o.clave = claveCorreo(); o.creado = new Date().toISOString(); }
+    o.forma = val('coForma'); S.cfg.correo = o;
+    return guardarCfg().then(function(){ toast(nueva ? 'Clave nueva: vuelve a copiar el script en Google' : 'Guardado'); render(); }).catch(function(e){ toast(e.message, true); });
+  }
+  $('coGen').onclick = function(){ guardarCo(false); };
+  if ($('coNueva')) $('coNueva').onclick = function(){ if (confirm('El script que ya instalaste dejará de funcionar hasta que pegues el nuevo. ¿Cambiar la clave?')) guardarCo(true); };
+  if ($('coRev')) $('coRev').onclick = function(){ var b = this; b.disabled = true; refrescarBandeja().then(function(n){ toast(n ? n + ' compras nuevas registradas' : 'No hay facturas nuevas del correo'); render(); }).catch(function(e){ b.disabled = false; toast(e.message, true); }); };
+  if ($('coCopy')) $('coCopy').onclick = function(){ var t = $('coTxt'); (navigator.clipboard ? navigator.clipboard.writeText(t.value) : Promise.reject()).then(function(){ toast('Script copiado'); }).catch(function(){ t.select(); document.execCommand('copy'); toast('Script copiado'); }); };
+  c.onclick = function(e){ var r = e.target.closest('[data-bdj]'); if (!r) return; ir('compras'); verCompra(r.getAttribute('data-bdj')); };
+}
+
 // =============== SERVIDOR (api/conta) ===============
 function api(accion, datos){
   return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-conta-token': lsGet(LS_TOK, '') || '' }, body: JSON.stringify({ accion: accion, datos: datos || {} }) })
@@ -2294,7 +2522,7 @@ function api(accion, datos){
 
 // =============== NAVEGACIÓN ===============
 var RENDER = { resumen: renderResumen, facturas: renderFacturas, compras: renderCompras, leer: renderLeer, importar: renderImportar, nomina: renderNomina, bancos: renderBancos, activos: renderActivos,
-  libros: renderLibros, estados: renderEstados, impuestos: renderImpuestos, exogena: renderExogena, calendario: renderCalendario, analisis: renderAnalisis, terceros: renderTerceros, config: renderConfig };
+  libros: renderLibros, estados: renderEstados, impuestos: renderImpuestos, exogena: renderExogena, calendario: renderCalendario, analisis: renderAnalisis, terceros: renderTerceros, cobros: renderCobros, config: renderConfig };
 function render(){
   var t = S.tab;
   Array.prototype.forEach.call(document.querySelectorAll('#tabs button'), function(b){ b.classList.toggle('on', b.getAttribute('data-t') === t); });
@@ -2420,9 +2648,10 @@ function renderResumen(){
 
 // =============== CONFIGURACIÓN ===============
 function renderConfig(){
-  var st = subtabs($('t-config'), 'config', [['empresa','Empresa'],['params','Parámetros e impuestos'],['ret','Retención en la fuente'],['num','Numeración'],['fe','Facturación electrónica'],['bancos','Bancos'],['map','Cuentas del dashboard'],['resp','Respaldo']]);
+  var st = subtabs($('t-config'), 'config', [['empresa','Empresa'],['params','Parámetros e impuestos'],['ret','Retención en la fuente'],['num','Numeración'],['fe','Facturación electrónica'],['bancos','Bancos'],['map','Cuentas del dashboard'],['correo','Correo de facturas'],['resp','Respaldo']]);
   var c = st.el, e = S.cfg.empresa, p = S.cfg.params;
   function ok(msg){ return guardarCfg().then(function(){ toast(msg || 'Guardado'); render(); renderBanners(); }).catch(function(err){ toast(err.message, true); }); }
+  if (st.cur === 'correo') return renderCorreoCfg(c);
   if (st.cur === 'empresa') {
     c.innerHTML = cajaSubirConfig() + '<div class="card"><div class="grid g3">' +
       fld('Razón social', inp('ceRaz', e.razon)) + fld('NIT (sin DV)', inp('ceNit', e.nit)) + fld('DV', inp('ceDv', e.dv || calcDV(e.nit), 'text', ' readonly')) +
@@ -2553,6 +2782,7 @@ document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape') cerr
     return asegurarCF();
   }).then(function(){
     renderBanners(); render();
+    setTimeout(function(){ procesarBandeja(); }, 400);
     api('ping').then(function(r){ S.svc = r && !r.error ? r : {}; renderEstado(); });
   }).catch(function(e){ console.error(e); $('t-resumen').innerHTML = '<div class="banner bad">No se pudo cargar: ' + esc(e.message) + '</div>'; });
 })();
