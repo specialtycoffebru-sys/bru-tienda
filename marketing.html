@@ -224,7 +224,7 @@ function ventas(){
 }
 function productos(){
   return ((S.store && S.store.catalogo) || []).filter(function(c){ return c && c.nombre; }).map(function(c){
-    return {nombre: c.nombre, precio: Number(c.precio) || 0, presentacion: c.presLabel || ((c.cantidad || '') + 'g'), stock: Number(c.stock) || 0, notas: c.notas || '', origen: c.origen || '', productor: c.productor || '', variedad: c.variedad || '', proceso: c.proceso || '', categoria: c.categoria || '', altitud: c.altitud || '', precioEU: c.precios && c.precios.EU || null, foto: c.img || '', descripcion: String(c.desc || '').slice(0, 500), activo: c.activo !== false};
+    var base = Number(c.precio) || 0; return {nombre: c.nombre, precio: Math.round(base * 1.19 / 100) * 100, precio_sin_iva: base, presentacion: c.presLabel || ((c.cantidad || '') + 'g'), stock: Number(c.stock) || 0, notas: c.notas || '', origen: c.origen || '', productor: c.productor || '', variedad: c.variedad || '', proceso: c.proceso || '', categoria: c.categoria || '', altitud: c.altitud || '', precioEU: c.precios && c.precios.EU || null, foto: c.img || '', descripcion: String(c.desc || '').slice(0, 500), activo: c.activo !== false};
   });
 }
 function clientes(){
@@ -245,7 +245,7 @@ function clientes(){
 }
 function resumen(){
   var V = ventas(), h = hoy(), mes = h.slice(0, 7), ant = sumaDias(mes + '-01', -1).slice(0, 7), porMes = {}, porProd = {}, porVend = {}, porDia = [0,0,0,0,0,0,0];
-  V.forEach(function(v){ var m = v.fecha.slice(0, 7); porMes[m] = (porMes[m] || 0) + v.total; porProd[v.prod] = porProd[v.prod] || {u: 0, v: 0}; porProd[v.prod].u += v.qty; porProd[v.prod].v += v.total; porVend[v.vendedor || '—'] = (porVend[v.vendedor || '—'] || 0) + v.total; porDia[new Date(v.fecha + 'T12:00:00').getDay()] += v.total; });
+  V.forEach(function(v){ var m = v.fecha.slice(0, 7); porMes[m] = (porMes[m] || 0) + v.total; porProd[v.prod] = porProd[v.prod] || {u: 0, v: 0}; porProd[v.prod].u += v.qty; porProd[v.prod].v += v.total; var vk = v.vendedor ? v.vendedor.charAt(0).toUpperCase() + v.vendedor.slice(1).toLowerCase() : '—'; porVend[vk] = (porVend[vk] || 0) + v.total; porDia[new Date(v.fecha + 'T12:00:00').getDay()] += v.total; });
   var vm = porMes[mes] || 0, va = porMes[ant] || 0, ult = V.length ? V[V.length - 1].fecha : null, C = clientes();
   var pubMes = S.gastoPub.filter(function(g){ return g.fecha && g.fecha.slice(0, 7) === mes; }).reduce(function(s, g){ return s + g.valor; }, 0);
   var pub90 = S.gastoPub.filter(function(g){ return g.fecha >= sumaDias(h, -90); }).reduce(function(s, g){ return s + g.valor; }, 0);
