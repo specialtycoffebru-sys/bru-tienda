@@ -838,6 +838,7 @@ function opsDash(){
   var firmas = {};
   asientos(true).forEach(function(a){ if (!/^dash:/.test(a.data.origen || '')) return; var tot = a.data.lineas.reduce(function(t, l){ return t + (l.d || 0); }, 0); firmas[a.fecha + '|' + norm(a.data.desc) + '|' + Math.round(tot)] = a.id; });
   out.forEach(function(o){ if (o.hecho) return; var tot = o.lineas(null).reduce(function(t, l){ return t + (l.d || 0); }, 0), k = o.fecha + '|' + norm(o.tipo + ' · ' + o.desc) + '|' + Math.round(tot); if (firmas[k]) o.hecho = firmas[k]; });
+  var ign = S.cfg.dashIgnorar || {}; out.forEach(function(o){ if (!o.hecho && ign[o.key]) { o.hecho = 'descartado'; o.motivo = ign[o.key].motivo || ''; } });
   return out.sort(function(a, b){ return b.fecha.localeCompare(a.fecha); });
 }
 function renderImportar(){
@@ -852,7 +853,7 @@ function renderImportar(){
     '<div class="tbl-w"><table class="t"><thead><tr><th><input type="checkbox" id="iAll"></th><th>Fecha</th><th>Tipo</th><th>Detalle</th><th>Tercero</th><th class="num">Valor</th><th>Asiento propuesto</th></tr></thead><tbody>' +
     (ops.filter(function(o){ return S.verHechas || !o.hecho; }).slice(0, 600).map(function(o){
       var L = o.lineas(null);
-      return '<tr' + (o.hecho ? ' style="opacity:.5"' : '') + '><td>' + (o.hecho ? '✓' : '<input type="checkbox" data-k="' + o.key + '"' + (S.selImp[o.key] ? ' checked' : '') + '>') + '</td><td>' + fFecha(o.fecha) + '</td><td>' + esc(o.tipo) + (o.ds ? ' <span class="st warn">doc. soporte</span>' : '') + '</td><td>' + esc(o.desc) + '</td><td>' + esc(o.tercero) + '</td><td class="num">' + fmt(o.valor) + '</td><td class="small muted">' +
+      return '<tr' + (o.hecho ? ' style="opacity:.5"' : '') + '><td>' + (o.hecho ? (o.hecho === 'descartado' ? '<span title="' + esc(o.motivo || 'Descartado') + '">✕</span>' : '✓') : '<input type="checkbox" data-k="' + o.key + '"' + (S.selImp[o.key] ? ' checked' : '') + '>') + '</td><td>' + fFecha(o.fecha) + '</td><td>' + esc(o.tipo) + (o.ds ? ' <span class="st warn">doc. soporte</span>' : '') + '</td><td>' + esc(o.desc) + '</td><td>' + esc(o.tercero) + '</td><td class="num">' + fmt(o.valor) + '</td><td class="small muted">' +
         L.map(function(l){ return (l.d ? 'Db ' : 'Cr ') + l.c + ' ' + fmt(l.d || l.h); }).join('<br>') + '</td></tr>';
     }).join('') || '<tr><td colspan="7" class="empty">No hay operaciones pendientes</td></tr>') + '</tbody></table></div>';
   function contabilizar(lst){
@@ -1959,7 +1960,7 @@ document.addEventListener('drop', function(e){ if (!e.dataTransfer || !e.dataTra
 // =============== AGENTE CONTABLE IA ===============
 // El servidor (api/conta → 'agente') habla con la IA; las herramientas se ejecutan aquí, sobre los datos de la página.
 S.ag = { msgs: [], vista: [], ocupado: false, adj: [], auto: !!lsGet('bru_conta_ag_auto', false) };
-var AG_ESCRIBE = { anular_comprobante: 1, actualizar_empresa: 1, registrar_compra: 1, registrar_venta_emitida: 1, crear_comprobante: 1, contabilizar_dashboard: 1, crear_tercero: 1 };
+var AG_ESCRIBE = { anular_comprobante: 1, actualizar_empresa: 1, registrar_compra: 1, registrar_venta_emitida: 1, crear_comprobante: 1, contabilizar_dashboard: 1, crear_tercero: 1, descartar_dashboard: 1 };
 var EMP_CAMPOS = { razon:'Razón social', nit:'NIT', persona:'Tipo de persona', regimen:'Régimen', simpleGrupo:'Grupo SIMPLE', ciiu:'CIIU', ciudad:'Ciudad', direccion:'Dirección', email:'Correo', tel:'Teléfono', respIVA:'Responsable de IVA', ivaPeriodo:'Periodo de IVA', agenteRet:'Agente de retención', autoret:'Autorretenedor', fechaInicio:'Contabilidad desde' };
 
 function agContexto(){
@@ -2047,6 +2048,15 @@ var AG_TOOLS = {
       return sig();
     });
   },
+  descartar_dashboard: function(i){
+    return (S.dash ? Promise.resolve() : cargarDash()).then(function(){
+      var t = norm(i.texto || ''), L = opsDash().filter(function(o){ return !o.hecho && (!t || norm(o.desc).indexOf(t) >= 0) && (!i.fecha || o.fecha === i.fecha) && (!i.valor || Math.abs(o.valor - Number(i.valor)) < 1); });
+      if (!L.length) return {error: 'No encontré esa operación pendiente en el dashboard'};
+      if (L.length > 1) return {error: 'Hay varias que coinciden; precisa fecha o valor', coinciden: L.map(function(o){ return o.fecha + ' · ' + o.tipo + ' · ' + o.desc + ' · ' + o.valor; })};
+      S.cfg.dashIgnorar = S.cfg.dashIgnorar || {}; S.cfg.dashIgnorar[L[0].key] = {motivo: String(i.motivo || '').slice(0, 200), fecha: hoy()};
+      return guardarCfg().then(function(){ return {ok: true, descartada: L[0].fecha + ' · ' + L[0].desc + ' · ' + L[0].valor}; });
+    });
+  },
   datos_dashboard: function(){
     return sb('bru_store?id=eq.main&select=inventario,catalogo,finanzas').then(function(r){
       var row = (r && r[0]) || {}, f = row.finanzas || {}; S.dash = f;
@@ -2087,6 +2097,7 @@ function agDescribir(n, i){
   if (n === 'crear_comprobante') return 'Comprobante manual: ' + esc(i.descripcion) + '<br>' + (i.lineas || []).map(function(l){ return '· ' + esc(l.cuenta) + ' ' + esc(nomCta(String(l.cuenta))) + (l.debito ? ' Db ' + fmt(l.debito) : '') + (l.credito ? ' Cr ' + fmt(l.credito) : ''); }).join('<br>');
   if (n === 'contabilizar_dashboard') return 'Contabilizar todas las operaciones pendientes del dashboard';
   if (n === 'anular_comprobante') { var a0 = asientos().filter(function(x){ return x.data.comp === i.comp && Number(x.data.num) === Number(i.num); })[0]; return 'Anular comprobante ' + esc(i.comp + ' ' + i.num) + (a0 ? ' · ' + esc(a0.data.desc) + ' · ' + fFecha(a0.fecha) : '') + '<br><span class="dim">' + esc(i.motivo || '') + '</span>'; }
+  if (n === 'descartar_dashboard') return 'No contabilizar del dashboard: <b>' + esc(i.texto || '') + '</b>' + (i.fecha ? ' · ' + fFecha(i.fecha) : '') + (i.valor ? ' · ' + fmt(i.valor) : '') + (i.motivo ? '<br>Motivo: ' + esc(i.motivo) : '');
   if (n === 'crear_tercero') return 'Crear ' + esc(i.rol) + ': <b>' + esc((i.tercero || {}).nombre) + '</b>';
   return n;
 }
