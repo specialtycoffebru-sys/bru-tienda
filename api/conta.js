@@ -173,14 +173,37 @@ function agente(d){
   }); });
 }
 
+
+// Facturas que llegan al correo (script de Google en el Gmail de facturación) → bandeja en Supabase
+var SB_URL = 'https://dzgtyazvqpdmwvwqpvco.supabase.co', SB_KEY = process.env.SUPABASE_KEY || 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
+function sbq(path, method, body, prefer){
+  var h = { 'apikey': SB_KEY, 'Content-Type': 'application/json' }; if (prefer) h.Prefer = prefer;
+  return fetch(SB_URL + '/rest/v1/' + path, { method: method || 'GET', headers: h, body: body ? JSON.stringify(body) : undefined })
+    .then(function(r){ return r.text().then(function(t){ if (!r.ok) throw new Error('Supabase ' + r.status + ': ' + t.slice(0, 120)); return t ? JSON.parse(t) : null; }); });
+}
+function facturaCorreo(d){
+  var xml = String(d.xml || '');
+  if (!d.clave || String(d.clave).length < 16) return Promise.resolve({ error: 'Falta la clave del enlace' });
+  if (xml.length < 200 || !/Invoice|AttachedDocument/.test(xml)) return Promise.resolve({ error: 'No es una factura electrónica' });
+  if (xml.length > 3500000) return Promise.resolve({ error: 'XML demasiado grande' });
+  return sbq('bru_conta?id=eq.cfg&select=data').then(function(rows){
+    var cfg = rows && rows[0] && rows[0].data, c = cfg && cfg.correo;
+    if (!c || !c.clave || c.clave !== String(d.clave)) return { error: 'Clave incorrecta: copia de nuevo el script desde Configuración → Correo de facturas' };
+    var id = 'bdj_' + require('crypto').createHash('sha1').update(xml).digest('hex').slice(0, 24);
+    var fila = { id: id, tipo: 'bandeja', fecha: new Date().toISOString().slice(0, 10), data: { estado: 'pendiente', xml: xml, nombre: String(d.nombre || '').slice(0, 160), de: String(d.de || '').slice(0, 160), asunto: String(d.asunto || '').slice(0, 200), recibido: d.fecha || new Date().toISOString() } };
+    return sbq('bru_conta?on_conflict=id', 'POST', [fila], 'resolution=ignore-duplicates,return=minimal').then(function(){ return { ok: true, id: id }; });
+  });
+}
+
 module.exports = function(req, res){
   if (req.method === 'OPTIONS') { res.setHeader('Allow', 'POST'); return json(res, 204, {}); }
-  if (req.method === 'GET') return json(res, 200, { ok: true, version: 5, alegra: alegraOK(), ia: !!process.env.ANTHROPIC_API_KEY, agente: true });
+  if (req.method === 'GET') return json(res, 200, { ok: true, version: 6, alegra: alegraOK(), ia: !!process.env.ANTHROPIC_API_KEY, agente: true });
   if (req.method !== 'POST') return json(res, 405, { error: 'Usa POST' });
   leerBody(req).then(function(b){
+    if (b.accion === 'factura_correo') return facturaCorreo(b.datos || {}).then(function(r){ json(res, 200, r); }).catch(function(e){ json(res, 200, { error: e.message }); });
     if (process.env.CONTA_TOKEN && req.headers['x-conta-token'] !== process.env.CONTA_TOKEN) return json(res, 401, { error: 'Clave de acceso incorrecta (Configuración → Facturación electrónica)' });
     var a = b.accion, d = b.datos || {};
-    if (a === 'ping') return json(res, 200, { ok: true, version: 5, alegra: alegraOK(), ia: !!process.env.ANTHROPIC_API_KEY, protegido: !!process.env.CONTA_TOKEN });
+    if (a === 'ping') return json(res, 200, { ok: true, version: 6, alegra: alegraOK(), ia: !!process.env.ANTHROPIC_API_KEY, protegido: !!process.env.CONTA_TOKEN });
     if (a === 'alegra_test') {
       if (!alegraOK()) return json(res, 200, { error: 'Faltan ALEGRA_EMAIL y ALEGRA_TOKEN en Vercel' });
       return al('/company').then(function(c){ json(res, 200, { ok: true, empresa: (c && (c.name || c.identification)) || '' }); }).catch(function(e){ json(res, 200, { error: e.message }); });
