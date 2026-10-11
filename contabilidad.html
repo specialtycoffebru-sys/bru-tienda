@@ -687,7 +687,8 @@ function imprimirFactura(d){
 
 // =============== COMPRAS, GASTOS Y DOCUMENTO SOPORTE ===============
 function compras(){ return lista('compra').sort(function(a, b){ return (b.fecha || '').localeCompare(a.fecha || ''); }); }
-function saldoCompra(d){ var x = d.data; if (x.anulada || x.forma !== 'credito') return 0; return r2(x.neto - (x.pagos || []).reduce(function(s, p){ return s + (Number(p.valor) || 0); }, 0)); }
+// saldo por pagar de una compra; si el proveedor ya no tiene deuda en libros (pagos registrados con otro comprobante), queda en 0
+function saldoCompra(d){ var x = d.data; if (x.anulada || x.forma !== 'credito') return 0; var s0 = r2(x.neto - (x.pagos || []).reduce(function(s, p){ return s + (Number(p.valor) || 0); }, 0)); if (s0 <= 0) return 0; var deuda = -saldo(['22','2335'], null, null, x.proveedor); return deuda <= 0.5 ? 0 : Math.min(s0, r2(deuda)); }
 function renderCompras(){
   var L = compras(), m = mesDe(hoy());
   var mes = L.filter(function(d){ return !d.data.anulada && mesDe(d.fecha) === m; });
@@ -831,6 +832,10 @@ function opsDash(){
     out.push({key: key, hecho: hechas[key], fecha: fe, tipo: 'Compra de insumos', desc: (v.nombre || v.insumo || v.desc || 'Insumos') + (v.proveedor ? ' · ' + v.proveedor : ''), valor: tot, tercero: v.proveedor || '',
       lineas: function(t){ return [{c:'140510', t: t, d: tot}, {c: m.caja, t: t, h: tot}]; }, comp: 'FC'});
   });
+  // si en el dashboard se edita o se vuelve a escribir una operación ya contabilizada, se reconoce por fecha, tipo, detalle y valor
+  var firmas = {};
+  asientos(true).forEach(function(a){ if (!/^dash:/.test(a.data.origen || '')) return; var tot = a.data.lineas.reduce(function(t, l){ return t + (l.d || 0); }, 0); firmas[a.fecha + '|' + norm(a.data.desc) + '|' + Math.round(tot)] = a.id; });
+  out.forEach(function(o){ if (o.hecho) return; var tot = o.lineas(null).reduce(function(t, l){ return t + (l.d || 0); }, 0), k = o.fecha + '|' + norm(o.tipo + ' · ' + o.desc) + '|' + Math.round(tot); if (firmas[k]) o.hecho = firmas[k]; });
   return out.sort(function(a, b){ return b.fecha.localeCompare(a.fecha); });
 }
 function renderImportar(){
