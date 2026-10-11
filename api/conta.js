@@ -158,16 +158,46 @@ var SISTEMA = 'Eres el agente contable de la empresa (café de especialidad en C
   '- Al terminar, resume lo que hiciste y lo que queda pendiente (por ejemplo, vencimientos cercanos).\n' +
   '- Organizar la contabilidad (cuando te lo pidan): 1) contabiliza lo pendiente del dashboard; 2) usa datos_dashboard y anula los gastos espejo que ya quedaron contabilizados (duplican compras de insumos o comisiones ya descontadas); 3) cruza compras de café verde, ventas por producto e insumos con el conteo físico que dé el usuario para calcular el costo de ventas (inventario periódico: inventario inicial + compras − inventario final), valorando el café tostado al costo del verde ajustado por la merma de tostión más el empaque y la etiqueta; si falta la merma u otro dato clave, propón un valor razonable (por ejemplo 16 % de merma) y pide confirmación antes de registrar; 4) registra el costo de ventas con crear_comprobante (débito 612001, créditos a 140505 café verde y 140510 insumos según corresponda; si queda café tostado, llévalo a 143005); 5) revisa IVA, retenciones y vencimientos y termina con un resumen claro de lo hecho y lo pendiente.\n' +
   '- No das asesoría legal definitiva: para decisiones de alto impacto recomienda validar con el contador.';
+
+// ---------- Agente de marketing ----------
+var POST_ITEM = { type: 'object', properties: { fecha: {type:'string', description:'YYYY-MM-DD'}, hora: {type:'string'}, red: {type:'string', enum:['Instagram','TikTok','WhatsApp','Facebook','Web']}, formato: {type:'string', enum:['Reel','Carrusel','Post','Historia','Estado WhatsApp','Live']},
+  titulo: {type:'string', description:'tema o gancho'}, visual: {type:'string', description:'qué grabar o diseñar, plano por plano si es reel'}, copy: {type:'string', description:'texto completo listo para pegar'}, hashtags: {type:'string'}, cta: {type:'string'}, campana_id: {type:'string'} }, required: ['fecha','red','formato','titulo','copy'] };
+var MKT_TOOLS = [
+  { name: 'ver_ventas', description: 'Ventas reales (resumen y detalle por venta: fecha, producto, cantidad, total, cliente, vendedor).', input_schema: { type: 'object', properties: { desde: {type:'string'}, hasta: {type:'string'} } } },
+  { name: 'ver_clientes', description: 'Clientes con compras, total, producto favorito, última compra y segmento (Fiel, Recurrente, Nuevo, Por recomprar, En riesgo, Dormido).', input_schema: { type: 'object', properties: { segmento: {type:'string'} } } },
+  { name: 'ver_productos', description: 'Catálogo: precio, presentación, stock, notas de cata, origen, productor, proceso.', input_schema: { type: 'object', properties: {} } },
+  { name: 'ver_contenido', description: 'Publicaciones del calendario (programadas y publicadas, con métricas si las hay).', input_schema: { type: 'object', properties: {} } },
+  { name: 'ver_campanas', description: 'Campañas con fechas, oferta, presupuesto y ventas logradas en sus fechas.', input_schema: { type: 'object', properties: {} } },
+  { name: 'ver_ideas', description: 'Banco de ideas guardadas.', input_schema: { type: 'object', properties: {} } },
+  { name: 'ver_publicidad', description: 'Gastos de publicidad registrados en la contabilidad.', input_schema: { type: 'object', properties: {} } },
+  { name: 'guardar_publicaciones', description: 'Guarda publicaciones en el calendario de contenido.', input_schema: { type: 'object', properties: { publicaciones: { type: 'array', items: POST_ITEM } }, required: ['publicaciones'] } },
+  { name: 'actualizar_publicacion', description: 'Cambia campos de una publicación existente (por id).', input_schema: { type: 'object', properties: { id: {type:'string'}, campos: {type:'object'} }, required: ['id','campos'] } },
+  { name: 'guardar_campana', description: 'Crea una campaña.', input_schema: { type: 'object', properties: { nombre: {type:'string'}, objetivo: {type:'string'}, desde: {type:'string'}, hasta: {type:'string'}, presupuesto: {type:'number'}, meta_ventas: {type:'number'}, oferta: {type:'string'}, codigo: {type:'string'}, canales: {type:'string'}, acciones: {type:'string', description:'plan paso a paso'} }, required: ['nombre','objetivo','desde','hasta'] } },
+  { name: 'guardar_ideas', description: 'Guarda ideas en el banco de ideas.', input_schema: { type: 'object', properties: { ideas: { type: 'array', items: { type: 'object', properties: { titulo: {type:'string'}, detalle: {type:'string'}, tipo: {type:'string'}, impacto: {type:'string', enum:['alto','medio','bajo']}, esfuerzo: {type:'string', enum:['bajo','medio','alto']} }, required: ['titulo','detalle'] } } }, required: ['ideas'] } },
+  { name: 'actualizar_marca', description: 'Actualiza datos de la marca o metas (propuesta, publico, tono, hashtags, diferenciales, instagram, meta, presupuesto).', input_schema: { type: 'object', properties: { campos: {type:'object'} }, required: ['campos'] } },
+  { type: 'web_search_20250305', name: 'web_search', max_uses: 4 }
+];
+var MKT_SISTEMA = 'Eres el director de marketing y ventas de B.R.U, marca colombiana de café de especialidad (persona natural, Bogotá; vende bolsas de café tostado por WhatsApp, Instagram, su tienda web y a conocidos; prepara exportación a España). Tu trabajo es que venda más, ya.\n' +
+  'Cómo trabajas:\n' +
+  '- Empiezas por los datos reales (contexto y herramientas ver_*): ventas, clientes, stock, ritmo frente a la meta. Nunca inventes cifras; si falta un dato, dilo y propón cómo medirlo.\n' +
+  '- Priorizas lo que trae ventas pronto y cuesta poco: recompra de clientes actuales por WhatsApp, referidos, mover el producto con más stock, regalos y empresas, alianzas locales (cafeterías, barberías, coworkings, oficinas), y contenido que muestre origen, productor y preparación.\n' +
+  '- Eres concreto: cada recomendación con qué hacer, cuándo, a quién, cuánto cuesta y cuánto debería vender. Usa números (bolsas, pesos, fechas).\n' +
+  '- Cuando creas publicaciones, campañas o ideas, guárdalas con las herramientas (no solo las escribas en el chat). Los copys van completos, en español colombiano, con el tono de la marca, emojis con moderación, gancho en la primera línea y llamado a la acción a WhatsApp o a la web. Para reels describe el guion plano por plano y la duración.\n' +
+  '- Los mensajes de WhatsApp a clientes son personales, cortos, sin sonar a publicidad, con el nombre y lo que compraron.\n' +
+  '- Puedes buscar en internet tendencias, fechas comerciales en Colombia, precios de la competencia o ideas, y citas de dónde sale.\n' +
+  '- Respeta la ley: nada de reseñas o testimonios inventados, ni promesas de salud; los descuentos deben ser reales.\n' +
+  '- Respondes breve y ordenado (viñetas), y al final dices el siguiente paso más importante.';
 function agente(d){
   var key = process.env.ANTHROPIC_API_KEY;
   if (!key) return Promise.reject(new Error('Falta ANTHROPIC_API_KEY en Vercel (Configuración → Facturación electrónica explica cómo crearla)'));
   var msgs = Array.isArray(d.messages) ? d.messages : [];
   if (!msgs.length) return Promise.reject(new Error('Sin mensajes'));
-  var sys = SISTEMA + '\n\nContexto actual de la contabilidad:\n' + String(d.contexto || '').slice(0, 24000);
+  var mkt = d.modo === 'marketing';
+  var sys = (mkt ? MKT_SISTEMA + '\n\nDatos actuales del negocio (JSON):\n' : SISTEMA + '\n\nContexto actual de la contabilidad:\n') + String(d.contexto || '').slice(0, 24000);
   return fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-    body: JSON.stringify({ model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: 16000, system: sys, tools: TOOLS, messages: msgs })
+    body: JSON.stringify({ model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: 16000, system: sys, tools: mkt ? MKT_TOOLS : TOOLS, messages: msgs })
   }).then(function(r){ return r.text().then(function(t){
     var j = null; try { j = JSON.parse(t); } catch (e) {}
     if (!r.ok) throw new Error('IA: ' + ((j && j.error && j.error.message) || ('error ' + r.status)));
@@ -211,6 +241,7 @@ module.exports = function(req, res){
       return al('/company').then(function(c){ json(res, 200, { ok: true, empresa: (c && (c.name || c.identification)) || '' }); }).catch(function(e){ json(res, 200, { error: e.message }); });
     }
     if (a === 'leer_documento') return leerIA(d).then(function(r){ json(res, 200, r); }).catch(function(e){ json(res, 200, { error: e.message }); });
+    if (a === 'marketing') { d.modo = 'marketing'; return agente(d).then(function(r){ json(res, 200, r); }).catch(function(e){ json(res, 200, { error: e.message }); }); }
     if (a === 'agente') return agente(d).then(function(r){ json(res, 200, r); }).catch(function(e){ json(res, 200, { error: e.message }); });
     if (a === 'alegra_factura') return emitir(d).then(function(r){ json(res, 200, r); }).catch(function(e){ json(res, 200, { error: e.message }); });
     json(res, 400, { error: 'Acción desconocida' });
