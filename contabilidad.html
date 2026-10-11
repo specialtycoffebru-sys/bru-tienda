@@ -1402,6 +1402,24 @@ function pagoImpuesto(clave, titulo, lineasDeb, total, extraCred){
   var L = lineasDeb.concat(extraCred || []); L.push({c: cta, h: total});
   nuevoAsiento('IMP', hoy(), 'Pago ' + titulo, L, 'imp:' + clave).then(function(){ S.cfg.presentadas[clave] = hoy(); return guardarCfg(); }).then(function(){ toast('Pago registrado'); render(); }).catch(function(e){ toast(e.message, true); });
 }
+// Renta estimada: persona natural → tabla del art. 241 E.T. (cédula general); jurídica → 35 %
+function impuestoArt241(baseUVT){
+  var T = [[31000, 0.39, 10352], [18970, 0.37, 5901], [8670, 0.35, 2296], [4100, 0.33, 788], [1700, 0.28, 116], [1090, 0.19, 0]];
+  for (var i = 0; i < T.length; i++) if (baseUVT > T[i][0]) return (baseUVT - T[i][0]) * T[i][1] + T[i][2];
+  return 0;
+}
+function rentaEstimada(anio){
+  var e = S.cfg.empresa, uvt = Number(S.cfg.params.uvt) || 52374, desde = anio + '-01-01', hasta = anio + '-12-31', R = resultados(desde, hasta);
+  var util = r0(R.antes), ingB = r0(R.I + R.NI), ret = saldo(['135515','135595'], desde, hasta), lab = Number(e.ingresosLaborales) || 0;
+  if (e.persona === 'N') {
+    var labNeto = lab ? r0(lab - Math.min(lab * 0.25, 790 * uvt)) : 0;
+    var base = Math.max(0, util) + labNeto, imp = r0(impuestoArt241(base / uvt) * uvt / 1000) * 1000;
+    return {metodo: 'persona natural · tabla art. 241 (cédula general)', utilidad: util, ingresos_brutos: ingB, ingresos_laborales: lab, base: base, base_uvt: Math.round(base / uvt), impuesto: imp, retenciones: ret, a_pagar: Math.max(0, imp - ret), uvt: uvt,
+      exento_hasta: 1090 * uvt, declara_por_ingresos: (ingB + lab) >= 1400 * uvt, tope_ingresos_declarar: 1400 * uvt};
+  }
+  var impJ = util > 0 ? r0(util * 0.35) : 0;
+  return {metodo: 'persona jurídica · 35 %', utilidad: util, ingresos_brutos: ingB, base: Math.max(0, util), impuesto: impJ, retenciones: ret, a_pagar: Math.max(0, impJ - ret), uvt: uvt};
+}
 function renderImpuestos(){
   var e = S.cfg.empresa;
   var items = [['iva','IVA'],['ret','Retención en la fuente'],['ica','ICA Bogotá'],['renta', e.regimen === 'simple' ? 'Régimen SIMPLE' : 'Renta'],['cert','Certificados de retención']];
@@ -1451,10 +1469,14 @@ function renderImpuestos(){
       c.innerHTML = '<div class="row" style="margin-bottom:10px">' + fld('Año', sel('imA', [anio - 1, anio, anio + 1], anio)) + '</div><div class="kpis"><div class="kpi"><b>' + fmt(ingB) + '</b><span>ingresos brutos del año</span></div><div class="kpi"><b>' + tS + ' %</b><span>tarifa SIMPLE grupo ' + e.simpleGrupo + '</span></div><div class="kpi"><b>' + fmt(r0(ingB * tS / 100)) + '</b><span>impuesto SIMPLE estimado</span></div></div>' +
         '<div class="tbl-w"><table class="t"><thead><tr><th>Bimestre</th><th class="num">Ingresos</th><th class="num">Anticipo (formulario 2593)</th></tr></thead><tbody>' + bims.map(function(b){ return '<tr><td>' + b.n + '</td><td class="num">' + fmt(b.ing) + '</td><td class="num">' + fmt(b.anticipo) + '</td></tr>'; }).join('') + '</tbody></table></div><div class="small muted" style="margin-top:8px">Estimado: el SIMPLE descuenta los aportes a pensión del empleador y el ICA consolidado. La declaración anual es el formulario 260.</div>';
     } else {
-      var impEst = R.antes > 0 ? r0(R.antes * 0.35) : 0;
-      c.innerHTML = '<div class="row" style="margin-bottom:10px">' + fld('Año', sel('imA', [anio - 1, anio, anio + 1], anio)) + '</div><div class="kpis"><div class="kpi"><b>' + fmt(R.antes) + '</b><span>utilidad contable antes de impuestos</span></div><div class="kpi"><b>' + fmt(impEst) + '</b><span>renta estimada (35 %)</span></div><div class="kpi"><b>' + fmt(ret) + '</b><span>retenciones y autorretenciones a descontar</span></div><div class="kpi"><b>' + fmt(Math.max(0, impEst - ret)) + '</b><span>saldo estimado a pagar</span></div></div>' +
-        '<div class="banner info">Es una estimación sobre la utilidad contable. La renta real (formulario 110) parte de la utilidad fiscal: tu contador ajusta gastos no deducibles, el GMF (deducible al 50 %) y la tasa mínima de tributación del 15 %. Se paga en dos cuotas: mayo y julio.</div>' +
-        '<div class="row"><button class="btn" id="rnProv"' + (hechas['renta:' + anio] ? ' disabled' : '') + '>' + (hechas['renta:' + anio] ? 'Provisión registrada ✓' : 'Registrar provisión de renta del año') + '</button></div>';
+      var RE = rentaEstimada(anio), impEst = RE.impuesto, esN = e.persona === 'N';
+      c.innerHTML = '<div class="row" style="margin-bottom:10px">' + fld('Año', sel('imA', [anio - 1, anio, anio + 1], anio)) + (esN ? fld('Tus ingresos laborales del año (salario, opcional)', inp('rnLab', e.ingresosLaborales || '', 'number', ' min="0" placeholder="Del certificado de ingresos y retenciones"')) : '') + '</div>' +
+        '<div class="kpis"><div class="kpi"><b>' + fmt(RE.utilidad) + '</b><span>utilidad del negocio antes de impuestos</span></div>' + (esN ? '<div class="kpi"><b>' + fmt(RE.base) + '</b><span>base gravable estimada (' + RE.base_uvt + ' UVT)</span></div>' : '') + '<div class="kpi"><b>' + fmt(impEst) + '</b><span>renta estimada · ' + (esN ? 'tabla art. 241' : '35 %') + '</span></div><div class="kpi"><b>' + fmt(RE.retenciones) + '</b><span>retenciones que te hicieron</span></div></div>' +
+        (esN ? '<div class="banner info">Eres <b>persona natural</b>: la renta se calcula con la tabla progresiva del art. 241 del Estatuto Tributario. Los primeros <b>1.090 UVT (' + fmt(RE.exento_hasta) + ')</b> de base gravable pagan 0 %. ' + (impEst ? '' : 'Con lo que llevas, <b>el impuesto estimado es $0</b> y no hace falta provisión. ') +
+          'Debes declarar (formulario 210, en ago–oct del año siguiente) si tus ingresos brutos totales —negocio más salario— superan 1.400 UVT (' + fmt(RE.tope_ingresos_declarar) + '), si tu patrimonio pasa de 4.500 UVT, si tus consumos con tarjeta o compras pasan de 1.400 UVT, o si eres responsable de IVA. El salario se toma con la renta exenta del 25 %; tu contador afina deducciones (dependientes, intereses de vivienda, medicina prepagada, aportes voluntarios).</div>' :
+          '<div class="banner info">Es una estimación sobre la utilidad contable. La renta real (formulario 110) parte de la utilidad fiscal: tu contador ajusta gastos no deducibles, el GMF (deducible al 50 %) y la tasa mínima de tributación del 15 %. Se paga en dos cuotas: mayo y julio.</div>') +
+        '<div class="row"><button class="btn" id="rnProv"' + (hechas['renta:' + anio] || !impEst ? ' disabled' : '') + '>' + (hechas['renta:' + anio] ? 'Provisión registrada ✓' : (impEst ? 'Registrar provisión de renta del año' : 'Sin impuesto estimado: no hay provisión que registrar')) + '</button></div>';
+      if ($('rnLab')) $('rnLab').onchange = function(){ e.ingresosLaborales = Number(val('rnLab')) || 0; guardarCfg().then(render); };
       var bp = $('rnProv'); if (bp) bp.onclick = function(){ var v = prompt('Valor de la provisión de renta (puedes ajustarlo con tu contador)', impEst); if (!v) return; nuevoAsiento('AJ', hasta, 'Provisión impuesto de renta ' + anio, [{c:'540505', d: num(v)}, {c:'240405', h: num(v)}], 'renta:' + anio).then(function(){ toast('Provisión registrada'); render(); }).catch(function(er){ toast(er.message, true); }); };
     }
     $('imA').onchange = function(){ S.impAnio = val('imA'); render(); };
@@ -1960,7 +1982,7 @@ document.addEventListener('drop', function(e){ if (!e.dataTransfer || !e.dataTra
 // =============== AGENTE CONTABLE IA ===============
 // El servidor (api/conta → 'agente') habla con la IA; las herramientas se ejecutan aquí, sobre los datos de la página.
 S.ag = { msgs: [], vista: [], ocupado: false, adj: [], auto: !!lsGet('bru_conta_ag_auto', false) };
-var AG_ESCRIBE = { anular_comprobante: 1, actualizar_empresa: 1, registrar_compra: 1, registrar_venta_emitida: 1, crear_comprobante: 1, contabilizar_dashboard: 1, crear_tercero: 1, descartar_dashboard: 1 };
+var AG_ESCRIBE = { anular_comprobante: 1, actualizar_empresa: 1, registrar_compra: 1, registrar_venta_emitida: 1, crear_comprobante: 1, contabilizar_dashboard: 1, crear_tercero: 1, descartar_dashboard: 1, provision_renta: 1 };
 var EMP_CAMPOS = { razon:'Razón social', nit:'NIT', persona:'Tipo de persona', regimen:'Régimen', simpleGrupo:'Grupo SIMPLE', ciiu:'CIIU', ciudad:'Ciudad', direccion:'Dirección', email:'Correo', tel:'Teléfono', respIVA:'Responsable de IVA', ivaPeriodo:'Periodo de IVA', agenteRet:'Agente de retención', autoret:'Autorretenedor', fechaInicio:'Contabilidad desde' };
 
 function agContexto(){
@@ -1999,6 +2021,7 @@ var AG_TOOLS = {
     return { total: L.length, documentos: lim(L, n).map(function(d){ var x = d.data; return i.tipo === 'factura' ? {fecha: d.fecha, numero: x.numero, cliente: nomTer(x.cliente), total: x.total, estado: x.estado, por_cobrar: saldoFac(d), cufe: !!x.cufe} : {fecha: d.fecha, numero: x.numero || x.facProv, proveedor: nomTer(x.proveedor), concepto: x.desc, base: x.base, iva: x.iva, retencion: x.retFte, neto: x.neto, por_pagar: saldoCompra(d), anulada: !!x.anulada}; }) }; },
   buscar_tercero: function(i){ var q = norm(i.texto || ''); return terceros().filter(function(d){ return norm(d.data.nombre + ' ' + d.data.num).indexOf(q) >= 0; }).slice(0, 15).map(function(d){ var x = d.data; return {nombre: x.nombre, doc: x.tipoDoc + ' ' + x.num + (x.dv ? '-' + x.dv : ''), roles: x.roles, responsable_iva: x.respIVA, declarante: x.declarante, saldo_por_cobrar: saldo('1305', null, null, d.id), saldo_por_pagar: -saldo(['22','2335'], null, null, d.id)}; }); },
   impuestos: function(i){
+    if (i.impuesto === 'renta') return rentaEstimada(i.anio || Number(hoy().slice(0, 4)));
     if (i.impuesto === 'iva') return periodosIVA(i.anio || Number(hoy().slice(0, 4))).map(function(p){ var c = calcIVA(p.desde, p.hasta); return {periodo: p.n, iva_generado: c.gen, iva_descontable: c.desc, reteiva_que_te_hicieron: c.rete, saldo: c.saldo, presentado: !!S.cfg.presentadas['iva:' + p.k]}; });
     if (i.impuesto === 'retencion') { var m = i.mes || mesDe(sumaDias(hoy().slice(0, 8) + '01', -1)), r = calcRetencion(m); return {mes: m, total_dian: r.tot, reteica: r.ica, por_cuenta: r.m}; }
     var d = i.desde || hoy().slice(0, 4) + '-01-01', h = i.hasta || hoy(); return calcICA(d, h);
@@ -2057,6 +2080,12 @@ var AG_TOOLS = {
       return guardarCfg().then(function(){ return {ok: true, descartada: L[0].fecha + ' · ' + L[0].desc + ' · ' + L[0].valor}; });
     });
   },
+  provision_renta: function(i){
+    var anio = Number(i.anio) || Number(hoy().slice(0, 4)), RE = rentaEstimada(anio), v = r0(Number(i.valor) || RE.impuesto);
+    if (origenesContabilizados()['renta:' + anio]) return {error: 'La provisión de renta de ' + anio + ' ya está registrada'};
+    if (!v) return {ok: true, registrada: false, mensaje: 'El impuesto estimado es $0: no se registra provisión', calculo: RE};
+    return nuevoAsiento('AJ', anio + '-12-31', 'Provisión impuesto de renta ' + anio, [{c:'540505', d: v}, {c:'240405', h: v}], 'renta:' + anio).then(function(){ return {ok: true, registrada: true, valor: v, calculo: RE}; });
+  },
   datos_dashboard: function(){
     return sb('bru_store?id=eq.main&select=inventario,catalogo,finanzas').then(function(r){
       var row = (r && r[0]) || {}, f = row.finanzas || {}; S.dash = f;
@@ -2098,6 +2127,7 @@ function agDescribir(n, i){
   if (n === 'contabilizar_dashboard') return 'Contabilizar todas las operaciones pendientes del dashboard';
   if (n === 'anular_comprobante') { var a0 = asientos().filter(function(x){ return x.data.comp === i.comp && Number(x.data.num) === Number(i.num); })[0]; return 'Anular comprobante ' + esc(i.comp + ' ' + i.num) + (a0 ? ' · ' + esc(a0.data.desc) + ' · ' + fFecha(a0.fecha) : '') + '<br><span class="dim">' + esc(i.motivo || '') + '</span>'; }
   if (n === 'descartar_dashboard') return 'No contabilizar del dashboard: <b>' + esc(i.texto || '') + '</b>' + (i.fecha ? ' · ' + fFecha(i.fecha) : '') + (i.valor ? ' · ' + fmt(i.valor) : '') + (i.motivo ? '<br>Motivo: ' + esc(i.motivo) : '');
+  if (n === 'provision_renta') { var RE0 = rentaEstimada(Number(i.anio) || Number(hoy().slice(0, 4))); return 'Registrar provisión de renta ' + (i.anio || hoy().slice(0, 4)) + ' por <b>' + fmt(Number(i.valor) || RE0.impuesto) + '</b> (Db 540505 · Cr 240405)<br><span class="small muted">' + esc(RE0.metodo) + '</span>'; }
   if (n === 'crear_tercero') return 'Crear ' + esc(i.rol) + ': <b>' + esc((i.tercero || {}).nombre) + '</b>';
   return n;
 }
