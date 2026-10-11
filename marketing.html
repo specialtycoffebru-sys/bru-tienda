@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>B.R.U · Marketing</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,300;9..144,500&display=swap" rel="stylesheet">
+<script>if(/[?&]embed=1/.test(location.search))document.documentElement.className+=' embed';</script>
+<style>
+:root{
+  --bg:#0d0b09;--bg2:#141210;--bg3:#1c1916;--card:#181512;--card2:#1e1b17;
+  --gold:#c9a84c;--gold2:#e8c96a;--gold3:rgba(201,168,76,.12);
+  --txt:#e8e2d8;--mut:#a8a098;--dim:#6a6058;
+  --line:rgba(255,255,255,.08);--line2:rgba(201,168,76,.28);
+  --ok:#5fd394;--ok-bg:rgba(95,211,148,.1);--bad:#f38b8b;--bad-bg:rgba(243,139,139,.1);--warn:#f3a96b;--warn-bg:rgba(243,169,107,.1);--info:#7fb2f0;--info-bg:rgba(127,178,240,.1);
+  --r:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+select,option{background:var(--card2);color:var(--txt)}
+a{color:var(--gold)}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:300;margin:0}
+.wrap{max-width:1320px;margin:0 auto;padding:18px 16px 80px}
+html.embed .wrap{padding:12px 12px 60px}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.top h1{font-size:28px}
+html.embed .top h1{display:none}
+.top .sp{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--mut);white-space:nowrap}
+.pill.ok{color:var(--ok);border-color:rgba(95,211,148,.35)}.pill.warn{color:var(--warn);border-color:rgba(243,169,107,.35)}.pill.bad{color:var(--bad);border-color:rgba(243,139,139,.35)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;scrollbar-width:thin}
+.tabs button{border:1px solid var(--line);background:transparent;padding:7px 13px;border-radius:999px;cursor:pointer;color:var(--mut);white-space:nowrap;font-size:13px}
+.tabs button.on{background:var(--gold);color:#1a1406;border-color:var(--gold);font-weight:600}
+.tabs .cnt{font-size:11px;margin-left:4px;opacity:.85}
+.subtabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px}
+.subtabs button{border:none;background:var(--card2);padding:6px 12px;border-radius:8px;cursor:pointer;color:var(--mut);font-size:13px}
+.subtabs button.on{background:var(--gold3);color:var(--gold2);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.card h3{font-size:19px;margin-bottom:10px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:860px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.grid>*{min-width:0}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+label.f.chk{flex-direction:row;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--txt)}
+input[type=text],input[type=number],input[type=date],input[type=month],input[type=email],input[type=search],input[type=password],select,textarea{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;outline:none;text-transform:none;letter-spacing:0}
+input:focus,select:focus,textarea:focus{border-color:var(--line2)}
+textarea{min-height:90px;resize:vertical}
+.btn{border:1px solid var(--line2);background:var(--card2);padding:8px 14px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:13px}
+.btn:hover{border-color:var(--gold)}
+.btn.pri{background:var(--gold);color:#1a1406;border-color:var(--gold);font-weight:600}
+.btn.sm{padding:4px 9px;font-size:12px}
+.btn.ghost{background:transparent}
+.btn.dang{color:var(--bad);border-color:rgba(243,139,139,.35)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+.muted{color:var(--mut)}.dim{color:var(--dim)}.small{font-size:12px}.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:11px 13px;min-width:0}
+.kpi b{display:block;font-family:Fraunces,serif;font-weight:300;font-size:22px;line-height:1.15;overflow-wrap:anywhere}
+.kpi span{font-size:12px;color:var(--mut)}
+.kpi.ok b{color:var(--ok)}.kpi.bad b{color:var(--bad)}.kpi.warn b{color:var(--warn)}
+.tbl-w{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+table.t{width:100%;border-collapse:collapse;font-size:13px}
+table.t th,table.t td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.t th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);font-weight:600;background:var(--bg2);position:sticky;top:0}
+table.t tr.tot td{font-weight:600;border-top:1px solid var(--line2)}
+table.t tr.grp td{background:var(--bg2);font-weight:600;color:var(--gold2)}
+table.t tr.click{cursor:pointer}
+table.t tr.click:hover td{background:rgba(255,255,255,.02)}
+table.t tr.anul td{opacity:.45;text-decoration:line-through}
+table.t td.num,table.t th.num{text-align:right}
+.st{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--card2);color:var(--mut);white-space:nowrap}
+.st.ok{color:var(--ok);background:var(--ok-bg)}.st.warn{color:var(--warn);background:var(--warn-bg)}.st.bad{color:var(--bad);background:var(--bad-bg)}.st.info{color:var(--info);background:var(--info-bg)}
+.banner{border-radius:var(--r);padding:10px 13px;margin-bottom:10px;font-size:13px;border:1px solid}
+.banner.warn{background:var(--warn-bg);border-color:rgba(243,169,107,.35)}
+.banner.info{background:var(--info-bg);border-color:rgba(127,178,240,.35)}
+.banner.bad{background:var(--bad-bg);border-color:rgba(243,139,139,.35)}
+.banner.ok{background:var(--ok-bg);border-color:rgba(95,211,148,.35)}
+.banner code{background:rgba(0,0,0,.3);padding:1px 5px;border-radius:4px;font-size:12px}
+.sec{margin:16px 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--dim)}
+.empty{padding:34px 16px;text-align:center;color:var(--mut)}
+.hide{display:none!important}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;display:none}
+.ov.on{display:block}
+.drawer{position:fixed;top:0;right:0;height:100dvh;width:min(760px,100vw);background:var(--bg2);border-left:1px solid var(--line);z-index:41;transform:translateX(105%);visibility:hidden;transition:transform .22s,visibility 0s .22s;display:flex;flex-direction:column}
+.drawer.on{transform:none;visibility:visible;transition:transform .22s}
+.drawer .hd{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center}
+.drawer .hd h2{font-size:22px;flex:1}
+.drawer .bd{padding:14px 16px;overflow:auto;flex:1}
+.drawer .ft{padding:10px 16px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lines td{padding:4px 4px}
+.lines input,.lines select{padding:6px 7px;font-size:13px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--gold);color:#1a1406;padding:9px 16px;border-radius:999px;font-weight:600;z-index:60;opacity:0;transition:opacity .25s;pointer-events:none;max-width:92vw;text-align:center}
+.toast.on{opacity:1}
+.toast.err{background:var(--bad)}
+.bar{height:8px;background:var(--card2);border-radius:4px;overflow:hidden;min-width:60px}
+.bar i{display:block;height:100%;background:var(--gold);border-radius:0 4px 4px 0}
+.drop{border:1.5px dashed var(--line2);border-radius:var(--r);padding:26px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--card);transition:background .15s,border-color .15s}
+.drop.on{background:var(--gold3);border-color:var(--gold)}
+.ag-fab{position:fixed;right:16px;bottom:16px;z-index:30;background:var(--gold);color:#1a1406;border:none;border-radius:999px;padding:11px 16px;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.45);display:flex;gap:6px;align-items:center}
+.ag{position:fixed;top:0;right:0;height:100dvh;width:min(460px,100vw);background:var(--bg2);border-left:1px solid var(--line2);z-index:44;transform:translateX(105%);visibility:hidden;transition:transform .22s,visibility 0s .22s;display:flex;flex-direction:column}
+.ag.on{transform:none;visibility:visible;transition:transform .22s}
+.ag.on~.ag-fab,body:has(.ag.on) .ag-fab{display:none}
+.ag .hd{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
+.ag .hd h2{font-size:20px;flex:1}
+.ag-msgs{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+.ag-in{padding:10px 12px;border-top:1px solid var(--line)}
+.ag-u{align-self:flex-end;background:var(--gold3);border:1px solid var(--line2);padding:8px 11px;border-radius:12px 12px 2px 12px;max-width:88%;overflow-wrap:anywhere}
+.ag-a{align-self:flex-start;background:var(--card);border:1px solid var(--line);padding:8px 11px;border-radius:12px 12px 12px 2px;max-width:92%;overflow-wrap:anywhere}
+.ag-a code,.ag-u code{background:rgba(0,0,0,.3);padding:0 4px;border-radius:4px}
+.ag-tool{font-size:12px;color:var(--mut);padding:6px 10px;border-left:2px solid var(--line2);overflow-wrap:anywhere}
+.ag-tool.ok{border-color:var(--ok)}.ag-tool.err{border-color:var(--bad);color:var(--bad)}.ag-tool.no{border-color:var(--dim)}
+.ag-ok{background:var(--warn-bg);border:1px solid rgba(243,169,107,.35);border-radius:10px;padding:10px 12px;font-size:13px}
+.ag-hola{color:var(--mut);line-height:1.6}
+.ag-sug{display:block;margin-top:6px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 10px;cursor:pointer;text-align:left;width:100%;color:var(--txt)}
+.ag-sug:hover{border-color:var(--gold)}
+@media(max-width:600px){.ag-fab span{display:none}}
+@media print{.ag,.ag-fab{display:none!important}}
+.cal-day{display:flex;gap:10px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line)}
+.cal-day .d{width:58px;font-variant-numeric:tabular-nums;color:var(--mut);font-size:12px}
+@media print{body{background:#fff;color:#000}.tabs,.top,.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><h1>Marketing</h1><span class="sp"></span><span class="pill">✨ Agente con tus ventas reales</span></div>
+  <div class="tabs" id="tabs"></div>
+  <div id="main"></div>
+</div>
+<div class="ov" id="ov"></div>
+<aside class="drawer" id="dr"></aside>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+'use strict';
+// =============== B.R.U · MARKETING ===============
+// Lee ventas, catálogo y clientes de bru_store (solo lectura) y guarda su trabajo en bru_conta (tipos mkt_*).
+var SB_URL = 'https://dzgtyazvqpdmwvwqpvco.supabase.co';
+var SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
+var T = 'bru_conta', API = '/api/conta';
+var S = { tab: 'resumen', docs: [], byId: {}, store: null, cfg: null, gastoPub: [], ag: { msgs: [], vista: [], ocupado: false, auto: true, adj: [] }, sub: {} };
+var DEF = { marca: { nombre: 'B.R.U · Brew Respect Unite', instagram: '@BruCoffeeRoasters_', whatsapp: '573044927790', web: 'brucoffeeshop.online',
+  propuesta: 'Café de especialidad colombiano de productores con historia y cafés de competencia, tostado fresco y entregado en todo Colombia.',
+  publico: 'Personas de 22 a 45 años en Bogotá y Colombia que preparan café en casa (V60, prensa, espresso, moka), regalan café y buscan productos con historia.',
+  tono: 'Cercano, experto sin ser elitista, orgulloso del origen colombiano. Frases cortas.', hashtags: '#cafedeespecialidad #cafecolombiano #specialtycoffee #BRUcoffee #huila',
+  diferenciales: 'Cafés de productores premiados (Chocomora: café de campeonato de barismo), trazabilidad de finca, tostión propia, atención directa por WhatsApp.' },
+  meta: 3000000, presupuesto: 300000 };
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function r0(n){ return Math.round(Number(n) || 0); }
+function fmt(n){ var v = Number(n) || 0; var neg = v < 0; var s = Math.abs(Math.round(v)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); return (neg ? '-$' : '$') + s; }
+function hoy(){ var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+function sumaDias(f, n){ var d = new Date(f + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
+function dias(a, b){ return Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 864e5); }
+function fFecha(f){ if (!f) return ''; var p = String(f).slice(0, 10).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+var MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+var DSEM = ['dom','lun','mar','mié','jue','vie','sáb'];
+function nomMes(ym){ var p = ym.split('-'); return MESES[Number(p[1]) - 1] + ' ' + p[0]; }
+function norm(s){ return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim(); }
+function uid(p){ return p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function lsGet(k, d){ try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+function toast(t, err){ var e = $('toast'); e.textContent = t; e.classList.toggle('err', !!err); e.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(function(){ e.classList.remove('on'); }, 3000); }
+function val(id){ var e = $(id); return e ? (e.type === 'checkbox' ? e.checked : e.value) : ''; }
+function fld(lbl, html){ return '<label class="f">' + esc(lbl) + html + '</label>'; }
+function inp(id, v, tipo, extra){ return '<input type="' + (tipo || 'text') + '" id="' + id + '" value="' + esc(v == null ? '' : v) + '"' + (extra || '') + '>'; }
+function txa(id, v, extra){ return '<textarea id="' + id + '"' + (extra || '') + '>' + esc(v || '') + '</textarea>'; }
+function sel(id, op, v){ return '<select id="' + id + '">' + op.map(function(o){ var k = Array.isArray(o) ? o[0] : o, n = Array.isArray(o) ? o[1] : o; return '<option value="' + esc(k) + '"' + (String(k) === String(v) ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') + '</select>'; }
+function abrirPanel(titulo, cuerpo, pie){
+  $('dr').innerHTML = '<div class="hd"><h2>' + esc(titulo) + '</h2><button class="btn sm ghost" id="drX">✕</button></div><div class="bd">' + cuerpo + '</div><div class="ft">' + (pie || '') + '</div>';
+  $('dr').classList.add('on'); $('ov').classList.add('on'); $('drX').onclick = cerrarPanel;
+}
+function cerrarPanel(){ $('dr').classList.remove('on'); $('ov').classList.remove('on'); }
+function copiar(t){ return (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ toast('Copiado'); }).catch(function(){ var a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); document.execCommand('copy'); a.remove(); toast('Copiado'); }); }
+
+// =============== DATOS ===============
+function sb(path, opts){
+  opts = opts || {};
+  var h = { 'apikey': SB_KEY, 'Content-Type': 'application/json' }; if (opts.prefer) h.Prefer = opts.prefer;
+  return fetch(SB_URL + '/rest/v1/' + path, { method: opts.method || 'GET', headers: h, body: opts.body ? JSON.stringify(opts.body) : undefined })
+    .then(function(r){ if (!r.ok) return r.text().then(function(t){ throw new Error('Supabase ' + r.status + ': ' + t.slice(0, 140)); }); if (r.status === 204) return null; return r.text().then(function(t){ return t ? JSON.parse(t) : null; }); });
+}
+function api(accion, datos){
+  return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accion: accion, datos: datos || {} }) })
+    .then(function(r){ return r.text().then(function(t){ var j; try { j = JSON.parse(t); } catch (e) { j = { error: 'Respuesta inválida del servidor (' + r.status + ')' }; } return j; }); })
+    .catch(function(){ return { error: 'No hay conexión con el servidor' }; });
+}
+function cargar(){
+  return Promise.all([
+    sb('bru_store?id=eq.main&select=catalogo,inventario,finanzas'),
+    sb(T + '?tipo=in.(mkt_cfg,mkt_post,mkt_camp,mkt_idea)&select=id,tipo,fecha,data,created_at&order=created_at.asc'),
+    sb(T + '?tipo=eq.asiento&select=fecha,data').catch(function(){ return []; })
+  ]).then(function(r){
+    S.store = (r[0] && r[0][0]) || {};
+    S.docs = r[1] || []; S.byId = {}; S.docs.forEach(function(d){ d.data = d.data || {}; S.byId[d.id] = d; });
+    var c = S.byId.mktcfg ? S.byId.mktcfg.data : {};
+    S.cfg = JSON.parse(JSON.stringify(DEF)); Object.keys(c).forEach(function(k){ if (k === 'marca') { for (var j in c.marca) S.cfg.marca[j] = c.marca[j]; } else S.cfg[k] = c[k]; });
+    // inversión en publicidad registrada en contabilidad (cuenta 523560)
+    S.gastoPub = [];
+    (r[2] || []).forEach(function(a){ if (!a.data || a.data.anulado) return; (a.data.lineas || []).forEach(function(l){ if (String(l.c).indexOf('523560') === 0) S.gastoPub.push({fecha: a.fecha, valor: (Number(l.d) || 0) - (Number(l.h) || 0), desc: a.data.desc}); }); });
+  });
+}
+function guardar(doc){
+  doc.data = doc.data || {};
+  if (!S.byId[doc.id]) { S.docs.push(doc); S.byId[doc.id] = doc; }
+  return sb(T + '?on_conflict=id', { method: 'POST', prefer: 'resolution=merge-duplicates,return=minimal', body: [{ id: doc.id, tipo: doc.tipo, fecha: doc.fecha || null, data: doc.data }] }).then(function(){ return doc; });
+}
+function borrar(id){ var d = S.byId[id]; if (!d) return Promise.resolve(); S.docs = S.docs.filter(function(x){ return x.id !== id; }); delete S.byId[id]; return sb(T + '?id=eq.' + encodeURIComponent(id), { method: 'DELETE' }); }
+function guardarCfg(){ return guardar({ id: 'mktcfg', tipo: 'mkt_cfg', data: S.cfg }); }
+function lista(t){ return S.docs.filter(function(d){ return d.tipo === t; }); }
+
+// =============== ANÁLISIS DE VENTAS ===============
+function ventas(){
+  var f = (S.store && S.store.finanzas) || {}, out = [];
+  (f.venExt || []).forEach(function(v){ var fe = String(v.date || v.fecha || '').slice(0, 10); if (!fe) return; out.push({fecha: fe, prod: v.prod || '', qty: Number(v.qty) || 1, total: Number(v.bruto) || (Number(v.qty) || 1) * (Number(v.precio) || 0), cliente: v.cliente || '', vendedor: v.vendedor || '', canal: v.pago || 'Directa', origen: 'externa'}); });
+  (f.ven || []).forEach(function(v){ var fe = String(v.date || v.fecha || '').slice(0, 10); if (!fe) return; out.push({fecha: fe, prod: v.prod || '', qty: Number(v.qty) || 1, total: Number(v.total) || (Number(v.qty) || 1) * (Number(v.precio) || 0), cliente: v.cliente || '', vendedor: v.vendedor || '', canal: v.canal || 'Tienda', origen: 'tienda'}); });
+  return out.filter(function(v){ return v.total > 0; }).sort(function(a, b){ return a.fecha < b.fecha ? -1 : 1; });
+}
+function productos(){
+  return ((S.store && S.store.catalogo) || []).filter(function(c){ return c && c.nombre; }).map(function(c){
+    return {nombre: c.nombre, precio: Number(c.precio) || 0, presentacion: c.presLabel || ((c.cantidad || '') + 'g'), stock: Number(c.stock) || 0, notas: c.notas || '', origen: c.origen || '', productor: c.productor || '', variedad: c.variedad || '', proceso: c.proceso || '', categoria: c.categoria || '', altitud: c.altitud || '', precioEU: c.precios && c.precios.EU || null, foto: c.img || '', descripcion: String(c.desc || '').slice(0, 500), activo: c.activo !== false};
+  });
+}
+function clientes(){
+  var m = {}, h = hoy(), f = (S.store && S.store.finanzas) || {}, extra = {};
+  (f.pedsManual || []).forEach(function(p){ var k = norm(p.cliente); if (k) extra[k] = {tel: p.tel || '', ciudad: p.ciudad || ''}; });
+  ventas().forEach(function(v){
+    var k = norm(v.cliente); if (!k || k === 'consumidor final') return;
+    var c = m[k] || (m[k] = {nombre: v.cliente, compras: 0, unidades: 0, total: 0, primera: v.fecha, ultima: v.fecha, prods: {}, vendedor: v.vendedor, fechas: {}});
+    c.unidades += v.qty; c.total += v.total; c.prods[v.prod] = (c.prods[v.prod] || 0) + v.qty; if (!c.fechas[v.fecha]) { c.fechas[v.fecha] = 1; c.compras++; }
+    if (v.fecha > c.ultima) c.ultima = v.fecha; if (v.fecha < c.primera) c.primera = v.fecha;
+  });
+  return Object.keys(m).map(function(k){
+    var c = m[k], d = dias(c.ultima, h), fav = Object.keys(c.prods).sort(function(a, b){ return c.prods[b] - c.prods[a]; })[0];
+    c.dias = Math.max(0, d); c.favorito = fav; c.tel = (extra[k] || {}).tel || ''; c.ciudad = (extra[k] || {}).ciudad || '';
+    c.segmento = c.compras >= 3 ? (d > 45 ? 'En riesgo' : 'Fiel') : c.compras === 2 ? (d > 45 ? 'En riesgo' : 'Recurrente') : (d > 60 ? 'Dormido' : d > 30 ? 'Por recomprar' : 'Nuevo');
+    delete c.fechas; return c;
+  }).sort(function(a, b){ return b.total - a.total; });
+}
+function resumen(){
+  var V = ventas(), h = hoy(), mes = h.slice(0, 7), ant = sumaDias(mes + '-01', -1).slice(0, 7), porMes = {}, porProd = {}, porVend = {}, porDia = [0,0,0,0,0,0,0];
+  V.forEach(function(v){ var m = v.fecha.slice(0, 7); porMes[m] = (porMes[m] || 0) + v.total; porProd[v.prod] = porProd[v.prod] || {u: 0, v: 0}; porProd[v.prod].u += v.qty; porProd[v.prod].v += v.total; porVend[v.vendedor || '—'] = (porVend[v.vendedor || '—'] || 0) + v.total; porDia[new Date(v.fecha + 'T12:00:00').getDay()] += v.total; });
+  var vm = porMes[mes] || 0, va = porMes[ant] || 0, ult = V.length ? V[V.length - 1].fecha : null, C = clientes();
+  var pubMes = S.gastoPub.filter(function(g){ return g.fecha && g.fecha.slice(0, 7) === mes; }).reduce(function(s, g){ return s + g.valor; }, 0);
+  var pub90 = S.gastoPub.filter(function(g){ return g.fecha >= sumaDias(h, -90); }).reduce(function(s, g){ return s + g.valor; }, 0);
+  var v90 = V.filter(function(v){ return v.fecha >= sumaDias(h, -90); }).reduce(function(s, v){ return s + v.total; }, 0);
+  var ped = {}; V.forEach(function(v){ ped[v.fecha + '|' + norm(v.cliente)] = (ped[v.fecha + '|' + norm(v.cliente)] || 0) + v.total; });
+  var nPed = Object.keys(ped).length, totV = V.reduce(function(s, v){ return s + v.total; }, 0);
+  var diaMes = Number(h.slice(8, 10)), diasMes = new Date(Number(h.slice(0, 4)), Number(h.slice(5, 7)), 0).getDate();
+  return {ventas_mes: vm, ventas_mes_anterior: va, meta_mes: S.cfg.meta, avance_meta_pct: S.cfg.meta ? Math.round(vm / S.cfg.meta * 100) : null, proyeccion_mes: diaMes ? r0(vm / diaMes * diasMes) : vm,
+    falta_para_meta: Math.max(0, S.cfg.meta - vm), ultima_venta: ult, dias_sin_vender: ult ? Math.max(0, dias(ult, h)) : null, ticket_promedio: nPed ? r0(totV / nPed) : 0, pedidos: nPed, ventas_totales: totV,
+    clientes: C.length, clientes_recurrentes: C.filter(function(c){ return c.compras > 1; }).length, publicidad_mes: pubMes, publicidad_90d: pub90, ventas_90d: v90, retorno_publicidad_90d: pub90 ? Math.round(v90 / pub90 * 10) / 10 : null,
+    por_mes: porMes, por_producto: porProd, por_vendedor: porVend, por_dia_semana: DSEM.map(function(d, i){ return d + ': ' + fmt(porDia[i]); }).join(', '),
+    productos: productos().map(function(p){ return {nombre: p.nombre, precio: p.precio, presentacion: p.presentacion, stock: p.stock}; })};
+}
+function oportunidades(){
+  var R = resumen(), C = clientes(), P = productos(), o = [];
+  if (R.dias_sin_vender != null && R.dias_sin_vender >= 5) o.push(['bad', 'Llevas <b>' + R.dias_sin_vender + ' días sin vender</b>. Lo más rápido: escribirle hoy a tus clientes que ya compraron.']);
+  if (S.cfg.meta && R.proyeccion_mes < S.cfg.meta) o.push(['warn', 'A este ritmo cierras el mes en <b>' + fmt(R.proyeccion_mes) + '</b> y la meta es ' + fmt(S.cfg.meta) + '. Te faltan ' + fmt(R.falta_para_meta) + ' (≈ ' + Math.ceil(R.falta_para_meta / Math.max(R.ticket_promedio, 1)) + ' pedidos de ' + fmt(R.ticket_promedio) + ').']);
+  P.forEach(function(p){ if (p.stock >= 10) o.push(['info', '<b>' + esc(p.nombre) + '</b> tiene ' + p.stock + ' unidades en stock: es el producto a empujar (' + fmt(p.stock * p.precio) + ' en ventas posibles).']); else if (p.stock > 0 && p.stock <= 3) o.push(['warn', 'Quedan solo <b>' + p.stock + '</b> de ' + esc(p.nombre) + ': úsalo como «últimas unidades» o planea el siguiente lote.']); });
+  var rec = C.filter(function(c){ return c.segmento === 'Por recomprar' || c.segmento === 'En riesgo' || c.segmento === 'Dormido'; });
+  if (rec.length) o.push(['info', '<b>' + rec.length + ' clientes</b> ya deberían volver a comprar (más de 30 días). Un mensaje personal por WhatsApp suele convertir mejor que un post.']);
+  var fieles = C.filter(function(c){ return c.compras > 1; });
+  if (fieles.length) o.push(['ok', '<b>' + fieles.length + ' clientes</b> han repetido. Pídeles una reseña o un referido con un beneficio para ambos.']);
+  if (!lista('mkt_post').some(function(d){ return d.data.fecha >= hoy(); })) o.push(['warn', 'No tienes publicaciones programadas. Pídele al agente el calendario de las próximas 2 semanas.']);
+  return o;
+}
+
+// =============== UI ===============
+var TABS = [['resumen', 'Resumen'], ['clientes', 'Clientes'], ['contenido', 'Contenido'], ['campanas', 'Campañas'], ['ideas', 'Ideas'], ['marca', 'Marca y metas']];
+function render(){
+  $('tabs').innerHTML = TABS.map(function(t){ return '<button data-t="' + t[0] + '" class="' + (S.tab === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('');
+  var fn = { resumen: renderResumen, clientes: renderClientes, contenido: renderContenido, campanas: renderCampanas, ideas: renderIdeas, marca: renderMarca }[S.tab] || renderResumen;
+  try { fn($('main')); } catch (e) { console.error(e); $('main').innerHTML = '<div class="banner bad">Error: ' + esc(e.message) + '</div>'; }
+}
+function ir(t){ S.tab = t; lsSet('bru_mkt_tab', t); cerrarPanel(); render(); window.scrollTo(0, 0); }
+function barras(obj, fmtFn){
+  var ks = Object.keys(obj), mx = Math.max.apply(null, ks.map(function(k){ return obj[k]; }).concat([1]));
+  return ks.map(function(k){ return '<div class="row" style="flex-wrap:nowrap;margin:5px 0"><span class="small" style="width:110px;flex:none">' + esc(k) + '</span><div class="bar" style="flex:1"><i style="width:' + Math.max(2, Math.round(obj[k] / mx * 100)) + '%"></i></div><span class="small num" style="width:90px;flex:none">' + (fmtFn || fmt)(obj[k]) + '</span></div>'; }).join('') || '<div class="dim small">Sin datos</div>';
+}
+function renderResumen(c){
+  var R = resumen(), O = oportunidades(), pct = Math.min(100, R.avance_meta_pct || 0);
+  var meses = {}; Object.keys(R.por_mes).sort().slice(-6).forEach(function(m){ meses[nomMes(m)] = R.por_mes[m]; });
+  var prods = {}; Object.keys(R.por_producto).forEach(function(p){ prods[p] = R.por_producto[p].v; });
+  c.innerHTML = '<div class="kpis">' +
+    '<div class="kpi' + (R.ventas_mes >= S.cfg.meta ? ' ok' : '') + '"><b>' + fmt(R.ventas_mes) + '</b><span>ventas de ' + MESES[Number(hoy().slice(5, 7)) - 1] + ' · meta ' + fmt(S.cfg.meta) + '</span><div class="bar" style="margin-top:6px"><i style="width:' + pct + '%"></i></div></div>' +
+    '<div class="kpi"><b>' + fmt(R.proyeccion_mes) + '</b><span>proyección al cierre del mes</span></div>' +
+    '<div class="kpi' + (R.dias_sin_vender >= 5 ? ' bad' : '') + '"><b>' + (R.dias_sin_vender == null ? '—' : R.dias_sin_vender) + '</b><span>días desde la última venta</span></div>' +
+    '<div class="kpi"><b>' + fmt(R.ticket_promedio) + '</b><span>ticket promedio · ' + R.pedidos + ' pedidos</span></div>' +
+    '<div class="kpi"><b>' + R.clientes + '</b><span>clientes · ' + R.clientes_recurrentes + ' han repetido</span></div>' +
+    '<div class="kpi"><b>' + (R.retorno_publicidad_90d == null ? '—' : R.retorno_publicidad_90d + 'x') + '</b><span>ventas por cada $1 en publicidad (90 días · ' + fmt(R.publicidad_90d) + ')</span></div></div>' +
+    '<div class="sec">Qué hacer ahora</div>' + O.map(function(x){ return '<div class="banner ' + x[0] + '">' + x[1] + '</div>'; }).join('') +
+    '<div class="row" style="margin:6px 0 4px"><button class="btn pri" data-ask="Hazme un plan para llegar a la meta de ventas de este mes: acciones concretas para esta semana, mensajes a clientes y publicaciones. Guarda las publicaciones e ideas.">🚀 Plan para llegar a la meta</button><button class="btn" data-ask="Escribe mensajes de WhatsApp personalizados para los clientes que ya deberían recomprar, uno por cliente, según lo que compraron.">💬 Mensajes de recompra</button><button class="btn" data-ask="Crea el calendario de contenido de Instagram de las próximas 2 semanas (4 publicaciones por semana: reels, carruseles e historias) y guárdalo.">📅 Calendario de 2 semanas</button></div>' +
+    '<div class="grid g2" style="margin-top:12px"><div class="card"><h3>Ventas por mes</h3>' + barras(meses) + '</div><div class="card"><h3>Por producto</h3>' + barras(prods) +
+    '<div class="sec">Stock</div>' + productos().map(function(p){ return '<div class="small">' + esc(p.nombre) + ' · ' + esc(p.presentacion) + ' · ' + fmt(p.precio) + ' — <b>' + p.stock + '</b> unidades</div>'; }).join('') + '</div></div>' +
+    '<div class="grid g2" style="margin-top:12px"><div class="card"><h3>Quién vende</h3>' + barras(R.por_vendedor) + '</div><div class="card"><h3>Día de la semana</h3>' + barras((function(){ var o = {}; R.por_dia_semana.split(', ').forEach(function(s){ var p = s.split(': '); o[p[0]] = Number(p[1].replace(/\D/g, '')); }); return o; })()) + '</div></div>';
+}
+var SEG_ST = {Fiel: 'ok', Recurrente: 'ok', Nuevo: 'info', 'Por recomprar': 'warn', 'En riesgo': 'bad', Dormido: 'bad'};
+function msgCliente(c){
+  var n = String(c.nombre).split(' ')[0]; n = n.charAt(0).toUpperCase() + n.slice(1);
+  if (c.segmento === 'Nuevo') return 'Hola ' + n + ', soy Camilo de B.R.U ☕ ¿Cómo te ha ido con el ' + c.favorito + '? Me encantaría saber cómo lo estás preparando. Si quieres te recomiendo la receta que mejor le va.';
+  if (c.segmento === 'Fiel' || c.segmento === 'Recurrente') return 'Hola ' + n + ' 🙌 gracias por seguir con B.R.U. Como cliente frecuente quiero ofrecerte primero lo nuevo: tenemos Chocomora (café de campeonato, natural, Pitalito). ¿Te separo una bolsa?';
+  return 'Hola ' + n + ', soy Camilo de B.R.U ☕ Hace un tiempo te llevaste ' + c.favorito + ' y quería contarte que tenemos tueste fresco esta semana. ¿Te separo una bolsa? Te la envío a domicilio.';
+}
+function renderClientes(c){
+  var C = clientes(), f = S.sub.seg || '';
+  var segs = ['Fiel', 'Recurrente', 'Nuevo', 'Por recomprar', 'En riesgo', 'Dormido'], L = f ? C.filter(function(x){ return x.segmento === f; }) : C;
+  c.innerHTML = '<div class="banner info">Los clientes salen de las ventas registradas en el dashboard. Escribir directo a quien ya compró es la forma más barata de vender más: usa los mensajes sugeridos o pídele al agente uno a la medida.</div>' +
+    '<div class="row" style="margin-bottom:10px"><button class="btn sm' + (f ? ' ghost' : ' pri') + '" data-seg="">Todos (' + C.length + ')</button>' + segs.map(function(s){ var n = C.filter(function(x){ return x.segmento === s; }).length; return n ? '<button class="btn sm' + (f === s ? ' pri' : ' ghost') + '" data-seg="' + s + '">' + s + ' (' + n + ')</button>' : ''; }).join('') + '</div>' +
+    '<div class="tbl-w"><table class="t"><thead><tr><th>Cliente</th><th>Segmento</th><th class="num">Compras</th><th class="num">Total</th><th>Favorito</th><th>Última</th><th></th></tr></thead><tbody>' +
+    (L.map(function(x, i){ return '<tr><td><b>' + esc(x.nombre) + '</b>' + (x.ciudad ? '<div class="small dim">' + esc(x.ciudad) + '</div>' : '') + '</td><td><span class="st ' + (SEG_ST[x.segmento] || '') + '">' + x.segmento + '</span></td><td class="num">' + x.compras + '</td><td class="num">' + fmt(x.total) + '</td><td>' + esc(x.favorito) + '</td><td>' + fFecha(x.ultima) + '<div class="small dim">hace ' + x.dias + ' días</div></td><td class="num"><button class="btn sm" data-msg="' + i + '">Mensaje</button></td></tr>'; }).join('') || '<tr><td colspan="7" class="empty">Sin clientes en este grupo</td></tr>') + '</tbody></table></div>';
+  c.onclick = function(e){
+    var s = e.target.closest('[data-seg]'); if (s) { S.sub.seg = s.getAttribute('data-seg'); render(); return; }
+    var b = e.target.closest('[data-msg]'); if (!b) return; var x = L[Number(b.getAttribute('data-msg'))], m = msgCliente(x);
+    abrirPanel('Mensaje para ' + x.nombre, '<div class="small muted" style="margin-bottom:6px">' + x.segmento + ' · ' + x.compras + ' compras · favorito ' + esc(x.favorito) + ' · última hace ' + x.dias + ' días</div>' + txa('mMsg', m, ' style="min-height:140px"'),
+      '<button class="btn pri" id="mCopy">Copiar</button>' + (x.tel ? '<a class="btn" target="_blank" rel="noopener" id="mWa" href="#">Abrir WhatsApp</a>' : '') + '<button class="btn ghost" id="mIA">Que lo escriba el agente</button>');
+    $('mCopy').onclick = function(){ copiar(val('mMsg')); };
+    if ($('mWa')) $('mWa').onclick = function(){ this.href = 'https://wa.me/' + String(x.tel).replace(/\D/g, '').replace(/^3/, '573') + '?text=' + encodeURIComponent(val('mMsg')); };
+    $('mIA').onclick = function(){ cerrarPanel(); agAbrir(); agEnviar('Escribe un mensaje de WhatsApp para ' + x.nombre + ' (' + x.segmento + ', ' + x.compras + ' compras, compró sobre todo ' + x.favorito + ', última compra hace ' + x.dias + ' días). Que suene a mí, corto y que invite a comprar.'); };
+  };
+}
+// ---------- contenido ----------
+var REDES = ['Instagram', 'TikTok', 'WhatsApp', 'Facebook', 'Web'], FORMATOS = ['Reel', 'Carrusel', 'Post', 'Historia', 'Estado WhatsApp', 'Live'], EST_POST = [['idea', 'Idea'], ['listo', 'Listo para publicar'], ['publicado', 'Publicado']];
+function posts(){ return lista('mkt_post').sort(function(a, b){ return String(a.data.fecha || '9').localeCompare(String(b.data.fecha || '9')); }); }
+function renderContenido(c){
+  var L = posts(), h = hoy(), prox = L.filter(function(d){ return d.data.estado !== 'publicado' && (d.data.fecha || h) >= sumaDias(h, -7); }), pub = L.filter(function(d){ return d.data.estado === 'publicado'; });
+  c.innerHTML = '<div class="row" style="margin-bottom:10px"><button class="btn pri" id="pNew">+ Publicación</button><button class="btn" data-ask="Crea el calendario de contenido de Instagram de las próximas 2 semanas para B.R.U (mezcla reels, carruseles e historias, con copy completo, hashtags y qué grabar) y guárdalo.">🤖 Que el agente arme 2 semanas</button><span class="sp"></span><span class="small muted">' + prox.length + ' por publicar · ' + pub.length + ' publicadas</span></div>' +
+    (prox.length ? prox.map(tarjetaPost).join('') : '<div class="empty">No hay publicaciones programadas. Crea una o pídele al agente el calendario.</div>') +
+    (pub.length ? '<div class="sec">Publicadas</div>' + pub.slice(-10).reverse().map(tarjetaPost).join('') : '');
+  $('pNew').onclick = function(){ formPost(); };
+  c.onclick = function(e){ var b = e.target.closest('[data-post]'); if (b) formPost(b.getAttribute('data-post')); var cp = e.target.closest('[data-copy]'); if (cp) { e.stopPropagation(); var d = S.byId[cp.getAttribute('data-copy')]; copiar((d.data.copy || '') + (d.data.hashtags ? '\n\n' + d.data.hashtags : '')); } };
+}
+function tarjetaPost(d){
+  var x = d.data, f = x.fecha ? new Date(x.fecha + 'T12:00:00') : null;
+  return '<div class="card" style="margin-bottom:8px;cursor:pointer" data-post="' + d.id + '"><div class="row"><span class="st ' + (x.estado === 'publicado' ? 'ok' : x.estado === 'listo' ? 'info' : '') + '">' + esc((EST_POST.filter(function(e){ return e[0] === x.estado; })[0] || ['', 'Idea'])[1]) + '</span><b>' + (f ? DSEM[f.getDay()] + ' ' + fFecha(x.fecha) : 'Sin fecha') + (x.hora ? ' · ' + esc(x.hora) : '') + '</b><span class="pill">' + esc(x.red || 'Instagram') + ' · ' + esc(x.formato || 'Post') + '</span>' + (x.campana && S.byId[x.campana] ? '<span class="pill">' + esc(S.byId[x.campana].data.nombre) + '</span>' : '') + '<span class="sp"></span><button class="btn sm ghost" data-copy="' + d.id + '">Copiar texto</button></div>' +
+    '<div style="margin-top:6px;font-weight:600">' + esc(x.titulo || '') + '</div>' + (x.visual ? '<div class="small muted" style="margin-top:3px">🎬 ' + esc(x.visual).slice(0, 220) + '</div>' : '') + (x.copy ? '<div class="small" style="margin-top:4px;white-space:pre-wrap;opacity:.9">' + esc(x.copy).slice(0, 280) + (x.copy.length > 280 ? '…' : '') + '</div>' : '') + '</div>';
+}
+function formPost(id){
+  var d = id ? S.byId[id] : null, x = d ? d.data : {fecha: sumaDias(hoy(), 1), red: 'Instagram', formato: 'Reel', estado: 'idea'};
+  var camps = [['', '— Ninguna —']].concat(lista('mkt_camp').map(function(c){ return [c.id, c.data.nombre]; }));
+  abrirPanel(d ? 'Publicación' : 'Nueva publicación', '<div class="grid g3">' + fld('Fecha', inp('pF', x.fecha, 'date')) + fld('Hora', inp('pH', x.hora || '', 'text', ' placeholder="7:00 pm"')) + fld('Estado', sel('pE', EST_POST, x.estado)) + fld('Red', sel('pR', REDES, x.red)) + fld('Formato', sel('pFo', FORMATOS, x.formato)) + fld('Campaña', sel('pC', camps, x.campana || '')) + '</div>' +
+    fld('Tema / gancho', inp('pT', x.titulo)) + fld('Qué grabar o diseñar', txa('pV', x.visual, ' style="min-height:70px"')) + fld('Texto (copy)', txa('pCo', x.copy, ' style="min-height:150px"')) + fld('Hashtags', inp('pHa', x.hashtags || S.cfg.marca.hashtags)) + fld('Llamado a la acción', inp('pCta', x.cta)) +
+    (x.estado === 'publicado' ? '<div class="grid g3">' + fld('Alcance', inp('pAl', x.alcance || '', 'number')) + fld('Interacciones', inp('pIn', x.interacciones || '', 'number')) + fld('Ventas que generó', inp('pVe', x.ventas || '', 'number')) + '</div>' : ''),
+    '<button class="btn pri" id="pOk">Guardar</button><button class="btn" id="pCp">Copiar texto</button>' + (d ? '<span class="sp"></span><button class="btn dang" id="pDel">Borrar</button>' : ''));
+  $('pCp').onclick = function(){ copiar(val('pCo') + (val('pHa') ? '\n\n' + val('pHa') : '')); };
+  $('pOk').onclick = function(){
+    var o = d || {id: uid('mp'), tipo: 'mkt_post', data: {}}; var y = o.data;
+    y.fecha = val('pF'); y.hora = val('pH'); y.estado = val('pE'); y.red = val('pR'); y.formato = val('pFo'); y.campana = val('pC'); y.titulo = val('pT'); y.visual = val('pV'); y.copy = val('pCo'); y.hashtags = val('pHa'); y.cta = val('pCta');
+    if ($('pAl')) { y.alcance = Number(val('pAl')) || 0; y.interacciones = Number(val('pIn')) || 0; y.ventas = Number(val('pVe')) || 0; }
+    o.fecha = y.fecha || null; guardar(o).then(function(){ toast('Guardado'); cerrarPanel(); render(); }).catch(function(e){ toast(e.message, true); });
+  };
+  if ($('pDel')) $('pDel').onclick = function(){ if (confirm('¿Borrar esta publicación?')) borrar(d.id).then(function(){ cerrarPanel(); render(); }); };
+}
+// ---------- campañas ----------
+function ventasEntre(a, b){ return ventas().filter(function(v){ return v.fecha >= a && v.fecha <= (b || '9999'); }).reduce(function(s, v){ return s + v.total; }, 0); }
+function renderCampanas(c){
+  var L = lista('mkt_camp').sort(function(a, b){ return String(b.data.desde || '').localeCompare(String(a.data.desde || '')); });
+  c.innerHTML = '<div class="row" style="margin-bottom:10px"><button class="btn pri" id="cNew">+ Campaña</button><button class="btn" data-ask="Propón 3 campañas para vender más este mes (con oferta, fechas, presupuesto, canales y meta de ventas) pensando en el stock que tengo; guarda la mejor como campaña y sus publicaciones.">🤖 Que el agente proponga campañas</button></div>' +
+    (L.length ? L.map(function(d){ var x = d.data, v = x.desde ? ventasEntre(x.desde, x.hasta) : 0, roi = x.presupuesto ? Math.round(v / x.presupuesto * 10) / 10 : null, np = lista('mkt_post').filter(function(p){ return p.data.campana === d.id; }).length;
+      return '<div class="card" style="margin-bottom:8px;cursor:pointer" data-camp="' + d.id + '"><div class="row"><span class="st ' + (x.estado === 'activa' ? 'ok' : x.estado === 'terminada' ? '' : 'info') + '">' + esc(x.estado || 'borrador') + '</span><b>' + esc(x.nombre) + '</b><span class="small muted">' + fFecha(x.desde) + ' → ' + fFecha(x.hasta) + '</span></div>' +
+        '<div class="small" style="margin-top:6px">' + esc(x.objetivo || '') + (x.oferta ? ' · <b>Oferta:</b> ' + esc(x.oferta) : '') + (x.codigo ? ' · código <code>' + esc(x.codigo) + '</code>' : '') + '</div>' +
+        '<div class="kpis" style="margin:10px 0 0"><div class="kpi"><b>' + fmt(x.presupuesto) + '</b><span>presupuesto</span></div><div class="kpi"><b>' + fmt(v) + '</b><span>ventas en las fechas' + (x.metaVentas ? ' · meta ' + fmt(x.metaVentas) : '') + '</span></div><div class="kpi"><b>' + (roi == null ? '—' : roi + 'x') + '</b><span>retorno</span></div><div class="kpi"><b>' + np + '</b><span>publicaciones</span></div></div></div>'; }).join('') : '<div class="empty">Aún no hay campañas.</div>');
+  $('cNew').onclick = function(){ formCamp(); };
+  c.onclick = function(e){ var b = e.target.closest('[data-camp]'); if (b) formCamp(b.getAttribute('data-camp')); };
+}
+function formCamp(id){
+  var d = id ? S.byId[id] : null, x = d ? d.data : {desde: hoy(), hasta: sumaDias(hoy(), 14), estado: 'borrador'};
+  abrirPanel(d ? x.nombre : 'Nueva campaña', fld('Nombre', inp('cN', x.nombre)) + fld('Objetivo', inp('cO', x.objetivo, 'text', ' placeholder="Ej. vender 15 bolsas de Chocomora"')) + '<div class="grid g3">' + fld('Desde', inp('cD', x.desde, 'date')) + fld('Hasta', inp('cH', x.hasta, 'date')) + fld('Estado', sel('cE', [['borrador', 'Borrador'], ['activa', 'Activa'], ['terminada', 'Terminada']], x.estado)) +
+    fld('Presupuesto', inp('cP', x.presupuesto || '', 'number')) + fld('Meta de ventas', inp('cM', x.metaVentas || '', 'number')) + fld('Código de descuento', inp('cCo', x.codigo)) + '</div>' + fld('Oferta', inp('cOf', x.oferta)) + fld('Canales', inp('cCa', x.canales, 'text', ' placeholder="Instagram, WhatsApp, pauta…"')) + fld('Plan / acciones', txa('cA', x.acciones, ' style="min-height:150px"')) + fld('Resultados y aprendizajes', txa('cR', x.resultados)),
+    '<button class="btn pri" id="cOk">Guardar</button>' + (d ? '<button class="btn" id="cIA">Publicaciones con el agente</button><span class="sp"></span><button class="btn dang" id="cDel">Borrar</button>' : ''));
+  $('cOk').onclick = function(){
+    var o = d || {id: uid('mc'), tipo: 'mkt_camp', data: {}}, y = o.data;
+    y.nombre = val('cN') || 'Campaña'; y.objetivo = val('cO'); y.desde = val('cD'); y.hasta = val('cH'); y.estado = val('cE'); y.presupuesto = Number(val('cP')) || 0; y.metaVentas = Number(val('cM')) || 0; y.codigo = val('cCo'); y.oferta = val('cOf'); y.canales = val('cCa'); y.acciones = val('cA'); y.resultados = val('cR');
+    o.fecha = y.desde; guardar(o).then(function(){ toast('Guardada'); cerrarPanel(); render(); }).catch(function(e){ toast(e.message, true); });
+  };
+  if ($('cIA')) $('cIA').onclick = function(){ cerrarPanel(); agAbrir(); agEnviar('Crea y guarda las publicaciones de la campaña "' + x.nombre + '" (id ' + d.id + ') del ' + x.desde + ' al ' + x.hasta + ', ligadas a esa campaña.'); };
+  if ($('cDel')) $('cDel').onclick = function(){ if (confirm('¿Borrar la campaña?')) borrar(d.id).then(function(){ cerrarPanel(); render(); }); };
+}
+// ---------- ideas ----------
+var EST_IDEA = [['nueva', 'Nueva'], ['probando', 'Probando'], ['hecha', 'Hecha'], ['descartada', 'Descartada']];
+function renderIdeas(c){
+  var L = lista('mkt_idea').sort(function(a, b){ var p = {alto: 0, medio: 1, bajo: 2}; return (p[a.data.impacto] || 1) - (p[b.data.impacto] || 1); });
+  c.innerHTML = '<div class="row" style="margin-bottom:10px"><button class="btn pri" id="iNew">+ Idea</button><button class="btn" data-ask="Dame 10 ideas creativas y concretas para vender más café B.R.U (alianzas, eventos, regalos corporativos, suscripción, contenido, España), ordenadas por impacto y esfuerzo, y guárdalas.">🤖 10 ideas nuevas</button></div>' +
+    (L.length ? '<div class="grid g2">' + L.map(function(d){ var x = d.data; return '<div class="card" style="cursor:pointer' + (x.estado === 'descartada' || x.estado === 'hecha' ? ';opacity:.55' : '') + '" data-idea="' + d.id + '"><div class="row"><span class="st ' + (x.impacto === 'alto' ? 'ok' : x.impacto === 'bajo' ? '' : 'info') + '">impacto ' + esc(x.impacto || 'medio') + '</span><span class="st">esfuerzo ' + esc(x.esfuerzo || 'medio') + '</span><span class="st">' + esc(x.tipo || '') + '</span><span class="sp"></span><span class="small dim">' + esc((EST_IDEA.filter(function(e){ return e[0] === x.estado; })[0] || ['', 'Nueva'])[1]) + '</span></div><div style="font-weight:600;margin-top:6px">' + esc(x.titulo) + '</div><div class="small muted" style="margin-top:4px;white-space:pre-wrap">' + esc(x.detalle || '').slice(0, 400) + '</div></div>'; }).join('') + '</div>' : '<div class="empty">Sin ideas todavía.</div>');
+  $('iNew').onclick = function(){ formIdea(); };
+  c.onclick = function(e){ var b = e.target.closest('[data-idea]'); if (b) formIdea(b.getAttribute('data-idea')); };
+}
+function formIdea(id){
+  var d = id ? S.byId[id] : null, x = d ? d.data : {impacto: 'medio', esfuerzo: 'medio', estado: 'nueva'};
+  abrirPanel(d ? 'Idea' : 'Nueva idea', fld('Idea', inp('iT', x.titulo)) + fld('Detalle', txa('iD', x.detalle, ' style="min-height:140px"')) + '<div class="grid g3">' + fld('Tipo', inp('iTi', x.tipo, 'text', ' placeholder="Alianza, evento, contenido…"')) + fld('Impacto', sel('iI', ['alto', 'medio', 'bajo'], x.impacto)) + fld('Esfuerzo', sel('iE', ['bajo', 'medio', 'alto'], x.esfuerzo)) + fld('Estado', sel('iS', EST_IDEA, x.estado)) + '</div>',
+    '<button class="btn pri" id="iOk">Guardar</button>' + (d ? '<button class="btn" id="iIA">Desarrollar con el agente</button><span class="sp"></span><button class="btn dang" id="iDel">Borrar</button>' : ''));
+  $('iOk').onclick = function(){ var o = d || {id: uid('mi'), tipo: 'mkt_idea', data: {}}, y = o.data; y.titulo = val('iT'); y.detalle = val('iD'); y.tipo = val('iTi'); y.impacto = val('iI'); y.esfuerzo = val('iE'); y.estado = val('iS'); guardar(o).then(function(){ toast('Guardada'); cerrarPanel(); render(); }); };
+  if ($('iIA')) $('iIA').onclick = function(){ cerrarPanel(); agAbrir(); agEnviar('Desarrolla esta idea en un plan paso a paso con costos, mensajes y publicaciones: "' + x.titulo + '". ' + (x.detalle || '')); };
+  if ($('iDel')) $('iDel').onclick = function(){ if (confirm('¿Borrar la idea?')) borrar(d.id).then(function(){ cerrarPanel(); render(); }); };
+}
+// ---------- marca ----------
+function renderMarca(c){
+  var m = S.cfg.marca;
+  c.innerHTML = '<div class="banner info">Esto es lo que el agente sabe de tu marca. Entre más preciso, mejores ideas y textos.</div><div class="card"><div class="grid g3">' + fld('Meta de ventas del mes', inp('kMeta', S.cfg.meta, 'number')) + fld('Presupuesto de publicidad al mes', inp('kPres', S.cfg.presupuesto, 'number')) + fld('Instagram', inp('kIg', m.instagram)) + '</div>' +
+    fld('Propuesta de valor', txa('kProp', m.propuesta, ' style="min-height:60px"')) + fld('Cliente ideal', txa('kPub', m.publico, ' style="min-height:60px"')) + fld('Diferenciales', txa('kDif', m.diferenciales, ' style="min-height:60px"')) + fld('Tono de comunicación', txa('kTono', m.tono, ' style="min-height:50px"')) +
+    '<div class="grid g2">' + fld('Hashtags base', inp('kHash', m.hashtags)) + fld('WhatsApp', inp('kWa', m.whatsapp)) + '</div><div class="row" style="margin-top:10px"><button class="btn pri" id="kOk">Guardar</button></div></div>';
+  $('kOk').onclick = function(){ S.cfg.meta = Number(val('kMeta')) || 0; S.cfg.presupuesto = Number(val('kPres')) || 0; m.instagram = val('kIg'); m.propuesta = val('kProp'); m.publico = val('kPub'); m.diferenciales = val('kDif'); m.tono = val('kTono'); m.hashtags = val('kHash'); m.whatsapp = val('kWa');
+    guardarCfg().then(function(){ toast('Guardado'); render(); }).catch(function(e){ toast(e.message, true); }); };
+}
+
+// =============== AGENTE DE MARKETING ===============
+var AG_ESCRIBE = { guardar_publicaciones: 1, guardar_campana: 1, guardar_ideas: 1, actualizar_publicacion: 1, actualizar_marca: 1 };
+function agContexto(){
+  var R = resumen();
+  return JSON.stringify({hoy: hoy(), marca: S.cfg.marca, meta_mes: S.cfg.meta, presupuesto_publicidad_mes: S.cfg.presupuesto, resumen_ventas: R, oportunidades: oportunidades().map(function(o){ return o[1].replace(/<[^>]+>/g, ''); }),
+    publicaciones_programadas: posts().filter(function(d){ return d.data.estado !== 'publicado' && (d.data.fecha || '') >= hoy(); }).slice(0, 20).map(function(d){ return d.data.fecha + ' ' + d.data.red + ' ' + d.data.formato + ': ' + d.data.titulo; }),
+    campanas: lista('mkt_camp').map(function(d){ return {id: d.id, nombre: d.data.nombre, estado: d.data.estado, desde: d.data.desde, hasta: d.data.hasta}; })});
+}
+var AG_TOOLS = {
+  ver_ventas: function(i){ var V = ventas(); if (i.desde) V = V.filter(function(v){ return v.fecha >= i.desde; }); if (i.hasta) V = V.filter(function(v){ return v.fecha <= i.hasta; }); return {resumen: resumen(), detalle: V.slice(-150)}; },
+  ver_clientes: function(i){ var C = clientes(); if (i.segmento) C = C.filter(function(c){ return c.segmento === i.segmento; }); return {clientes: C.slice(0, 120).map(function(c){ return {nombre: c.nombre, segmento: c.segmento, compras: c.compras, total: c.total, favorito: c.favorito, ultima: c.ultima, dias: c.dias, ciudad: c.ciudad, tiene_telefono: !!c.tel}; })}; },
+  ver_productos: function(){ return {productos: productos()}; },
+  ver_contenido: function(){ return {publicaciones: posts().slice(-60).map(function(d){ var x = d.data; return {id: d.id, fecha: x.fecha, red: x.red, formato: x.formato, titulo: x.titulo, estado: x.estado, campana: x.campana, alcance: x.alcance, interacciones: x.interacciones, ventas: x.ventas}; })}; },
+  ver_campanas: function(){ return {campanas: lista('mkt_camp').map(function(d){ var x = d.data; return {id: d.id, nombre: x.nombre, objetivo: x.objetivo, desde: x.desde, hasta: x.hasta, estado: x.estado, oferta: x.oferta, presupuesto: x.presupuesto, meta: x.metaVentas, ventas_en_fechas: x.desde ? ventasEntre(x.desde, x.hasta) : 0}; })}; },
+  ver_ideas: function(){ return {ideas: lista('mkt_idea').map(function(d){ return {id: d.id, titulo: d.data.titulo, impacto: d.data.impacto, esfuerzo: d.data.esfuerzo, estado: d.data.estado}; })}; },
+  ver_publicidad: function(){ return {gastos_publicidad_contabilidad: S.gastoPub.slice(-40)}; },
+  guardar_publicaciones: function(i){
+    var L = (i.publicaciones || []).slice(0, 40), p = Promise.resolve(), n = 0;
+    L.forEach(function(x){ p = p.then(function(){ var o = {id: uid('mp'), tipo: 'mkt_post', fecha: x.fecha || null, data: {fecha: x.fecha || '', hora: x.hora || '', red: x.red || 'Instagram', formato: x.formato || 'Post', titulo: x.titulo || '', visual: x.visual || '', copy: x.copy || '', hashtags: x.hashtags || '', cta: x.cta || '', campana: x.campana_id || '', estado: 'idea', creadoPor: 'agente'}}; return guardar(o).then(function(){ n++; }); }); });
+    return p.then(function(){ return {ok: true, guardadas: n}; });
+  },
+  actualizar_publicacion: function(i){ var d = S.byId[i.id]; if (!d || d.tipo !== 'mkt_post') return {ok: false, error: 'No existe esa publicación'}; Object.keys(i.campos || {}).forEach(function(k){ d.data[k] = i.campos[k]; }); d.fecha = d.data.fecha || null; return guardar(d).then(function(){ return {ok: true}; }); },
+  guardar_campana: function(i){ var o = {id: uid('mc'), tipo: 'mkt_camp', fecha: i.desde || null, data: {nombre: i.nombre || 'Campaña', objetivo: i.objetivo || '', desde: i.desde || hoy(), hasta: i.hasta || sumaDias(hoy(), 14), estado: 'borrador', presupuesto: Number(i.presupuesto) || 0, metaVentas: Number(i.meta_ventas) || 0, codigo: i.codigo || '', oferta: i.oferta || '', canales: i.canales || '', acciones: i.acciones || '', creadoPor: 'agente'}}; return guardar(o).then(function(){ return {ok: true, id: o.id}; }); },
+  guardar_ideas: function(i){ var p = Promise.resolve(), n = 0; (i.ideas || []).slice(0, 30).forEach(function(x){ p = p.then(function(){ return guardar({id: uid('mi'), tipo: 'mkt_idea', data: {titulo: x.titulo || '', detalle: x.detalle || '', tipo: x.tipo || '', impacto: x.impacto || 'medio', esfuerzo: x.esfuerzo || 'medio', estado: 'nueva', creadoPor: 'agente'}}).then(function(){ n++; }); }); }); return p.then(function(){ return {ok: true, guardadas: n}; }); },
+  actualizar_marca: function(i){ var c = i.campos || {}, cambios = []; ['propuesta', 'publico', 'tono', 'hashtags', 'diferenciales', 'instagram'].forEach(function(k){ if (c[k] != null) { S.cfg.marca[k] = c[k]; cambios.push(k); } }); if (c.meta != null) { S.cfg.meta = Number(c.meta) || 0; cambios.push('meta'); } if (c.presupuesto != null) { S.cfg.presupuesto = Number(c.presupuesto) || 0; cambios.push('presupuesto'); } return guardarCfg().then(function(){ return {ok: true, cambios: cambios}; }); }
+};
+function agDescribir(n, i){
+  if (n === 'guardar_publicaciones') return 'Guardar ' + (i.publicaciones || []).length + ' publicaciones en el calendario';
+  if (n === 'guardar_campana') return 'Crear campaña <b>' + esc(i.nombre) + '</b>';
+  if (n === 'guardar_ideas') return 'Guardar ' + (i.ideas || []).length + ' ideas';
+  if (n === 'actualizar_publicacion') return 'Actualizar una publicación';
+  if (n === 'actualizar_marca') return 'Actualizar datos de la marca: ' + esc(Object.keys(i.campos || {}).join(', '));
+  return n;
+}
+function md(s){
+  var bt = String.fromCharCode(96), h = esc(s).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(new RegExp(bt + '([^' + bt + ']+)' + bt, 'g'), '<code>$1</code>');
+  return h.split('\n').map(function(l){ return /^\s*[-•·]\s+/.test(l) ? '<div style="padding-left:12px">• ' + l.replace(/^\s*[-•·]\s+/, '') + '</div>' : (/^#{1,3}\s/.test(l) ? '<b>' + l.replace(/^#+\s/, '') + '</b>' : l + '<br>'); }).join('').replace(/(<br>)+$/, '');
+}
+function agAbrir(){ $('ag').classList.add('on'); agPintar(); setTimeout(function(){ var t = $('agIn'); if (t) t.focus(); }, 50); }
+function agCerrar(){ $('ag').classList.remove('on'); }
+function agPintar(){
+  var b = $('agMsgs'); if (!b) return;
+  b.innerHTML = (S.ag.vista.length ? '' : '<div class="ag-hola"><b>Hola, soy tu agente de marketing.</b><br>Conozco tus ventas, clientes, productos y stock. Pídeme ideas, campañas, textos o el calendario de contenido. Ejemplos:' +
+      ['¿Por qué bajaron las ventas y qué hago esta semana?', 'Plan para vender las bolsas de Chocomora que tengo', 'Calendario de Instagram de 2 semanas', 'Mensajes de WhatsApp para clientes que no han vuelto', 'Ideas para regalos corporativos de fin de año', '¿Qué está funcionando en marketing de café de especialidad ahora?'].map(function(x){ return '<button class="ag-sug" data-sug="' + esc(x) + '">' + esc(x) + '</button>'; }).join('') + '</div>') +
+    S.ag.vista.map(function(v, idx){
+      if (v.t === 'user') return '<div class="ag-u">' + md(v.texto) + (v.archivos && v.archivos.length ? '<div class="small" style="opacity:.8;margin-top:4px">📎 ' + v.archivos.map(esc).join(', ') + '</div>' : '') + '</div>';
+      if (v.t === 'ai') return '<div class="ag-a">' + md(v.texto) + '<div style="text-align:right;margin-top:4px"><button class="btn sm ghost" data-cp="' + idx + '">Copiar</button></div></div>';
+      if (v.t === 'tool') return '<div class="ag-tool ' + (v.estado || '') + '">' + (v.estado === 'ok' ? '✓ ' : v.estado === 'err' ? '✕ ' : v.estado === 'no' ? '⊘ ' : '… ') + v.html + (v.res ? '<div class="small dim">' + esc(v.res) + '</div>' : '') + '</div>';
+      if (v.t === 'aprobar') return '<div class="ag-ok"><div>' + v.html + '</div>' + (v.resuelto ? '' : '<div class="row" style="margin-top:8px"><button class="btn sm pri" data-apr="' + idx + '">Aprobar</button><button class="btn sm ghost" data-rec="' + idx + '">Rechazar</button></div>') + '</div>';
+      if (v.t === 'err') return '<div class="ag-tool err">' + esc(v.texto) + '</div>';
+      return '';
+    }).join('') + (S.ag.ocupado ? '<div class="ag-a dim">Pensando…</div>' : '');
+  b.scrollTop = b.scrollHeight;
+  $('agAdj').innerHTML = S.ag.adj.map(function(f, i){ return '<span class="pill">📎 ' + esc(f.name) + ' <a href="#" data-qx="' + i + '">✕</a></span>'; }).join('');
+  $('agSend').disabled = S.ag.ocupado; $('agAuto').checked = S.ag.auto;
+}
+function imagenB64(file){
+  return new Promise(function(ok, no){ var r = new FileReader(); r.onload = function(){ var img = new Image(); img.onload = function(){ var k = Math.min(1, 1400 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); ok(c.toDataURL('image/jpeg', 0.82).split(',')[1]); }; img.onerror = function(){ no(new Error('No se pudo abrir la imagen')); }; img.src = r.result; }; r.onerror = function(){ no(new Error('No se pudo leer')); }; r.readAsDataURL(file); });
+}
+function agEnviar(texto, files){
+  texto = String(texto || '').trim(); files = files || [];
+  if (S.ag.ocupado || (!texto && !files.length)) return;
+  if (!texto) texto = 'Mira estas imágenes y propón publicaciones con su texto.';
+  S.ag.ctx = agContexto();
+  S.ag.msgs.forEach(function(m){ if (m.role === 'assistant' && Array.isArray(m.content)) { m.content = m.content.filter(function(c){ return c.type !== 'thinking' && c.type !== 'redacted_thinking'; }); if (!m.content.length) m.content = [{type: 'text', text: '(listo)'}]; } });
+  S.ag.ocupado = true; S.ag.vista.push({t: 'user', texto: texto, archivos: files.map(function(f){ return f.name; })}); agPintar();
+  var bloques = [], i = 0;
+  function prep(){ if (i >= files.length) return Promise.resolve(); var f = files[i++]; if (!/^image\//.test(f.type)) { bloques.push({type: 'text', text: 'Archivo ' + f.name + ': solo leo imágenes.'}); return prep(); } return imagenB64(f).then(function(d){ bloques.push({type: 'text', text: 'Imagen: ' + f.name}); bloques.push({type: 'image', source: {type: 'base64', media_type: 'image/jpeg', data: d}}); }).catch(function(){}).then(prep); }
+  prep().then(function(){ S.ag.msgs.push({role: 'user', content: bloques.concat([{type: 'text', text: texto}])}); return agCiclo(0); })
+    .catch(function(e){ S.ag.vista.push({t: 'err', texto: e.message}); })
+    .then(function(){ S.ag.msgs.forEach(function(m){ if (Array.isArray(m.content)) m.content = m.content.map(function(c){ return c.type === 'image' ? {type: 'text', text: '[imagen ya vista arriba]'} : c; }); }); S.ag.ocupado = false; agPintar(); render(); lsSet('bru_mkt_chat', S.ag.vista.filter(function(v){ return v.t === 'user' || v.t === 'ai'; }).slice(-30)); });
+}
+function agCiclo(n){
+  if (n > 14) { S.ag.vista.push({t: 'err', texto: 'Me detuve para no dar demasiadas vueltas. Dime si sigo.'}); return Promise.resolve(); }
+  return api('marketing', {messages: S.ag.msgs, contexto: S.ag.ctx || agContexto()}).then(function(r){
+    if (r.error && /signature|thinking/i.test(r.error) && !agCiclo.limpio) { agCiclo.limpio = true; var ult = S.ag.msgs.filter(function(m){ return m.role === 'user' && Array.isArray(m.content) && m.content.some(function(c){ return c.type === 'text' || c.type === 'image'; }); }).pop(); S.ag.msgs = ult ? [ult] : S.ag.msgs.slice(-1); return agCiclo(n); }
+    agCiclo.limpio = false;
+    if (r.error) throw new Error(r.error);
+    S.ag.msgs.push({role: 'assistant', content: r.content});
+    r.content.forEach(function(c){ if (c.type === 'text' && c.text.trim()) S.ag.vista.push({t: 'ai', texto: c.text}); if (c.type === 'server_tool_use' && c.name === 'web_search') S.ag.vista.push({t: 'tool', estado: 'ok', html: 'Buscando en internet: ' + esc((c.input && c.input.query) || '')}); });
+    agPintar();
+    if (r.stop_reason === 'pause_turn') return agCiclo(n + 1);
+    var usos = r.content.filter(function(c){ return c.type === 'tool_use'; });
+    if (r.stop_reason === 'max_tokens' && !usos.length) { S.ag.msgs.push({role: 'user', content: [{type: 'text', text: 'Tu respuesta se cortó. Continúa desde donde ibas.'}]}); return agCiclo(n + 1); }
+    if (r.stop_reason !== 'tool_use' || !usos.length) return;
+    var res = [], k = 0;
+    function sig(){ if (k >= usos.length) { S.ag.msgs.push({role: 'user', content: res}); return agCiclo(n + 1); } var u = usos[k++]; return agEjecutar(u).then(function(out){ res.push({type: 'tool_result', tool_use_id: u.id, content: JSON.stringify(out).slice(0, 30000), is_error: !!(out && out.ok === false)}); }).then(sig); }
+    return sig();
+  });
+}
+function agEjecutar(u){
+  var fn = AG_TOOLS[u.name], inp = u.input || {};
+  if (!fn) return Promise.resolve({ok: false, error: 'Herramienta desconocida'});
+  var escribe = AG_ESCRIBE[u.name], paso = {t: escribe && !S.ag.auto ? 'aprobar' : 'tool', html: escribe ? agDescribir(u.name, inp) : 'Consultando: ' + esc(u.name.replace(/_/g, ' '))};
+  S.ag.vista.push(paso); agPintar();
+  var permiso = paso.t === 'aprobar' ? new Promise(function(ok){ paso.cb = ok; }) : Promise.resolve(true);
+  return permiso.then(function(si){
+    paso.t = 'tool'; delete paso.cb;
+    if (!si) { paso.estado = 'no'; paso.res = 'Rechazado'; agPintar(); return {ok: false, error: 'El usuario rechazó esta acción. Pregúntale qué cambiar.'}; }
+    return Promise.resolve().then(function(){ return fn(inp); }).then(function(out){ paso.estado = out && out.ok === false ? 'err' : 'ok'; if (out && out.guardadas != null) paso.res = out.guardadas + ' guardadas'; if (out && out.ok === false) paso.res = out.error; agPintar(); return out == null ? {ok: true} : out; })
+      .catch(function(e){ paso.estado = 'err'; paso.res = e.message; agPintar(); return {ok: false, error: e.message}; });
+  });
+}
+
+// =============== ARRANQUE ===============
+(function(){
+  var fab = document.createElement('button'); fab.id = 'agFab'; fab.className = 'ag-fab'; fab.innerHTML = '✨ <span>Agente de marketing</span>'; fab.onclick = agAbrir; document.body.appendChild(fab);
+  var p = document.createElement('aside'); p.id = 'ag'; p.className = 'ag';
+  p.innerHTML = '<div class="hd"><h2>Agente de marketing</h2><label class="f chk small" title="Si lo desactivas, te pide aprobación antes de guardar"><input type="checkbox" id="agAuto"> Guardar sin preguntar</label><button class="btn sm ghost" id="agNew">Nueva</button><button class="btn sm ghost" id="agX">✕</button></div>' +
+    '<div class="ag-msgs" id="agMsgs"></div><div class="ag-in"><div id="agAdj" class="row" style="margin-bottom:6px"></div><div class="row" style="flex-wrap:nowrap;align-items:flex-end"><label class="btn" title="Adjuntar fotos de producto">📷<input type="file" id="agFile" multiple accept="image/*" class="hide"></label>' +
+    '<textarea id="agIn" placeholder="Pide ideas, campañas, textos…" style="min-height:42px;max-height:140px;flex:1"></textarea><button class="btn pri" id="agSend">Enviar</button></div></div>';
+  document.body.appendChild(p);
+  S.ag.auto = lsGet('bru_mkt_auto', true); S.ag.vista = lsGet('bru_mkt_chat', []);
+  // las conversaciones guardadas se muestran, pero el agente empieza con memoria limpia
+  if (S.ag.vista.length) S.ag.msgs = [{role: 'user', content: [{type: 'text', text: 'Conversación anterior (resumen de lo que hablamos): ' + S.ag.vista.slice(-8).map(function(v){ return (v.t === 'user' ? 'Yo: ' : 'Tú: ') + String(v.texto).slice(0, 600); }).join('\n')}]}, {role: 'assistant', content: [{type: 'text', text: 'Entendido, sigo desde ahí.'}]}];
+  $('agX').onclick = agCerrar;
+  $('agNew').onclick = function(){ if (S.ag.ocupado) return; S.ag.msgs = []; S.ag.vista = []; lsSet('bru_mkt_chat', []); agPintar(); };
+  $('agAuto').onchange = function(){ S.ag.auto = this.checked; lsSet('bru_mkt_auto', S.ag.auto); };
+  $('agFile').onchange = function(e){ S.ag.adj = S.ag.adj.concat(Array.prototype.slice.call(e.target.files)); e.target.value = ''; agPintar(); };
+  $('agSend').onclick = function(){ var t = $('agIn').value, f = S.ag.adj; $('agIn').value = ''; S.ag.adj = []; agEnviar(t, f); };
+  $('agIn').onkeydown = function(e){ if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('agSend').click(); } };
+  p.onclick = function(e){
+    var s = e.target.closest('[data-sug]'); if (s) { agEnviar(s.getAttribute('data-sug'), []); return; }
+    var c = e.target.closest('[data-cp]'); if (c) { copiar(S.ag.vista[Number(c.getAttribute('data-cp'))].texto); return; }
+    var a = e.target.closest('[data-apr],[data-rec]'); if (a) { var v = S.ag.vista[Number(a.getAttribute('data-apr') || a.getAttribute('data-rec'))]; if (v && v.cb) { v.resuelto = a.hasAttribute('data-apr') ? 'si' : 'no'; v.cb(v.resuelto === 'si'); agPintar(); } return; }
+    var q = e.target.closest('[data-qx]'); if (q) { e.preventDefault(); S.ag.adj.splice(Number(q.getAttribute('data-qx')), 1); agPintar(); }
+  };
+  $('tabs').onclick = function(e){ var b = e.target.closest('button[data-t]'); if (b) ir(b.getAttribute('data-t')); };
+  document.addEventListener('click', function(e){ var a = e.target.closest('[data-ask]'); if (a && !e.target.closest('#ag')) { e.preventDefault(); agAbrir(); agEnviar(a.getAttribute('data-ask')); } });
+  $('ov').onclick = cerrarPanel;
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') { cerrarPanel(); } });
+  var t0 = lsGet('bru_mkt_tab', 'resumen'); if (TABS.some(function(t){ return t[0] === t0; })) S.tab = t0;
+  $('main').innerHTML = '<div class="empty">Cargando…</div>';
+  cargar().then(render).catch(function(e){ $('main').innerHTML = '<div class="banner bad">No se pudo cargar: ' + esc(e.message) + '</div>'; });
+})();
+
+})();
+</script>
+</body>
+</html>
