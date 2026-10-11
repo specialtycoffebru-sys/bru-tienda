@@ -124,6 +124,10 @@ table.t td.num,table.t th.num{text-align:right}
 .cal-day{display:flex;gap:10px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line)}
 .cal-day .d{width:58px;font-variant-numeric:tabular-nums;color:var(--mut);font-size:12px}
 @media print{body{background:#fff;color:#000}.tabs,.top,.no-print{display:none!important}}
+.ag.inline{position:relative;top:auto;right:auto;height:calc(100dvh - 150px);min-height:480px;width:100%;transform:none;visibility:visible;border:1px solid var(--line2);border-radius:var(--r);z-index:1;transition:none}
+html.embed .ag.inline{height:calc(100dvh - 110px)}
+.ag.inline #agX{display:none}
+.tabs button[data-t=agente]:not(.on){border-color:var(--line2);color:var(--gold2)}
 </style>
 </head>
 <body>
@@ -273,13 +277,17 @@ function oportunidades(){
 }
 
 // =============== UI ===============
-var TABS = [['resumen', 'Resumen'], ['clientes', 'Clientes'], ['contenido', 'Contenido'], ['campanas', 'Campañas'], ['ideas', 'Ideas'], ['marca', 'Marca y metas']];
+var TABS = [['agente', '✨ Agente'], ['resumen', 'Resumen'], ['clientes', 'Clientes'], ['contenido', 'Contenido'], ['campanas', 'Campañas'], ['ideas', 'Ideas'], ['marca', 'Marca y metas']];
 function render(){
   $('tabs').innerHTML = TABS.map(function(t){ return '<button data-t="' + t[0] + '" class="' + (S.tab === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('');
+  var ag = $('ag');
+  if (S.tab === 'agente') { $('main').innerHTML = ''; $('main').appendChild(ag); ag.classList.add('on', 'inline'); $('agFab').style.display = 'none'; agPintar(); return; }
+  if (ag.classList.contains('inline')) { ag.classList.remove('on', 'inline'); document.body.appendChild(ag); }
+  $('agFab').style.display = '';
   var fn = { resumen: renderResumen, clientes: renderClientes, contenido: renderContenido, campanas: renderCampanas, ideas: renderIdeas, marca: renderMarca }[S.tab] || renderResumen;
   try { fn($('main')); } catch (e) { console.error(e); $('main').innerHTML = '<div class="banner bad">Error: ' + esc(e.message) + '</div>'; }
 }
-function ir(t){ S.tab = t; lsSet('bru_mkt_tab', t); cerrarPanel(); render(); window.scrollTo(0, 0); }
+function ir(t){ S.tab = t; lsSet('bru_mkt_tab2', t); cerrarPanel(); render(); window.scrollTo(0, 0); }
 function barras(obj, fmtFn){
   var ks = Object.keys(obj), mx = Math.max.apply(null, ks.map(function(k){ return obj[k]; }).concat([1]));
   return ks.map(function(k){ return '<div class="row" style="flex-wrap:nowrap;margin:5px 0"><span class="small" style="width:110px;flex:none">' + esc(k) + '</span><div class="bar" style="flex:1"><i style="width:' + Math.max(2, Math.round(obj[k] / mx * 100)) + '%"></i></div><span class="small num" style="width:90px;flex:none">' + (fmtFn || fmt)(obj[k]) + '</span></div>'; }).join('') || '<div class="dim small">Sin datos</div>';
@@ -447,8 +455,8 @@ function md(s){
   var bt = String.fromCharCode(96), h = esc(s).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(new RegExp(bt + '([^' + bt + ']+)' + bt, 'g'), '<code>$1</code>');
   return h.split('\n').map(function(l){ return /^\s*[-•·]\s+/.test(l) ? '<div style="padding-left:12px">• ' + l.replace(/^\s*[-•·]\s+/, '') + '</div>' : (/^#{1,3}\s/.test(l) ? '<b>' + l.replace(/^#+\s/, '') + '</b>' : l + '<br>'); }).join('').replace(/(<br>)+$/, '');
 }
-function agAbrir(){ $('ag').classList.add('on'); agPintar(); setTimeout(function(){ var t = $('agIn'); if (t) t.focus(); }, 50); }
-function agCerrar(){ $('ag').classList.remove('on'); }
+function agAbrir(){ if (S.tab !== 'agente') { ir('agente'); return; } $('ag').classList.add('on'); agPintar(); setTimeout(function(){ var t = $('agIn'); if (t) t.focus(); }, 50); }
+function agCerrar(){ if (S.tab === 'agente') { ir('resumen'); return; } $('ag').classList.remove('on'); }
 function agPintar(){
   var b = $('agMsgs'); if (!b) return;
   b.innerHTML = (S.ag.vista.length ? '' : '<div class="ag-hola"><b>Hola, soy tu agente de marketing.</b><br>Conozco tus ventas, clientes, productos y stock. Pídeme ideas, campañas, textos o el calendario de contenido. Ejemplos:' +
@@ -540,7 +548,7 @@ function agEjecutar(u){
   document.addEventListener('click', function(e){ var a = e.target.closest('[data-ask]'); if (a && !e.target.closest('#ag')) { e.preventDefault(); agAbrir(); agEnviar(a.getAttribute('data-ask')); } });
   $('ov').onclick = cerrarPanel;
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape') { cerrarPanel(); } });
-  var t0 = lsGet('bru_mkt_tab', 'resumen'); if (TABS.some(function(t){ return t[0] === t0; })) S.tab = t0;
+  var t0 = lsGet('bru_mkt_tab2', 'agente'); if (TABS.some(function(t){ return t[0] === t0; })) S.tab = t0;
   $('main').innerHTML = '<div class="empty">Cargando…</div>';
   cargar().then(render).catch(function(e){ $('main').innerHTML = '<div class="banner bad">No se pudo cargar: ' + esc(e.message) + '</div>'; });
 })();
