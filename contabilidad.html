@@ -388,7 +388,8 @@ function anularAsiento(id, motivo){
   a.data.anulado = true; a.data.anuladoEl = new Date().toISOString(); a.data.motivo = motivo || '';
   return guardar(a);
 }
-function origenesContabilizados(){ var o = {}; asientos().forEach(function(a){ if (a.data.origen) o[a.data.origen] = a.id; }); return o; }
+// incluye los anulados: una operación del dashboard que se anuló a propósito no debe volver a proponerse
+function origenesContabilizados(){ var o = {}; asientos(true).forEach(function(a){ if (a.data.origen && (!o[a.data.origen] || !a.data.anulado)) o[a.data.origen] = a.id; }); return o; }
 // recorre las líneas de los asientos vigentes en un rango
 function movs(desde, hasta, fn){
   asientos().forEach(function(a){
