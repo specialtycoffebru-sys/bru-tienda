@@ -33,7 +33,7 @@ header nav a:hover,header nav a.on{color:var(--gold2)}
 .steps{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:26px}
 .steps span{border:1px solid var(--bd);border-radius:999px;padding:6px 14px;font-size:13px;color:var(--cream2)}
 .steps b{color:var(--gold2);margin-right:6px}
-.clases{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:26px 0 60px}
+.clases{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin:26px 0 60px}
 @media(max-width:900px){.clases{grid-template-columns:1fr}}
 .cl-card{text-align:left;background:var(--card);border:1px solid var(--bd);border-radius:16px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;transition:border-color .2s,transform .2s}
 .cl-card:hover{border-color:var(--bd2);transform:translateY(-2px)}
@@ -57,6 +57,13 @@ header nav a:hover,header nav a.on{color:var(--gold2)}
 .opl{font-size:12px}
 .faq{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 @media(max-width:900px){.faq{grid-template-columns:1fr!important}}
+.cl-card{position:relative}
+.cl-card.soon{cursor:default}
+.cl-card.soon:hover{transform:none;border-color:var(--bd)}
+.cl-card.soon .cl-img{filter:grayscale(.6) brightness(.7)}
+.pronto{position:absolute;top:14px;left:14px;background:var(--gold);color:#1a1406;font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px}
+.cl-card.soon .cl-inc{font-size:14px;color:var(--gold2);background:var(--gold3);border:1px solid var(--bd2);border-radius:10px;padding:8px 10px}
+.cl-cta{text-decoration:none}
 .cl-cta{color:var(--gold2);font-weight:600;font-size:14px}
 .vacio{grid-column:1/-1;text-align:center;color:var(--cream2);padding:40px;border:1px dashed var(--bd2);border-radius:16px}
 #armar{scroll-margin-top:80px;margin-bottom:60px}
@@ -132,11 +139,11 @@ footer{border-top:1px solid var(--bd);padding:26px 0;color:var(--muted);font-siz
       <div>
         <div class="blk"><div class="eyebrow">Paso 2</div><h2 id="a-titulo">Arma tu combo</h2><div class="a-dur" id="a-dur"></div><div class="sub">Empieza con un combo y cámbialo como quieras: quita, agrega o elige tu café.</div><div class="combos" id="combos"></div></div>
         <div class="blk"><h2>Agrega a tu clase</h2><div class="sub" id="d-nota"></div><div class="exs" id="extras"></div></div>
-        <div class="blk"><h2>¿Cuántas personas?</h2><div class="pers"><button type="button" id="pm" aria-label="Menos">−</button><input type="number" id="personas" min="1" value="1"><button type="button" id="pp" aria-label="Más">+</button></div><div class="nota" id="p-nota"></div></div>
+        <div class="blk"><h2>¿Cuántas personas?</h2><div class="pers"><button type="button" id="pm" aria-label="Menos">−</button><input type="number" id="personas" min="1" value="1"><button type="button" id="pp" aria-label="Más">+</button></div><div class="nota" id="p-nota"></div><div id="g-blk" class="hide" style="margin-top:16px"><h2 style="font-size:24px">¿Cuántos grupos?</h2><div class="pers"><button type="button" id="gm" aria-label="Menos">−</button><input type="number" id="grupos" min="1" value="1"><button type="button" id="gp" aria-label="Más">+</button></div><div class="nota" id="g-nota"></div></div></div>
         <form class="blk" id="form"><div id="datos"></div><div class="eyebrow">Paso 3</div><h2>Tus datos</h2><div class="sub">Te escribimos para confirmar la fecha y el pago. Vamos a tu casa u oficina en Bogotá con todos los equipos. <span class="js-disp"></span></div>
           <div class="grid2"><label>Nombre<input id="f-nombre" autocomplete="name" required></label><label>WhatsApp<input id="f-tel" type="tel" autocomplete="tel" placeholder="300 000 0000" required></label>
           <label>Fecha preferida<input id="f-fecha" type="date"><span class="fnota" id="f-fnota"></span></label><label>Horario<select id="f-hora"><option value="">Cualquiera</option><option>Sábado en la mañana</option><option>Sábado en la tarde</option><option>Domingo en la mañana</option><option>Domingo en la tarde</option><option>Entre semana (consultar disponibilidad)</option></select></label>
-          <label>Barrio o dirección de la clase<input id="f-dir" autocomplete="street-address" placeholder="Ej. Chapinero, Calle 60 # 5-20"></label><label>Correo (opcional)<input id="f-email" type="email" autocomplete="email"></label><label>¿Algo que debamos saber?<input id="f-nota" placeholder="Nivel, si es un regalo, piso o parqueadero…"></label></div>
+          <label>Empresa (si aplica)<input id="f-emp" autocomplete="organization"></label><label>Barrio o dirección de la clase<input id="f-dir" autocomplete="street-address" placeholder="Ej. Chapinero, Calle 60 # 5-20"></label><label>Correo (opcional)<input id="f-email" type="email" autocomplete="email"></label><label>¿Algo que debamos saber?<input id="f-nota" placeholder="Nivel, si es un regalo, piso o parqueadero…"></label></div>
           <button class="btn" id="f-btn">Reservar por WhatsApp</button><div class="err" id="f-err"></div>
           <div class="ok hide" id="f-ok">¡Listo! Recibimos tu solicitud. Si WhatsApp no se abrió, escríbenos al 304 492 7790.</div>
         </form>
@@ -154,7 +161,9 @@ footer{border-top:1px solid var(--bd);padding:26px 0;color:var(--muted);font-siz
 // =============== B.R.U · Clases personalizadas (página pública) ===============
 var SB_URL = 'https://dzgtyazvqpdmwvwqpvco.supabase.co';
 var SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
-var P = null, st = { clase: null, combo: '', items: {}, cafes: {}, personas: 1 };
+var P = null, st = { clase: null, combo: '', items: {}, cafes: {}, personas: 1, grupos: 1 };
+function gruposMin(c){ return c && c.porGrupo ? Math.max(1, Math.ceil(Math.max(c.minPersonas || 1, st.personas) / c.porGrupo)) : 1; }
+function notaGrupos(c){ $('g-nota').textContent = 'Cada grupo es una sesión de hasta ' + c.porGrupo + ' personas. Con ' + Math.max(c.minPersonas || 1, st.personas) + ' personas necesitas mínimo ' + gruposMin(c) + '. Puedes pedir más grupos si prefieres grupos pequeños.'; }
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 function fmt(n){ return '$' + Math.round(Number(n) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
@@ -177,7 +186,7 @@ function extraPor(id){ return P.extras.filter(function(e){ return e.id === id; }
 function precioCafe(nombre){ var c = P.cafes.filter(function(x){ return x.nombre === nombre; })[0]; return c ? c.precio : 0; }
 function calcular(){
   var c = claseAct(); if (!c) return null;
-  var n = Math.max(1, st.personas), base = c.precio + (n - 1) * c.precioExtra, lineas = [], ext = 0, cuenta = 0;
+  var n = Math.max(c.minPersonas || 1, st.personas), g = c.porGrupo ? Math.max(gruposMin(c), st.grupos || 1) : 1, base = g * (c.precio - c.precioExtra) + n * c.precioExtra, lineas = [], ext = 0, cuenta = 0;
   Object.keys(st.items).forEach(function(id){
     var q = st.items[id], e = extraPor(id); if (!q || !e) return;
     if (e.tipo === 'opcion') { for (var j = 0; j < q; j++) { var O = e.opciones || [], on = (st.cafes[id] || [])[j] || (O[0] && O[0].nombre) || '', op = O.filter(function(o){ return o.nombre === on; })[0] || O[0] || { precio: 0 }; var pz = e.precio + (op.precio || 0); lineas.push({ nombre: e.nombre, cafe: on, qty: 1, precio: pz }); ext += pz; } }
@@ -186,13 +195,15 @@ function calcular(){
     cuenta += q;
   });
   var d = P.descuento || {}, desc = cuenta >= (d.minExtras || 99) ? Math.round(ext * (d.pct || 0) / 100) : 0;
-  return { clase: c, base: base, lineas: lineas, extras: ext, descuento: desc, total: base + ext - desc, cuenta: cuenta, faltan: Math.max(0, (d.minExtras || 0) - cuenta) };
+  return { clase: c, grupos: g, base: base, lineas: lineas, extras: ext, descuento: desc, total: base + ext - desc, cuenta: cuenta, faltan: Math.max(0, (d.minExtras || 0) - cuenta) };
 }
 function pintarClases(){
   $('clases').innerHTML = P.clases.map(function(c){
+    if (c.estado === 'pronto') return '<div class="cl-card soon">' + (c.img ? '<div class="cl-img" style="background-image:url(\'' + esc(c.img) + '\')"></div>' : '<div class="cl-img cl-ico">' + (ICON[c.id] || ICON.filtrados) + '</div>') + '<span class="pronto">Disponible pronto</span>' +
+      '<div class="cl-bd"><div class="cl-meta"><span class="cl-dur">' + RELOJ + esc(dur(c.duracion)) + '</span><span class="eyebrow">Hasta ' + esc(c.maxPersonas) + ' personas</span></div><h3>' + esc(c.corto || c.nombre) + '</h3><p>' + esc(c.desc) + '</p><div class="cl-pr">Muy pronto abrimos cupos</div><a class="cl-cta" target="_blank" rel="noopener" href="https://wa.me/' + (P.wa || '573044927790') + '?text=' + encodeURIComponent('Hola B.R.U ☕ Quiero que me avisen cuando abran la ' + c.nombre + '.') + '">Avísame cuando abra →</a></div></div>';
     return '<button class="cl-card' + (st.clase === c.id ? ' on' : '') + '" data-clase="' + c.id + '">' +
       (c.img ? '<div class="cl-img" style="background-image:url(\'' + esc(c.img) + '\')"></div>' : '<div class="cl-img cl-ico">' + (ICON[c.id] || ICON.filtrados) + '</div>') +
-      '<div class="cl-bd"><div class="cl-meta"><span class="cl-dur">' + RELOJ + esc(dur(c.duracion)) + '</span><span class="eyebrow">Hasta ' + esc(c.maxPersonas) + ' personas</span></div><h3>' + esc(c.corto || c.nombre) + '</h3><p>' + esc(c.desc) + '</p><div class="cl-pr">desde <b>' + fmt(c.precio) + '</b></div><span class="cl-cta">' + (st.clase === c.id ? 'Seleccionada ✓' : 'Armar mi clase →') + '</span></div></button>';
+      '<div class="cl-bd"><div class="cl-meta"><span class="cl-dur">' + RELOJ + esc(dur(c.duracion)) + '</span><span class="eyebrow">' + ((c.minPersonas || 1) > 1 ? 'De ' + c.minPersonas + ' a ' + esc(c.maxPersonas) : 'Hasta ' + esc(c.maxPersonas)) + ' personas</span></div><h3>' + esc(c.corto || c.nombre) + '</h3><p>' + esc(c.desc) + '</p>' + (c.incluye ? '<div class="cl-inc">🎁 Cada asistente recibe: ' + esc(c.incluye) + '</div>' : '') + '<div class="cl-pr">' + ((c.minPersonas || 1) > 1 ? 'grupo de ' + c.minPersonas + ' desde <b>' + fmt(c.precio + (c.minPersonas - 1) * c.precioExtra) + '</b>' : 'desde <b>' + fmt(c.precio) + '</b>') + '</div><span class="cl-cta">' + (st.clase === c.id ? 'Seleccionada ✓' : 'Armar mi clase →') + '</span></div></button>';
   }).join('');
 }
 function aplicarCombo(nombre){
@@ -210,7 +221,7 @@ function pintarArmador(){
   if (!c) { box.classList.add('hide'); return; }
   box.classList.remove('hide');
   var L = P.combos[st.clase] || [], actual = comboActual(), d = P.descuento || {};
-  $('a-titulo').textContent = c.nombre; $('a-dur').innerHTML = RELOJ + 'Duración: ' + esc(dur(c.duracion)) + ' · hasta ' + esc(c.maxPersonas) + ' personas';
+  $('a-titulo').textContent = c.nombre; $('a-dur').innerHTML = RELOJ + 'Duración: ' + esc(dur(c.duracion)) + ' · ' + ((c.minPersonas || 1) > 1 ? 'de ' + c.minPersonas + ' a ' : 'hasta ') + esc(c.maxPersonas) + ' personas' + (c.incluye ? '<div class="cl-inc" style="margin-top:6px">🎁 Cada asistente recibe: ' + esc(c.incluye) + ' (incluido)</div>' : '');
   $('combos').innerHTML = L.map(function(cb){ var r = (function(){ var s0 = st.items, s1 = st.cafes, s2 = st.combo; aplicarCombo(cb.nombre); var t = calcular(); st.items = s0; st.cafes = s1; st.combo = s2; return t; })();
     return '<button class="cb' + (actual === cb.nombre ? ' on' : '') + '" data-combo="' + esc(cb.nombre) + '"><b>' + esc(cb.nombre) + '</b><span>' + (cb.items.length ? cb.items.map(function(i){ var e = extraPor(i.id); return e ? (i.qty > 1 ? i.qty + ' × ' : '') + e.nombre : ''; }).filter(Boolean).join(' + ') : 'Solo la clase') + '</span><i>' + fmt(r.total) + '</i></button>'; }).join('') +
     (actual === 'Mi combo' ? '<div class="cb on mine"><b>Mi combo</b><span>Lo armaste a tu gusto</span></div>' : '');
@@ -222,37 +233,39 @@ function pintarArmador(){
     var dis = e.tipo === 'cafe' && !P.cafes.length;
     return '<div class="ex' + (q ? ' on' : '') + '"><div class="ex-tx"><b>' + esc(e.nombre) + '</b><span>' + esc(e.desc) + '</span></div><div class="ex-pr">' + pr + '</div><div class="qty"><button data-q="' + e.id + '|-1"' + (q ? '' : ' disabled') + ' aria-label="Quitar">−</button><b>' + q + '</b><button data-q="' + e.id + '|1"' + (dis ? ' disabled' : '') + ' aria-label="Agregar">+</button></div>' + sel + '</div>';
   }).join('');
-  $('personas').max = c.maxPersonas; $('personas').value = st.personas;
-  $('p-nota').textContent = c.precioExtra ? 'Cada persona adicional: ' + fmt(c.precioExtra) : '';
+  $('g-blk').classList.toggle('hide', !c.porGrupo); if (c.porGrupo) { st.grupos = Math.max(gruposMin(c), st.grupos || 1); $('grupos').value = st.grupos; notaGrupos(c); }
+  $('personas').max = c.maxPersonas; $('personas').min = c.minPersonas || 1; if (st.personas < (c.minPersonas || 1)) st.personas = c.minPersonas || 1; $('personas').value = st.personas;
+  $('p-nota').textContent = ((c.minPersonas || 1) > 1 ? 'Mínimo ' + c.minPersonas + ' personas. ' : '') + (c.precioExtra ? 'Cada persona adicional: ' + fmt(c.precioExtra) + (c.incluye ? ' (con su regalo incluido)' : '') : '');
   $('d-nota').textContent = d.pct ? 'Suma ' + d.minExtras + ' o más elementos y obtienes ' + d.pct + ' % de descuento en ellos.' : '';
   pintarResumen();
 }
 function pintarResumen(){
   var r = calcular(); if (!r) return;
-  var html = '<div class="rs-dur">' + RELOJ + esc(dur(r.clase.duracion)) + ' de clase</div><div class="rs-l"><span>' + esc(r.clase.corto || r.clase.nombre) + (st.personas > 1 ? ' · ' + st.personas + ' personas' : '') + '</span><b>' + fmt(r.base) + '</b></div>' +
+  var html = '<div class="rs-dur">' + RELOJ + esc(dur(r.clase.duracion)) + ' de clase</div><div class="rs-l"><span>' + esc(r.clase.corto || r.clase.nombre) + (st.personas > 1 ? ' · ' + st.personas + ' personas' : '') + (r.clase.porGrupo ? ' · ' + r.grupos + (r.grupos > 1 ? ' grupos' : ' grupo') : '') + '</span><b>' + fmt(r.base) + '</b></div>' + (r.clase.incluye ? '<div class="rs-l"><span>🎁 ' + esc(r.clase.incluye) + ' × ' + Math.max(r.clase.minPersonas || 1, st.personas) + '</span><b>Incluido</b></div>' : '') +
     r.lineas.map(function(l){ return '<div class="rs-l"><span>' + (l.qty > 1 ? l.qty + ' × ' : '') + esc(l.nombre) + (l.cafe ? ' <i>' + esc(l.cafe) + '</i>' : '') + '</span><b>' + fmt(l.precio) + '</b></div>'; }).join('') +
     (r.descuento ? '<div class="rs-l desc"><span>Descuento combo</span><b>−' + fmt(r.descuento) + '</b></div>' : (r.cuenta && r.faltan ? '<div class="rs-hint">Agrega ' + r.faltan + ' elemento' + (r.faltan > 1 ? 's' : '') + ' más y obtienes ' + P.descuento.pct + ' % de descuento</div>' : ''));
   $('rs-lineas').innerHTML = html; $('rs-total').textContent = fmt(r.total); $('bar-total').textContent = fmt(r.total); $('rs-combo').textContent = comboActual();
   $('bar').classList.remove('hide');
 }
 function mensaje(r, f){
-  var L = ['Hola B.R.U ☕ Quiero reservar una clase:', '', '• ' + r.clase.nombre + ' · ' + dur(r.clase.duracion) + ' (' + st.personas + ' persona' + (st.personas > 1 ? 's' : '') + ') — ' + fmt(r.base)];
+  var L = ['Hola B.R.U ☕ Quiero reservar una clase:', '', '• ' + r.clase.nombre + ' · ' + dur(r.clase.duracion) + ' (' + st.personas + ' persona' + (st.personas > 1 ? 's' : '') + (r.clase.porGrupo ? ', ' + r.grupos + (r.grupos > 1 ? ' grupos' : ' grupo') : '') + ') — ' + fmt(r.base)];
+  if (r.clase.incluye) L.push('• Regalo por asistente: ' + r.clase.incluye + ' (incluido)');
   r.lineas.forEach(function(l){ L.push('• ' + (l.qty > 1 ? l.qty + ' × ' : '') + l.nombre + (l.cafe ? ' (' + l.cafe + ')' : '') + ' — ' + fmt(l.precio)); });
   if (r.descuento) L.push('• Descuento combo — −' + fmt(r.descuento));
   L.push('', 'Total: ' + fmt(r.total), 'Combo: ' + comboActual());
   if (f.fecha) L.push('Fecha preferida: ' + f.fecha.split('-').reverse().join('/') + (f.hora ? ' · ' + f.hora : '')); else if (f.hora) L.push('Horario: ' + f.hora);
-  L.push('Lugar: ' + f.direccion); L.push('Nombre: ' + f.nombre); if (f.nota) L.push('Nota: ' + f.nota);
+  if (f.empresa) L.push('Empresa: ' + f.empresa); L.push('Lugar: ' + f.direccion); L.push('Nombre: ' + f.nombre); if (f.nota) L.push('Nota: ' + f.nota);
   return L.join('\n');
 }
 function enviar(ev){
   ev.preventDefault();
   var r = calcular(); if (!r) return;
-  var f = { nombre: $('f-nombre').value.trim(), telefono: $('f-tel').value.trim(), email: $('f-email').value.trim(), direccion: $('f-dir').value.trim(), fecha: $('f-fecha').value, hora: $('f-hora').value, nota: $('f-nota').value.trim() };
+  var f = { nombre: $('f-nombre').value.trim(), telefono: $('f-tel').value.trim(), email: $('f-email').value.trim(), direccion: $('f-dir').value.trim(), empresa: ($('f-emp') || { value: '' }).value.trim(), fecha: $('f-fecha').value, hora: $('f-hora').value, nota: $('f-nota').value.trim() };
   if (!f.nombre || f.telefono.replace(/\D/g, '').length < 7) { $('f-err').textContent = 'Escribe tu nombre y un teléfono de WhatsApp.'; return; }
   if (!f.direccion) { $('f-err').textContent = 'Escribe el barrio o la dirección donde será la clase.'; return; }
   $('f-err').textContent = ''; var b = $('f-btn'); b.disabled = true; b.textContent = 'Enviando…';
   var id = 'res_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  var datos = { estado: 'nueva', clase: r.clase.nombre, claseId: r.clase.id, combo: comboActual(), personas: st.personas, items: r.lineas, base: r.base, extras: r.extras, descuento: r.descuento, total: r.total, nombre: f.nombre, telefono: f.telefono, email: f.email, direccion: f.direccion, fechaPref: f.fecha, horaPref: f.hora, nota: f.nota, origen: 'web' };
+  var datos = { estado: 'nueva', clase: r.clase.nombre, claseId: r.clase.id, combo: comboActual(), personas: st.personas, grupos: r.grupos, items: r.lineas, base: r.base, extras: r.extras, descuento: r.descuento, total: r.total, nombre: f.nombre, telefono: f.telefono, email: f.email, direccion: f.direccion, empresa: f.empresa, fechaPref: f.fecha, horaPref: f.hora, nota: f.nota, origen: 'web' };
   var wa = 'https://wa.me/' + (P.wa || '573044927790') + '?text=' + encodeURIComponent(mensaje(r, f));
   var win = window.open('', '_blank');
   sb('bru_conta', { method: 'POST', prefer: 'return=minimal', body: [{ id: id, tipo: 'clase_res', fecha: hoy(), data: datos }] }).catch(function(){}).then(function(){
@@ -270,18 +283,21 @@ function irArmar(){ var a = $('armar'); if (a) setTimeout(function(){ a.scrollIn
     if (P.disponibilidad) { Array.prototype.forEach.call(document.querySelectorAll('.js-disp'), function(n){ n.textContent = P.disponibilidad; }); Array.prototype.forEach.call(document.querySelectorAll('.js-disp-box'), function(n){ n.classList.remove('hide'); }); }
     var q = /[?&]clase=([a-z]+)/.exec(location.search);
     pintarClases();
-    if (q && P.clases.some(function(c){ return c.id === q[1]; })) { st.clase = q[1]; var L = P.combos[st.clase] || []; aplicarCombo(L[1] ? L[1].nombre : (L[0] ? L[0].nombre : '')); pintarClases(); pintarArmador(); irArmar(); }
+    if (q && P.clases.some(function(c){ return c.id === q[1] && c.estado !== 'pronto'; })) { st.clase = q[1]; st.personas = (claseAct() || {}).minPersonas || 1; var L = P.combos[st.clase] || []; aplicarCombo(L[1] ? L[1].nombre : (L[0] ? L[0].nombre : '')); pintarClases(); pintarArmador(); irArmar(); }
   }).catch(function(e){ $('clases').innerHTML = '<div class="vacio">' + esc(e.message) + '</div>'; });
   document.addEventListener('click', function(e){
-    var c = e.target.closest('[data-clase]'); if (c) { st.clase = c.getAttribute('data-clase'); st.personas = 1; var L = P.combos[st.clase] || []; aplicarCombo(L[1] ? L[1].nombre : (L[0] ? L[0].nombre : '')); pintarClases(); pintarArmador(); irArmar(); return; }
+    var c = e.target.closest('[data-clase]'); if (c) { st.clase = c.getAttribute('data-clase'); st.personas = (claseAct() || {}).minPersonas || 1; st.grupos = 1; var L = P.combos[st.clase] || []; aplicarCombo(L[1] ? L[1].nombre : (L[0] ? L[0].nombre : '')); pintarClases(); pintarArmador(); irArmar(); return; }
     var cb = e.target.closest('[data-combo]'); if (cb) { aplicarCombo(cb.getAttribute('data-combo')); pintarArmador(); return; }
-    var q = e.target.closest('[data-q]'); if (q) { var p = q.getAttribute('data-q').split('|'); st.items[p[0]] = Math.max(0, Math.min(9, (st.items[p[0]] || 0) + Number(p[1]))); if (st.cafes[p[0]]) st.cafes[p[0]].length = st.items[p[0]]; pintarArmador(); return; }
+    var q = e.target.closest('[data-q]'); if (q) { var p = q.getAttribute('data-q').split('|'); st.items[p[0]] = Math.max(0, Math.min(50, (st.items[p[0]] || 0) + Number(p[1]))); if (st.cafes[p[0]]) st.cafes[p[0]].length = st.items[p[0]]; pintarArmador(); return; }
     if (e.target.closest('#bar-btn')) { $('datos').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   });
   document.addEventListener('change', function(e){ var s = e.target.getAttribute('data-cafe'); if (s) { var p = s.split('|'); (st.cafes[p[0]] = st.cafes[p[0]] || [])[Number(p[1])] = e.target.value; pintarArmador(); } });
-  $('personas').oninput = function(){ var c = claseAct(); st.personas = Math.max(1, Math.min(c ? c.maxPersonas : 10, Number(this.value) || 1)); pintarResumen(); };
-  $('pm').onclick = function(){ $('personas').value = Math.max(1, st.personas - 1); $('personas').oninput(); };
+  $('personas').oninput = function(){ var c = claseAct(); st.personas = Math.max(c ? (c.minPersonas || 1) : 1, Math.min(c ? c.maxPersonas : 10, Number(this.value) || 1)); if (c && c.porGrupo) { st.grupos = Math.max(gruposMin(c), st.grupos || 1); $('grupos').value = st.grupos; notaGrupos(c); } pintarResumen(); };
+  $('pm').onclick = function(){ $('personas').value = st.personas - 1; $('personas').oninput(); $('personas').value = st.personas; };
   $('pp').onclick = function(){ $('personas').value = st.personas + 1; $('personas').oninput(); $('personas').value = st.personas; };
+  $('grupos').oninput = function(){ var c = claseAct(); st.grupos = Math.max(gruposMin(c), Math.min(20, Number(this.value) || 1)); pintarResumen(); };
+  $('gm').onclick = function(){ $('grupos').value = st.grupos - 1; $('grupos').oninput(); $('grupos').value = st.grupos; };
+  $('gp').onclick = function(){ $('grupos').value = st.grupos + 1; $('grupos').oninput(); $('grupos').value = st.grupos; };
   $('f-fecha').min = hoy();
   $('f-fecha').onchange = function(){ var v = this.value, n = $('f-fnota'); if (!v) { n.textContent = ''; return; } var d = new Date(v + 'T12:00:00').getDay(); n.textContent = (d === 0 || d === 6) ? 'Fin de semana: es nuestro horario principal.' : 'Entre semana: sujeto a disponibilidad, te confirmamos por WhatsApp.'; };
   $('form').onsubmit = enviar;
