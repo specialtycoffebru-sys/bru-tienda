@@ -203,7 +203,7 @@ function upsert(fila){ return sb(T + '?on_conflict=id', { method: 'POST', prefer
 function redondear(v){ var r = S.cfg.redondeo || 1000; return Math.ceil(v / r) * r; }
 function costoClase(c){
   var g = S.cfg.costoG || 0;
-  var partes = { instructor: c.horas * c.valorHora, cafe: c.cafeG * g, leche: c.leche || 0, insumos: c.insumos || 0, equipos: c.equipos || 0, material: c.material || 0 };
+  var partes = { instructor: c.horas * c.valorHora, cafe: c.cafeG * g, leche: c.leche || 0, insumos: c.insumos || 0, equipos: c.equipos || 0, transporte: c.transporte || 0, material: c.material || 0 };
   var total = 0; for (var k in partes) total += partes[k];
   var extra = (c.extraCafeG || 0) * g + (c.extraInsumos || 0) + (c.material || 0);
   var m = Math.min(90, S.cfg.margen || 0) / 100;
@@ -274,7 +274,7 @@ function enlazar(c, alCambiar){
   c.onchange = c.oninput;
 }
 function renderCosteo(c){
-  c.innerHTML = '<div class="banner info">Cada clase se costea con el tiempo del instructor, el café que se usa (a ' + fmt(S.cfg.costoG) + ' por gramo), insumos, uso de equipos y material. El precio sugerido busca un margen del ' + S.cfg.margen + ' %; si escribes un precio propio, ese es el que sale en la web.</div>' +
+  c.innerHTML = '<div class="banner info">Las clases son a domicilio: cada una se costea con el tiempo del instructor, el café que se usa (a ' + fmt(S.cfg.costoG) + ' por gramo), insumos, desgaste de equipos, el transporte llevando los equipos y el material. El precio sugerido busca un margen del ' + S.cfg.margen + ' %; si escribes un precio propio, ese es el que sale en la web.</div>' +
     S.cfg.clases.map(function(k, i){ return '<div class="card" style="margin-bottom:12px" id="cl' + i + '">' + tarjetaClase(k, i) + '</div>'; }).join('');
   enlazar(c, function(el){ var i = Number(el.getAttribute('data-p').split('.')[1]); var box = $('res' + i); if (box) box.innerHTML = resumenClase(S.cfg.clases[i]); });
 }
@@ -285,14 +285,14 @@ function tarjetaClase(k, i){
     '<label class="f" style="margin-top:8px">Descripción<textarea data-p="' + b + 'desc" style="min-height:60px">' + esc(k.desc) + '</textarea></label>' +
     campo('Foto (URL de imagen)', b + 'img', k.img, 'text', ' placeholder="https://res.cloudinary.com/…"') +
     '<div class="sec">Costos por clase (1 persona)</div><div class="grid g4">' + campo('Horas del instructor', b + 'horas', k.horas) + campo('Valor hora instructor', b + 'valorHora', k.valorHora) + campo('Café usado (g)', b + 'cafeG', k.cafeG) + campo('Leche y otros alimentos', b + 'leche', k.leche) +
-    campo('Insumos (filtros, vasos, agua…)', b + 'insumos', k.insumos) + campo('Uso de equipos / espacio', b + 'equipos', k.equipos) + campo('Material (guía, certificado)', b + 'material', k.material) + '<div></div></div>' +
+    campo('Insumos (filtros, vasos, agua…)', b + 'insumos', k.insumos) + campo('Desgaste de equipos', b + 'equipos', k.equipos) + campo('Transporte con equipos (ida y vuelta)', b + 'transporte', k.transporte || 0) + campo('Material (guía, certificado)', b + 'material', k.material) + '</div>' +
     '<div class="sec">Persona adicional</div><div class="grid g4">' + campo('Café extra por persona (g)', b + 'extraCafeG', k.extraCafeG) + campo('Insumos extra por persona', b + 'extraInsumos', k.extraInsumos) + campo('Precio propio por persona extra (0 = sugerido)', b + 'precioExtra', k.precioExtra || '') + campo('Precio propio de la clase (0 = sugerido)', b + 'precio', k.precio || '') + '</div>' +
     '<div id="res' + i + '">' + resumenClase(k) + '</div>';
 }
 function resumenClase(k){
   var r = costoClase(k), p = r.partes;
   return '<div class="kpis" style="margin-top:12px"><div class="kpi"><b>' + fmt(r.total) + '</b><span>costo de la clase</span></div><div class="kpi"><b>' + fmt(r.sugerido) + '</b><span>precio sugerido (' + S.cfg.margen + ' %)</span></div><div class="kpi ' + (r.margen < 30 ? 'bad' : 'ok') + '"><b>' + fmt(r.precio) + '</b><span>precio en la web · margen ' + pct(r.margen) + '</span></div><div class="kpi"><b>' + fmt(r.precioExtra) + '</b><span>por persona adicional · costo ' + fmt(r.extraCosto) + '</span></div></div>' +
-    '<div class="small muted">Instructor ' + fmt(p.instructor) + ' · café ' + fmt(p.cafe) + (p.leche ? ' · leche ' + fmt(p.leche) : '') + ' · insumos ' + fmt(p.insumos) + ' · equipos ' + fmt(p.equipos) + ' · material ' + fmt(p.material) + ' · ganancia por clase ' + fmt(r.precio - r.total) + '</div>';
+    '<div class="small muted">Instructor ' + fmt(p.instructor) + ' · café ' + fmt(p.cafe) + (p.leche ? ' · leche ' + fmt(p.leche) : '') + ' · insumos ' + fmt(p.insumos) + ' · equipos ' + fmt(p.equipos) + (p.transporte ? ' · transporte ' + fmt(p.transporte) : '') + ' · material ' + fmt(p.material) + ' · ganancia por clase ' + fmt(r.precio - r.total) + '</div>';
 }
 function renderExtras(c){
   var E = S.cfg.extras, cafes = cafesCatalogo();
@@ -339,7 +339,7 @@ function renderReservas(c){
   c.innerHTML = '<div class="row" style="margin-bottom:10px"><span class="small muted">Solicitudes que llegan desde la página de clases. Escríbele a la persona para confirmar fecha y pago.</span><span class="sp"></span><button class="btn sm" id="rRef">Actualizar</button><a class="btn sm" href="/clases.html" target="_blank">Ver página ↗</a></div>' +
     (R.length ? R.map(function(r){ var x = r.data, tel = String(x.telefono || '').replace(/\D/g, ''); if (tel.length === 10) tel = '57' + tel;
       return '<div class="card" style="margin-bottom:8px"><div class="row"><b>' + esc(x.nombre || 'Sin nombre') + '</b><span class="pill">' + esc(x.clase || '') + '</span><span class="small muted">' + fFecha(String(r.created_at || '').slice(0, 10)) + '</span><span class="sp"></span><select data-est="' + r.id + '">' + EST.map(function(s){ return '<option value="' + s[0] + '"' + ((x.estado || 'nueva') === s[0] ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select></div>' +
-        '<div class="small" style="margin-top:6px">' + esc(x.personas || 1) + ' persona(s) · ' + (x.fechaPref ? 'prefiere ' + fFecha(x.fechaPref) + (x.horaPref ? ' ' + esc(x.horaPref) : '') + ' · ' : '') + (x.combo ? 'combo ' + esc(x.combo) + ' · ' : '') + '<b>' + fmt(x.total) + '</b></div>' +
+        '<div class="small" style="margin-top:6px">' + esc(x.personas || 1) + ' persona(s) · ' + (x.fechaPref ? 'prefiere ' + fFecha(x.fechaPref) + (x.horaPref ? ' ' + esc(x.horaPref) : '') + ' · ' : '') + (x.combo ? 'combo ' + esc(x.combo) + ' · ' : '') + '<b>' + fmt(x.total) + '</b></div>' + (x.direccion ? '<div class="small" style="margin-top:4px">📍 ' + esc(x.direccion) + '</div>' : '') +
         (x.items && x.items.length ? '<div class="small muted" style="margin-top:4px">' + x.items.map(function(i){ return esc(i.qty + ' × ' + i.nombre + (i.cafe ? ' (' + i.cafe + ')' : '')); }).join(' · ') + '</div>' : '') + (x.nota ? '<div class="small" style="margin-top:4px">“' + esc(x.nota) + '”</div>' : '') +
         '<div class="row" style="margin-top:8px">' + (tel ? '<a class="btn sm pri" target="_blank" rel="noopener" href="https://wa.me/' + tel + '?text=' + encodeURIComponent('Hola ' + String(x.nombre || '').split(' ')[0] + ', soy Camilo de B.R.U ☕ Recibí tu solicitud para la ' + (x.clase || 'clase') + '. ¿Te queda bien ' + (x.fechaPref ? fFecha(x.fechaPref) : 'esta semana') + '?') + '">WhatsApp ' + esc(x.telefono) + '</a>' : '') + (x.email ? '<span class="small muted">' + esc(x.email) + '</span>' : '') + '</div></div>'; }).join('') : '<div class="empty">Aún no hay reservas. Comparte la página <b>brucoffeeshop.online/clases.html</b>.</div>');
   $('rRef').onclick = function(){ sb(T + '?tipo=eq.clase_res&select=id,fecha,data,created_at&order=created_at.desc&limit=200').then(function(r){ S.res = r || []; render(); }); };
