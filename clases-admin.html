@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>B.R.U · Clases</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,300;9..144,500&display=swap" rel="stylesheet">
+<script>if(/[?&]embed=1/.test(location.search))document.documentElement.className+=' embed';</script>
+<style>
+:root{
+  --bg:#0d0b09;--bg2:#141210;--bg3:#1c1916;--card:#181512;--card2:#1e1b17;
+  --gold:#c9a84c;--gold2:#e8c96a;--gold3:rgba(201,168,76,.12);
+  --txt:#e8e2d8;--mut:#a8a098;--dim:#6a6058;
+  --line:rgba(255,255,255,.08);--line2:rgba(201,168,76,.28);
+  --ok:#5fd394;--ok-bg:rgba(95,211,148,.1);--bad:#f38b8b;--bad-bg:rgba(243,139,139,.1);--warn:#f3a96b;--warn-bg:rgba(243,169,107,.1);--info:#7fb2f0;--info-bg:rgba(127,178,240,.1);
+  --r:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+select,option{background:var(--card2);color:var(--txt)}
+a{color:var(--gold)}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:300;margin:0}
+.wrap{max-width:1320px;margin:0 auto;padding:18px 16px 80px}
+html.embed .wrap{padding:12px 12px 60px}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.top h1{font-size:28px}
+html.embed .top h1{display:none}
+.top .sp{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--mut);white-space:nowrap}
+.pill.ok{color:var(--ok);border-color:rgba(95,211,148,.35)}.pill.warn{color:var(--warn);border-color:rgba(243,169,107,.35)}.pill.bad{color:var(--bad);border-color:rgba(243,139,139,.35)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;scrollbar-width:thin}
+.tabs button{border:1px solid var(--line);background:transparent;padding:7px 13px;border-radius:999px;cursor:pointer;color:var(--mut);white-space:nowrap;font-size:13px}
+.tabs button.on{background:var(--gold);color:#1a1406;border-color:var(--gold);font-weight:600}
+.tabs .cnt{font-size:11px;margin-left:4px;opacity:.85}
+.subtabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px}
+.subtabs button{border:none;background:var(--card2);padding:6px 12px;border-radius:8px;cursor:pointer;color:var(--mut);font-size:13px}
+.subtabs button.on{background:var(--gold3);color:var(--gold2);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.card h3{font-size:19px;margin-bottom:10px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:860px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.grid>*{min-width:0}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+label.f.chk{flex-direction:row;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--txt)}
+input[type=text],input[type=number],input[type=date],input[type=month],input[type=email],input[type=search],input[type=password],select,textarea{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;outline:none;text-transform:none;letter-spacing:0}
+input:focus,select:focus,textarea:focus{border-color:var(--line2)}
+textarea{min-height:90px;resize:vertical}
+.btn{border:1px solid var(--line2);background:var(--card2);padding:8px 14px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:13px}
+.btn:hover{border-color:var(--gold)}
+.btn.pri{background:var(--gold);color:#1a1406;border-color:var(--gold);font-weight:600}
+.btn.sm{padding:4px 9px;font-size:12px}
+.btn.ghost{background:transparent}
+.btn.dang{color:var(--bad);border-color:rgba(243,139,139,.35)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+.muted{color:var(--mut)}.dim{color:var(--dim)}.small{font-size:12px}.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:11px 13px;min-width:0}
+.kpi b{display:block;font-family:Fraunces,serif;font-weight:300;font-size:22px;line-height:1.15;overflow-wrap:anywhere}
+.kpi span{font-size:12px;color:var(--mut)}
+.kpi.ok b{color:var(--ok)}.kpi.bad b{color:var(--bad)}.kpi.warn b{color:var(--warn)}
+.tbl-w{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+table.t{width:100%;border-collapse:collapse;font-size:13px}
+table.t th,table.t td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.t th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);font-weight:600;background:var(--bg2);position:sticky;top:0}
+table.t tr.tot td{font-weight:600;border-top:1px solid var(--line2)}
+table.t tr.grp td{background:var(--bg2);font-weight:600;color:var(--gold2)}
+table.t tr.click{cursor:pointer}
+table.t tr.click:hover td{background:rgba(255,255,255,.02)}
+table.t tr.anul td{opacity:.45;text-decoration:line-through}
+table.t td.num,table.t th.num{text-align:right}
+.st{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--card2);color:var(--mut);white-space:nowrap}
+.st.ok{color:var(--ok);background:var(--ok-bg)}.st.warn{color:var(--warn);background:var(--warn-bg)}.st.bad{color:var(--bad);background:var(--bad-bg)}.st.info{color:var(--info);background:var(--info-bg)}
+.banner{border-radius:var(--r);padding:10px 13px;margin-bottom:10px;font-size:13px;border:1px solid}
+.banner.warn{background:var(--warn-bg);border-color:rgba(243,169,107,.35)}
+.banner.info{background:var(--info-bg);border-color:rgba(127,178,240,.35)}
+.banner.bad{background:var(--bad-bg);border-color:rgba(243,139,139,.35)}
+.banner.ok{background:var(--ok-bg);border-color:rgba(95,211,148,.35)}
+.banner code{background:rgba(0,0,0,.3);padding:1px 5px;border-radius:4px;font-size:12px}
+.sec{margin:16px 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--dim)}
+.empty{padding:34px 16px;text-align:center;color:var(--mut)}
+.hide{display:none!important}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;display:none}
+.ov.on{display:block}
+.drawer{position:fixed;top:0;right:0;height:100dvh;width:min(760px,100vw);background:var(--bg2);border-left:1px solid var(--line);z-index:41;transform:translateX(105%);visibility:hidden;transition:transform .22s,visibility 0s .22s;display:flex;flex-direction:column}
+.drawer.on{transform:none;visibility:visible;transition:transform .22s}
+.drawer .hd{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center}
+.drawer .hd h2{font-size:22px;flex:1}
+.drawer .bd{padding:14px 16px;overflow:auto;flex:1}
+.drawer .ft{padding:10px 16px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lines td{padding:4px 4px}
+.lines input,.lines select{padding:6px 7px;font-size:13px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--gold);color:#1a1406;padding:9px 16px;border-radius:999px;font-weight:600;z-index:60;opacity:0;transition:opacity .25s;pointer-events:none;max-width:92vw;text-align:center}
+.toast.on{opacity:1}
+.toast.err{background:var(--bad)}
+.bar{height:8px;background:var(--card2);border-radius:4px;overflow:hidden;min-width:60px}
+.bar i{display:block;height:100%;background:var(--gold);border-radius:0 4px 4px 0}
+.drop{border:1.5px dashed var(--line2);border-radius:var(--r);padding:26px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--card);transition:background .15s,border-color .15s}
+.drop.on{background:var(--gold3);border-color:var(--gold)}
+.ag-fab{position:fixed;right:16px;bottom:16px;z-index:30;background:var(--gold);color:#1a1406;border:none;border-radius:999px;padding:11px 16px;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.45);display:flex;gap:6px;align-items:center}
+.ag{position:fixed;top:0;right:0;height:100dvh;width:min(460px,100vw);background:var(--bg2);border-left:1px solid var(--line2);z-index:44;transform:translateX(105%);visibility:hidden;transition:transform .22s,visibility 0s .22s;display:flex;flex-direction:column}
+.ag.on{transform:none;visibility:visible;transition:transform .22s}
+.ag.on~.ag-fab,body:has(.ag.on) .ag-fab{display:none}
+.ag .hd{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
+.ag .hd h2{font-size:20px;flex:1}
+.ag-msgs{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+.ag-in{padding:10px 12px;border-top:1px solid var(--line)}
+.ag-u{align-self:flex-end;background:var(--gold3);border:1px solid var(--line2);padding:8px 11px;border-radius:12px 12px 2px 12px;max-width:88%;overflow-wrap:anywhere}
+.ag-a{align-self:flex-start;background:var(--card);border:1px solid var(--line);padding:8px 11px;border-radius:12px 12px 12px 2px;max-width:92%;overflow-wrap:anywhere}
+.ag-a code,.ag-u code{background:rgba(0,0,0,.3);padding:0 4px;border-radius:4px}
+.ag-tool{font-size:12px;color:var(--mut);padding:6px 10px;border-left:2px solid var(--line2);overflow-wrap:anywhere}
+.ag-tool.ok{border-color:var(--ok)}.ag-tool.err{border-color:var(--bad);color:var(--bad)}.ag-tool.no{border-color:var(--dim)}
+.ag-ok{background:var(--warn-bg);border:1px solid rgba(243,169,107,.35);border-radius:10px;padding:10px 12px;font-size:13px}
+.ag-hola{color:var(--mut);line-height:1.6}
+.ag-sug{display:block;margin-top:6px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 10px;cursor:pointer;text-align:left;width:100%;color:var(--txt)}
+.ag-sug:hover{border-color:var(--gold)}
+@media(max-width:600px){.ag-fab span{display:none}}
+@media print{.ag,.ag-fab{display:none!important}}
+.cal-day{display:flex;gap:10px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line)}
+.cal-day .d{width:58px;font-variant-numeric:tabular-nums;color:var(--mut);font-size:12px}
+@media print{body{background:#fff;color:#000}.tabs,.top,.no-print{display:none!important}}
+.ag.inline{position:relative;top:auto;right:auto;height:calc(100dvh - 150px);min-height:480px;width:100%;transform:none;visibility:visible;border:1px solid var(--line2);border-radius:var(--r);z-index:1;transition:none}
+html.embed .ag.inline{height:calc(100dvh - 110px)}
+.ag.inline #agX{display:none}
+.tabs button[data-t=agente]:not(.on){border-color:var(--line2);color:var(--gold2)}
+.chipq{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:2px 4px 2px 9px;margin:2px;font-size:12px;color:var(--mut)}
+.chipq.on{border-color:var(--line2);color:var(--gold2);background:var(--gold3)}
+.chipq button{border:none;background:var(--card2);color:var(--txt);border-radius:50%;width:20px;height:20px;cursor:pointer;line-height:1}
+.chipq b{min-width:10px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><h1>Clases personalizadas</h1><span class="sp"></span><span class="pill" id="estado">Los cambios se publican solos en la web</span><a class="btn sm" href="/clases.html" target="_blank">Ver página ↗</a></div>
+  <div class="tabs" id="tabs"></div>
+  <div id="main"></div>
+</div>
+<div class="ov" id="ov"></div>
+<aside class="drawer" id="dr"></aside>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+'use strict';
+// =============== B.R.U · CLASES PERSONALIZADAS (dashboard) ===============
+// Costeo de clases, extras y combos. Guarda en bru_conta: 'clasescfg' (con costos, privado) y 'clasespub' (solo precios, lo lee la web).
+// Las reservas que llegan de la web son documentos tipo 'clase_res'. Nunca modifica bru_store.
+var SB_URL = 'https://dzgtyazvqpdmwvwqpvco.supabase.co';
+var SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
+var T = 'bru_conta';
+var S = { tab: 'costeo', cfg: null, cat: [], res: [], sub: {} };
+var DEF = {
+  costoG: 100, margen: 40, redondeo: 5000, wa: '573044927790',
+  descuento: { pct: 10, minExtras: 2 },
+  clases: [
+    { id: 'filtrados', nombre: 'Clase personalizada de Filtrados', corto: 'Filtrados', desc: 'Aprende a preparar café de especialidad en casa: V60, Chemex, prensa francesa y AeroPress. Molienda, proporciones, temperatura y cómo ajustar cada receta a tu gusto.', duracion: 2, maxPersonas: 4,
+      horas: 2, valorHora: 40000, cafeG: 80, leche: 0, insumos: 10000, equipos: 25000, material: 8000, extraCafeG: 40, extraInsumos: 5000, precio: 0, precioExtra: 0, img: '', activa: true },
+    { id: 'catacion', nombre: 'Clase personalizada de Catación', corto: 'Catación', desc: 'Cata como un profesional con el protocolo SCA: fragancia, aroma, sabor, acidez y cuerpo. Comparamos cafés de distintos orígenes y procesos, y entrenas tu paladar.', duracion: 2.5, maxPersonas: 6,
+      horas: 2.5, valorHora: 40000, cafeG: 150, leche: 0, insumos: 12000, equipos: 30000, material: 8000, extraCafeG: 60, extraInsumos: 6000, precio: 0, precioExtra: 0, img: '', activa: true },
+    { id: 'barismo', nombre: 'Clase personalizada de Barismo', corto: 'Barismo', desc: 'Espresso de principio a fin: dosis, molienda, extracción y calibración. Texturiza leche y da tus primeros pasos en arte latte con máquina profesional.', duracion: 3, maxPersonas: 3,
+      horas: 3, valorHora: 45000, cafeG: 300, leche: 13500, insumos: 10000, equipos: 60000, material: 8000, extraCafeG: 150, extraInsumos: 12000, precio: 0, precioExtra: 0, img: '', activa: true }
+  ],
+  extras: [
+    { id: 'kit_v60', nombre: 'Kit de filtrado en casa', desc: 'Gotero V60 02, 40 filtros, cuchara medidora y guía de recetas', costo: 62000, precio: 105000, tipo: 'item', activo: true },
+    { id: 'kit_prensa', nombre: 'Kit prensa francesa', desc: 'Prensa francesa de 600 ml, cuchara y guía de recetas', costo: 48000, precio: 85000, tipo: 'item', activo: true },
+    { id: 'kit_barista', nombre: 'Kit de barismo en casa', desc: 'Jarra para leche de 350 ml, termómetro, tamper y guía', costo: 85000, precio: 145000, tipo: 'item', activo: true },
+    { id: 'cafe', nombre: 'Café de tu elección', desc: 'Una bolsa del café B.R.U que prefieras', costo: 0, precio: 0, tipo: 'cafe', activo: true },
+    { id: 'drip5', nombre: 'Drip bags x5', desc: 'Cinco sobres listos para preparar en cualquier lugar', costo: 12500, precio: 32000, tipo: 'item', activo: true },
+    { id: 'drip10', nombre: 'Drip bags x10', desc: 'Diez sobres listos para preparar en cualquier lugar', costo: 24000, precio: 58000, tipo: 'item', activo: true },
+    { id: 'molino', nombre: 'Molino manual', desc: 'Molino de muelas cónicas con ajuste de molienda', costo: 95000, precio: 160000, tipo: 'item', activo: true },
+    { id: 'taza', nombre: 'Taza B.R.U', desc: 'Taza de cerámica de la marca', costo: 18000, precio: 35000, tipo: 'item', activo: true }
+  ],
+  cafes: {},
+  combos: {
+    filtrados: [{ nombre: 'Esencial', items: [] }, { nombre: 'Filtra en casa', items: [{ id: 'kit_v60', qty: 1 }, { id: 'cafe', qty: 1 }] }, { nombre: 'Completo', items: [{ id: 'kit_v60', qty: 1 }, { id: 'cafe', qty: 1 }, { id: 'drip5', qty: 1 }] }],
+    catacion: [{ nombre: 'Esencial', items: [] }, { nombre: 'Catador', items: [{ id: 'cafe', qty: 2 }] }, { nombre: 'Explorador', items: [{ id: 'cafe', qty: 2 }, { id: 'drip10', qty: 1 }] }],
+    barismo: [{ nombre: 'Esencial', items: [] }, { nombre: 'Barista en casa', items: [{ id: 'kit_barista', qty: 1 }, { id: 'cafe', qty: 1 }, { id: 'drip5', qty: 1 }] }, { nombre: 'Barista Pro', items: [{ id: 'kit_barista', qty: 1 }, { id: 'molino', qty: 1 }, { id: 'cafe', qty: 2 }] }]
+  }
+};
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function fmt(n){ var v = Math.round(Number(n) || 0), neg = v < 0; return (neg ? '-$' : '$') + Math.abs(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+function pct(n){ return (Math.round((Number(n) || 0) * 10) / 10) + ' %'; }
+function num(v){ return Number(String(v == null ? '' : v).replace(/[^\d.-]/g, '')) || 0; }
+function uid(p){ return p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
+function toast(t, err){ var e = $('toast'); e.textContent = t; e.classList.toggle('err', !!err); e.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(function(){ e.classList.remove('on'); }, 2600); }
+function fFecha(f){ if (!f) return ''; var p = String(f).slice(0, 10).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+function copia(o){ return JSON.parse(JSON.stringify(o)); }
+function sb(path, opts){
+  opts = opts || {};
+  var h = { 'apikey': SB_KEY, 'Content-Type': 'application/json' }; if (opts.prefer) h.Prefer = opts.prefer;
+  return fetch(SB_URL + '/rest/v1/' + path, { method: opts.method || 'GET', headers: h, body: opts.body ? JSON.stringify(opts.body) : undefined })
+    .then(function(r){ if (!r.ok) return r.text().then(function(t){ throw new Error('Supabase ' + r.status + ': ' + t.slice(0, 140)); }); if (r.status === 204) return null; return r.text().then(function(t){ return t ? JSON.parse(t) : null; }); });
+}
+function upsert(fila){ return sb(T + '?on_conflict=id', { method: 'POST', prefer: 'resolution=merge-duplicates,return=minimal', body: [fila] }); }
+
+// =============== CÁLCULOS ===============
+function redondear(v){ var r = S.cfg.redondeo || 1000; return Math.ceil(v / r) * r; }
+function costoClase(c){
+  var g = S.cfg.costoG || 0;
+  var partes = { instructor: c.horas * c.valorHora, cafe: c.cafeG * g, leche: c.leche || 0, insumos: c.insumos || 0, equipos: c.equipos || 0, material: c.material || 0 };
+  var total = 0; for (var k in partes) total += partes[k];
+  var extra = (c.extraCafeG || 0) * g + (c.extraInsumos || 0) + (c.material || 0);
+  var m = Math.min(90, S.cfg.margen || 0) / 100;
+  var sug = redondear(total / (1 - m)), sugExtra = redondear(extra / (1 - m));
+  var precio = c.precio || sug, precioExtra = c.precioExtra || sugExtra;
+  return { partes: partes, total: total, sugerido: sug, precio: precio, margen: precio ? (precio - total) / precio * 100 : 0, extraCosto: extra, extraSugerido: sugExtra, precioExtra: precioExtra, extraMargen: precioExtra ? (precioExtra - extra) / precioExtra * 100 : 0 };
+}
+function cafesCatalogo(){
+  return S.cat.filter(function(c){ return c && c.nombre && c.activo !== false; }).map(function(c){
+    var precio = Math.round((Number(c.precio) || 0) * 1.19 / 100) * 100, cc = S.cfg.cafes[c.nombre];
+    return { nombre: c.nombre, presentacion: c.presLabel || ((c.cantidad || '') + 'g'), precio: precio, costo: cc != null ? cc : Math.round(precio * 0.45), stock: Number(c.stock) || 0, notas: c.notas || '', img: c.img || '' };
+  });
+}
+function extra(id){ return S.cfg.extras.filter(function(e){ return e.id === id; })[0]; }
+function precioExtra(e){ if (e.tipo !== 'cafe') return { precio: e.precio, costo: e.costo }; var L = cafesCatalogo(); if (!L.length) return { precio: e.precio, costo: e.costo }; var p = L.reduce(function(s, c){ return s + c.precio; }, 0) / L.length, k = L.reduce(function(s, c){ return s + c.costo; }, 0) / L.length; return { precio: Math.round(p), costo: Math.round(k), promedio: true }; }
+function totalCombo(clase, items, personas){
+  var cc = costoClase(clase), n = Math.max(1, personas || 1);
+  var precio = cc.precio + (n - 1) * cc.precioExtra, costo = cc.total + (n - 1) * cc.extraCosto, pe = 0, ce = 0, cuenta = 0;
+  (items || []).forEach(function(it){ var e = extra(it.id); if (!e) return; var v = precioExtra(e); pe += v.precio * it.qty; ce += v.costo * it.qty; cuenta += it.qty; });
+  var d = S.cfg.descuento, desc = cuenta >= (d.minExtras || 99) ? Math.round(pe * (d.pct || 0) / 100) : 0;
+  var total = precio + pe - desc, costoT = costo + ce;
+  return { clase: precio, extras: pe, descuento: desc, total: total, costo: costoT, ganancia: total - costoT, margen: total ? (total - costoT) / total * 100 : 0 };
+}
+
+// =============== DATOS ===============
+function cargar(){
+  return Promise.all([
+    sb(T + '?id=eq.clasescfg&select=data'),
+    sb('bru_store?id=eq.main&select=catalogo'),
+    sb(T + '?tipo=eq.clase_res&select=id,fecha,data,created_at&order=created_at.desc&limit=200').catch(function(){ return []; })
+  ]).then(function(r){
+    var c = r[0] && r[0][0] ? r[0][0].data : null;
+    S.cfg = copia(DEF); S.existe = !!c;
+    if (c) Object.keys(c).forEach(function(k){ S.cfg[k] = c[k]; });
+    S.cat = (r[1] && r[1][0] && r[1][0].catalogo) || [];
+    S.res = r[2] || [];
+  });
+}
+function publico(){
+  var C = S.cfg;
+  return {
+    actualizado: new Date().toISOString(), wa: C.wa, descuento: C.descuento,
+    clases: C.clases.filter(function(c){ return c.activa !== false; }).map(function(c){ var k = costoClase(c); return { id: c.id, nombre: c.nombre, corto: c.corto, desc: c.desc, duracion: c.duracion, maxPersonas: c.maxPersonas, precio: k.precio, precioExtra: k.precioExtra, img: c.img || '' }; }),
+    extras: C.extras.filter(function(e){ return e.activo !== false; }).map(function(e){ return { id: e.id, nombre: e.nombre, desc: e.desc, precio: e.tipo === 'cafe' ? 0 : e.precio, tipo: e.tipo }; }),
+    cafes: cafesCatalogo().filter(function(c){ return c.stock > 0; }).sort(function(a, b){ return b.stock - a.stock; }).map(function(c){ return { nombre: c.nombre, presentacion: c.presentacion, precio: c.precio, notas: c.notas, img: c.img }; }),
+    combos: C.combos
+  };
+}
+function guardar(){
+  return Promise.all([
+    upsert({ id: 'clasescfg', tipo: 'clases_cfg', fecha: null, data: S.cfg }),
+    upsert({ id: 'clasespub', tipo: 'clases_pub', fecha: null, data: publico() })
+  ]).then(function(){ toast('Guardado y publicado en la web'); }).catch(function(e){ toast(e.message, true); });
+}
+var guardarLuego = (function(){ var t; return function(){ clearTimeout(t); $('estado').textContent = 'Guardando…'; t = setTimeout(function(){ guardar().then(function(){ $('estado').textContent = 'Publicado ✓'; }); }, 900); }; })();
+
+// =============== UI ===============
+var TABS = [['costeo', 'Costeo de clases'], ['extras', 'Kits y extras'], ['combos', 'Combos'], ['reservas', 'Reservas'], ['ajustes', 'Ajustes']];
+function render(){
+  $('tabs').innerHTML = TABS.map(function(t){ var n = t[0] === 'reservas' ? S.res.filter(function(r){ return (r.data.estado || 'nueva') === 'nueva'; }).length : 0; return '<button data-t="' + t[0] + '" class="' + (S.tab === t[0] ? 'on' : '') + '">' + t[1] + (n ? ' <span class="cnt">' + n + '</span>' : '') + '</button>'; }).join('');
+  var fn = { costeo: renderCosteo, extras: renderExtras, combos: renderCombos, reservas: renderReservas, ajustes: renderAjustes }[S.tab];
+  try { fn($('main')); } catch (e) { console.error(e); $('main').innerHTML = '<div class="banner bad">Error: ' + esc(e.message) + '</div>'; }
+}
+function campo(lbl, path, v, tipo, extraAttr){ return '<label class="f">' + esc(lbl) + '<input type="' + (tipo || 'number') + '" data-p="' + path + '" value="' + esc(v == null ? '' : v) + '"' + (extraAttr || '') + '></label>'; }
+function setPath(path, val){ var p = path.split('.'), o = S.cfg; for (var i = 0; i < p.length - 1; i++) o = o[isNaN(p[i]) ? p[i] : Number(p[i])]; var k = p[p.length - 1]; o[k] = val; }
+function enlazar(c, alCambiar){
+  c.oninput = function(e){ var el = e.target; if (!el.getAttribute('data-p')) return; var v = el.type === 'number' ? num(el.value) : (el.type === 'checkbox' ? el.checked : el.value); setPath(el.getAttribute('data-p'), v); guardarLuego(); if (alCambiar) alCambiar(el); };
+  c.onchange = c.oninput;
+}
+function renderCosteo(c){
+  c.innerHTML = '<div class="banner info">Cada clase se costea con el tiempo del instructor, el café que se usa (a ' + fmt(S.cfg.costoG) + ' por gramo), insumos, uso de equipos y material. El precio sugerido busca un margen del ' + S.cfg.margen + ' %; si escribes un precio propio, ese es el que sale en la web.</div>' +
+    S.cfg.clases.map(function(k, i){ return '<div class="card" style="margin-bottom:12px" id="cl' + i + '">' + tarjetaClase(k, i) + '</div>'; }).join('');
+  enlazar(c, function(el){ var i = Number(el.getAttribute('data-p').split('.')[1]); var box = $('res' + i); if (box) box.innerHTML = resumenClase(S.cfg.clases[i]); });
+}
+function tarjetaClase(k, i){
+  var b = 'clases.' + i + '.';
+  return '<div class="row"><h3 style="flex:1">' + esc(k.nombre) + '</h3><label class="f chk"><input type="checkbox" data-p="' + b + 'activa"' + (k.activa !== false ? ' checked' : '') + '> Visible en la web</label></div>' +
+    '<div class="grid g3">' + campo('Nombre en la web', b + 'nombre', k.nombre, 'text') + campo('Duración (horas)', b + 'duracion', k.duracion) + campo('Máximo de personas', b + 'maxPersonas', k.maxPersonas) + '</div>' +
+    '<label class="f" style="margin-top:8px">Descripción<textarea data-p="' + b + 'desc" style="min-height:60px">' + esc(k.desc) + '</textarea></label>' +
+    campo('Foto (URL de imagen)', b + 'img', k.img, 'text', ' placeholder="https://res.cloudinary.com/…"') +
+    '<div class="sec">Costos por clase (1 persona)</div><div class="grid g4">' + campo('Horas del instructor', b + 'horas', k.horas) + campo('Valor hora instructor', b + 'valorHora', k.valorHora) + campo('Café usado (g)', b + 'cafeG', k.cafeG) + campo('Leche y otros alimentos', b + 'leche', k.leche) +
+    campo('Insumos (filtros, vasos, agua…)', b + 'insumos', k.insumos) + campo('Uso de equipos / espacio', b + 'equipos', k.equipos) + campo('Material (guía, certificado)', b + 'material', k.material) + '<div></div></div>' +
+    '<div class="sec">Persona adicional</div><div class="grid g4">' + campo('Café extra por persona (g)', b + 'extraCafeG', k.extraCafeG) + campo('Insumos extra por persona', b + 'extraInsumos', k.extraInsumos) + campo('Precio propio por persona extra (0 = sugerido)', b + 'precioExtra', k.precioExtra || '') + campo('Precio propio de la clase (0 = sugerido)', b + 'precio', k.precio || '') + '</div>' +
+    '<div id="res' + i + '">' + resumenClase(k) + '</div>';
+}
+function resumenClase(k){
+  var r = costoClase(k), p = r.partes;
+  return '<div class="kpis" style="margin-top:12px"><div class="kpi"><b>' + fmt(r.total) + '</b><span>costo de la clase</span></div><div class="kpi"><b>' + fmt(r.sugerido) + '</b><span>precio sugerido (' + S.cfg.margen + ' %)</span></div><div class="kpi ' + (r.margen < 30 ? 'bad' : 'ok') + '"><b>' + fmt(r.precio) + '</b><span>precio en la web · margen ' + pct(r.margen) + '</span></div><div class="kpi"><b>' + fmt(r.precioExtra) + '</b><span>por persona adicional · costo ' + fmt(r.extraCosto) + '</span></div></div>' +
+    '<div class="small muted">Instructor ' + fmt(p.instructor) + ' · café ' + fmt(p.cafe) + (p.leche ? ' · leche ' + fmt(p.leche) : '') + ' · insumos ' + fmt(p.insumos) + ' · equipos ' + fmt(p.equipos) + ' · material ' + fmt(p.material) + ' · ganancia por clase ' + fmt(r.precio - r.total) + '</div>';
+}
+function renderExtras(c){
+  var E = S.cfg.extras, cafes = cafesCatalogo();
+  c.innerHTML = '<div class="banner info">Estos son los elementos que la persona puede sumar a su clase en la web. Ajusta el costo real de cada uno y el precio de venta.</div>' +
+    '<div class="tbl-w"><table class="t"><thead><tr><th>Visible</th><th>Elemento</th><th>Descripción</th><th class="num">Costo</th><th class="num">Precio</th><th class="num">Margen</th><th></th></tr></thead><tbody>' +
+    E.map(function(e, i){ var b = 'extras.' + i + '.', v = precioExtra(e), m = v.precio ? (v.precio - v.costo) / v.precio * 100 : 0;
+      return '<tr><td><input type="checkbox" data-p="' + b + 'activo"' + (e.activo !== false ? ' checked' : '') + '></td><td style="min-width:160px"><input type="text" data-p="' + b + 'nombre" value="' + esc(e.nombre) + '"></td><td style="min-width:220px"><input type="text" data-p="' + b + 'desc" value="' + esc(e.desc) + '"></td>' +
+        (e.tipo === 'cafe' ? '<td class="num" colspan="2"><span class="small muted">Según el café elegido (abajo) · promedio ' + fmt(v.precio) + '</span></td>' : '<td class="num"><input type="number" data-p="' + b + 'costo" value="' + e.costo + '" style="width:110px"></td><td class="num"><input type="number" data-p="' + b + 'precio" value="' + e.precio + '" style="width:110px"></td>') +
+        '<td class="num"><span class="st ' + (m < 30 ? 'bad' : 'ok') + '">' + pct(m) + '</span></td><td>' + (e.tipo === 'cafe' ? '' : '<button class="btn sm ghost" data-del="' + i + '">✕</button>') + '</td></tr>'; }).join('') +
+    '</tbody></table></div><div class="row" style="margin:10px 0 18px"><button class="btn" id="exNew">+ Agregar elemento</button></div>' +
+    '<h3 style="margin-bottom:8px">Cafés para «café de tu elección»</h3><div class="small muted" style="margin-bottom:8px">Salen del catálogo de la tienda con su precio de venta. Pon el costo real de cada bolsa para que el margen del combo sea exacto. Solo se ofrecen los que tienen stock.</div>' +
+    '<div class="tbl-w"><table class="t"><thead><tr><th>Café</th><th>Presentación</th><th class="num">Stock</th><th class="num">Precio venta</th><th class="num">Costo bolsa</th><th class="num">Margen</th></tr></thead><tbody>' +
+    (cafes.map(function(k){ var m = k.precio ? (k.precio - k.costo) / k.precio * 100 : 0; return '<tr><td><b>' + esc(k.nombre) + '</b></td><td>' + esc(k.presentacion) + '</td><td class="num">' + k.stock + '</td><td class="num">' + fmt(k.precio) + '</td><td class="num"><input type="number" data-cafe="' + esc(k.nombre) + '" value="' + k.costo + '" style="width:110px"></td><td class="num"><span class="st ' + (m < 30 ? 'bad' : 'ok') + '">' + pct(m) + '</span></td></tr>'; }).join('') || '<tr><td colspan="6" class="empty">No hay cafés en el catálogo</td></tr>') + '</tbody></table></div>';
+  enlazar(c);
+  c.onchange = function(e){ var k = e.target.getAttribute('data-cafe'); if (k) { S.cfg.cafes[k] = num(e.target.value); guardarLuego(); render(); } else if (e.target.getAttribute('data-p')) { c.oninput(e); render(); } };
+  $('exNew').onclick = function(){ S.cfg.extras.push({ id: uid('ex'), nombre: 'Nuevo elemento', desc: '', costo: 0, precio: 0, tipo: 'item', activo: true }); guardarLuego(); render(); };
+  c.onclick = function(e){ var d = e.target.closest('[data-del]'); if (!d) return; var i = Number(d.getAttribute('data-del')), id = S.cfg.extras[i].id; if (!confirm('¿Quitar «' + S.cfg.extras[i].nombre + '»?')) return; S.cfg.extras.splice(i, 1); Object.keys(S.cfg.combos).forEach(function(k){ S.cfg.combos[k].forEach(function(cb){ cb.items = cb.items.filter(function(it){ return it.id !== id; }); }); }); guardarLuego(); render(); };
+}
+function renderCombos(c){
+  var d = S.cfg.descuento;
+  c.innerHTML = '<div class="banner info">Los combos son puntos de partida: en la web cada persona puede quitar o agregar elementos y armar el suyo. Si suma ' + d.minExtras + ' o más elementos, recibe ' + d.pct + ' % de descuento sobre los elementos (cámbialo en Ajustes).</div>' +
+    S.cfg.clases.map(function(k){
+      var L = S.cfg.combos[k.id] || (S.cfg.combos[k.id] = []);
+      return '<div class="card" style="margin-bottom:12px"><div class="row"><h3 style="flex:1">' + esc(k.corto || k.nombre) + '</h3><button class="btn sm" data-addc="' + k.id + '">+ Combo</button></div>' +
+        '<div class="tbl-w" style="margin-top:8px"><table class="t"><thead><tr><th>Combo</th><th>Incluye</th><th class="num">Precio (1 persona)</th><th class="num">Costo</th><th class="num">Ganancia</th><th class="num">Margen</th><th></th></tr></thead><tbody>' +
+        L.map(function(cb, j){ var t = totalCombo(k, cb.items, 1);
+          return '<tr><td style="min-width:150px"><input type="text" data-cn="' + k.id + '|' + j + '" value="' + esc(cb.nombre) + '"></td><td style="min-width:260px">' + cb.items.map(function(it){ var e = extra(it.id); if (!e) return '';
+              return '<span class="chipq on">' + esc(e.nombre) + ' <button data-q="' + k.id + '|' + j + '|' + e.id + '|-1">−</button><b>' + it.qty + '</b><button data-q="' + k.id + '|' + j + '|' + e.id + '|1">+</button></span>'; }).join('') + (cb.items.length ? '' : '<span class="small muted">Solo la clase </span>') +
+              '<select data-add="' + k.id + '|' + j + '" style="width:auto;padding:3px 6px;font-size:12px;margin:2px"><option value="">+ agregar…</option>' + S.cfg.extras.filter(function(e){ return e.activo !== false && !cb.items.some(function(x){ return x.id === e.id; }); }).map(function(e){ return '<option value="' + e.id + '">' + esc(e.nombre) + '</option>'; }).join('') + '</select></td>' +
+            '<td class="num"><b>' + fmt(t.total) + '</b>' + (t.descuento ? '<div class="small muted">incluye −' + fmt(t.descuento) + '</div>' : '') + '</td><td class="num">' + fmt(t.costo) + '</td><td class="num">' + fmt(t.ganancia) + '</td><td class="num"><span class="st ' + (t.margen < 30 ? 'bad' : 'ok') + '">' + pct(t.margen) + '</span></td><td><button class="btn sm ghost" data-delc="' + k.id + '|' + j + '">✕</button></td></tr>'; }).join('') +
+        '</tbody></table></div></div>'; }).join('');
+  c.onclick = function(e){
+    var q = e.target.closest('[data-q]'), a = e.target.closest('[data-addc]'), dl = e.target.closest('[data-delc]');
+    if (q) { var p = q.getAttribute('data-q').split('|'), cb = S.cfg.combos[p[0]][Number(p[1])], it = cb.items.filter(function(x){ return x.id === p[2]; })[0]; if (!it) { it = { id: p[2], qty: 0 }; cb.items.push(it); } it.qty = Math.max(0, Math.min(9, it.qty + Number(p[3]))); cb.items = cb.items.filter(function(x){ return x.qty > 0; }); guardarLuego(); render(); }
+    if (a) { S.cfg.combos[a.getAttribute('data-addc')].push({ nombre: 'Nuevo combo', items: [] }); guardarLuego(); render(); }
+    if (dl) { var p2 = dl.getAttribute('data-delc').split('|'); S.cfg.combos[p2[0]].splice(Number(p2[1]), 1); guardarLuego(); render(); }
+  };
+  c.onchange = function(e){ var a = e.target.getAttribute('data-add'); if (!a || !e.target.value) return; var p = a.split('|'); S.cfg.combos[p[0]][Number(p[1])].items.push({ id: e.target.value, qty: 1 }); guardarLuego(); render(); };
+  c.oninput = function(e){ var n = e.target.getAttribute('data-cn'); if (!n) return; var p = n.split('|'); S.cfg.combos[p[0]][Number(p[1])].nombre = e.target.value; guardarLuego(); };
+}
+var EST = [['nueva', 'Nueva'], ['confirmada', 'Confirmada'], ['pagada', 'Pagada'], ['realizada', 'Realizada'], ['cancelada', 'Cancelada']];
+function renderReservas(c){
+  var R = S.res;
+  c.innerHTML = '<div class="row" style="margin-bottom:10px"><span class="small muted">Solicitudes que llegan desde la página de clases. Escríbele a la persona para confirmar fecha y pago.</span><span class="sp"></span><button class="btn sm" id="rRef">Actualizar</button><a class="btn sm" href="/clases.html" target="_blank">Ver página ↗</a></div>' +
+    (R.length ? R.map(function(r){ var x = r.data, tel = String(x.telefono || '').replace(/\D/g, ''); if (tel.length === 10) tel = '57' + tel;
+      return '<div class="card" style="margin-bottom:8px"><div class="row"><b>' + esc(x.nombre || 'Sin nombre') + '</b><span class="pill">' + esc(x.clase || '') + '</span><span class="small muted">' + fFecha(String(r.created_at || '').slice(0, 10)) + '</span><span class="sp"></span><select data-est="' + r.id + '">' + EST.map(function(s){ return '<option value="' + s[0] + '"' + ((x.estado || 'nueva') === s[0] ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select></div>' +
+        '<div class="small" style="margin-top:6px">' + esc(x.personas || 1) + ' persona(s) · ' + (x.fechaPref ? 'prefiere ' + fFecha(x.fechaPref) + (x.horaPref ? ' ' + esc(x.horaPref) : '') + ' · ' : '') + (x.combo ? 'combo ' + esc(x.combo) + ' · ' : '') + '<b>' + fmt(x.total) + '</b></div>' +
+        (x.items && x.items.length ? '<div class="small muted" style="margin-top:4px">' + x.items.map(function(i){ return esc(i.qty + ' × ' + i.nombre + (i.cafe ? ' (' + i.cafe + ')' : '')); }).join(' · ') + '</div>' : '') + (x.nota ? '<div class="small" style="margin-top:4px">“' + esc(x.nota) + '”</div>' : '') +
+        '<div class="row" style="margin-top:8px">' + (tel ? '<a class="btn sm pri" target="_blank" rel="noopener" href="https://wa.me/' + tel + '?text=' + encodeURIComponent('Hola ' + String(x.nombre || '').split(' ')[0] + ', soy Camilo de B.R.U ☕ Recibí tu solicitud para la ' + (x.clase || 'clase') + '. ¿Te queda bien ' + (x.fechaPref ? fFecha(x.fechaPref) : 'esta semana') + '?') + '">WhatsApp ' + esc(x.telefono) + '</a>' : '') + (x.email ? '<span class="small muted">' + esc(x.email) + '</span>' : '') + '</div></div>'; }).join('') : '<div class="empty">Aún no hay reservas. Comparte la página <b>brucoffeeshop.online/clases.html</b>.</div>');
+  $('rRef').onclick = function(){ sb(T + '?tipo=eq.clase_res&select=id,fecha,data,created_at&order=created_at.desc&limit=200').then(function(r){ S.res = r || []; render(); }); };
+  c.onchange = function(e){ var id = e.target.getAttribute('data-est'); if (!id) return; var r = S.res.filter(function(x){ return x.id === id; })[0]; r.data.estado = e.target.value; upsert({ id: r.id, tipo: 'clase_res', fecha: r.fecha, data: r.data }).then(function(){ toast('Estado actualizado'); render(); }); };
+}
+function renderAjustes(c){
+  var C = S.cfg;
+  c.innerHTML = '<div class="card"><div class="grid g3">' + campo('Costo del café tostado por gramo', 'costoG', C.costoG) + campo('Margen objetivo (%)', 'margen', C.margen) + campo('Redondear precios a', 'redondeo', C.redondeo) +
+    campo('Descuento por combo (%)', 'descuento.pct', C.descuento.pct) + campo('Desde cuántos elementos aplica', 'descuento.minExtras', C.descuento.minExtras) + campo('WhatsApp para reservas', 'wa', C.wa, 'text') + '</div>' +
+    '<div class="small muted" style="margin-top:10px">El costo por gramo incluye café verde, merma de tostión y gas. Con un verde de unos $' + '35.000/kg y 16 % de merma, más tostión, queda alrededor de $90–110 por gramo.</div>' +
+    '<div class="row" style="margin-top:12px"><button class="btn" id="aRes">Volver a los valores iniciales</button><a class="btn" href="/clases.html" target="_blank">Ver la página de clases ↗</a></div></div>';
+  enlazar(c);
+  $('aRes').onclick = function(){ if (!confirm('Se reemplazan todos los costos, precios y combos por los valores iniciales. ¿Seguir?')) return; S.cfg = copia(DEF); guardar().then(render); };
+}
+
+// =============== ARRANQUE ===============
+(function(){
+  $('tabs').onclick = function(e){ var b = e.target.closest('button[data-t]'); if (b) { S.tab = b.getAttribute('data-t'); render(); window.scrollTo(0, 0); } };
+  $('main').innerHTML = '<div class="empty">Cargando…</div>';
+  cargar().then(function(){ render(); if (!S.existe) guardar(); else upsert({ id: 'clasespub', tipo: 'clases_pub', fecha: null, data: publico() }).catch(function(){}); }).catch(function(e){ $('main').innerHTML = '<div class="banner bad">No se pudo cargar: ' + esc(e.message) + '</div>'; });
+})();
+
+})();
+</script>
+</body>
+</html>
