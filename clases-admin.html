@@ -166,7 +166,7 @@ var SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
 var T = 'bru_conta';
 var S = { tab: 'costeo', cfg: null, cat: [], res: [], sub: {} };
 var DEF = {
-  costoG: 100, margen: 40, redondeo: 5000, wa: '573044927790', mig: 4,
+  costoG: 100, margen: 40, redondeo: 5000, wa: '573044927790', mig: 5,
   disponibilidad: 'Principalmente sábados y domingos. Entre semana, pregúntanos disponibilidad.',
   descuento: { pct: 10, minExtras: 2 },
   agenda: { horarios: ['9:00 a.m.', '2:00 p.m.'], dias: [6, 0], semanas: 8, anticipacion: 2, bloq: [], extra: [] },
@@ -178,7 +178,7 @@ var DEF = {
     { id: 'barismo', nombre: 'Clase personalizada de Barismo', corto: 'Barismo', desc: 'Espresso de principio a fin: dosis, molienda, extracción y calibración. Texturiza leche y da tus primeros pasos en arte latte con máquina profesional.', duracion: 3, maxPersonas: 3,
       horas: 3, valorHora: 45000, cafeG: 300, leche: 13500, insumos: 10000, equipos: 60000, material: 8000, extraCafeG: 150, extraInsumos: 12000, precio: 0, precioExtra: 0, img: '', activa: true, estado: 'pronto' },
     { id: 'empresas', nombre: 'Taller de café para empresas', corto: 'Empresas', desc: 'Una experiencia de café para tu equipo en tu oficina: preparación de filtrados, cata guiada y la historia detrás de cada taza. Ideal para integraciones, clientes y celebraciones.', duracion: 2, maxPersonas: 100, minPersonas: 5, porGrupo: 15,
-      horas: 2, valorHora: 60000, cafeG: 300, leche: 0, insumos: 30000, equipos: 40000, material: 8000, extraCafeG: 30, extraInsumos: 4000, kitPersona: 37500, kitPersonaTxt: 'Una bolsa de café de 250 g y 5 drip bags', precio: 0, precioExtra: 0, img: '', activa: true, estado: 'disponible' }
+      horas: 2, valorHora: 60000, cafeG: 300, leche: 0, insumos: 30000, equipos: 40000, material: 8000, extraCafeG: 30, extraInsumos: 4000, kitPersona: 37500, kitPersonaTxt: 'Una bolsa de café de 250 g y 5 drip bags', extrasPorPersona: true, precio: 475000, precioExtra: 120000, img: '', activa: true, estado: 'disponible' }
   ],
   extras: [
     { id: 'kit_v60', nombre: 'Kit de filtrado en casa', desc: 'Gotero V60 02, 40 filtros, cuchara medidora y guía de recetas', costo: 62000, precio: 105000, tipo: 'item', activo: true },
@@ -196,7 +196,7 @@ var DEF = {
   combos: {
     filtrados: [{ nombre: 'Esencial', items: [] }, { nombre: 'Filtra en casa', items: [{ id: 'kit_v60', qty: 1 }, { id: 'cafe', qty: 1 }] }, { nombre: 'Completo', items: [{ id: 'kit_v60', qty: 1 }, { id: 'cafe', qty: 1 }, { id: 'drip5', qty: 1 }] }, { nombre: 'Barra en casa', items: [{ id: 'kit_completo', qty: 1 }, { id: 'cafe', qty: 1 }, { id: 'drip5', qty: 1 }] }],
     catacion: [{ nombre: 'Esencial', items: [] }, { nombre: 'Catador', items: [{ id: 'cafe', qty: 2 }] }, { nombre: 'Explorador', items: [{ id: 'cafe', qty: 2 }, { id: 'drip10', qty: 1 }] }],
-    empresas: [{ nombre: 'Esencial', items: [] }, { nombre: 'Oficina con método', items: [{ id: 'kit_v60', qty: 1 }, { id: 'cafe', qty: 2 }] }, { nombre: 'Barra para la oficina', items: [{ id: 'kit_completo', qty: 1 }, { id: 'cafe', qty: 3 }] }],
+    empresas: [{ nombre: 'Esencial', items: [] }, { nombre: 'Oficina con método', items: [{ id: 'kit_v60', qty: 1 }, { id: 'cafe', qty: 1 }] }, { nombre: 'Barra para la oficina', items: [{ id: 'kit_completo', qty: 1 }, { id: 'cafe', qty: 1 }] }],
     barismo: [{ nombre: 'Esencial', items: [] }, { nombre: 'Barista en casa', items: [{ id: 'kit_barista', qty: 1 }, { id: 'cafe', qty: 1 }, { id: 'drip5', qty: 1 }] }, { nombre: 'Barista Pro', items: [{ id: 'kit_barista', qty: 1 }, { id: 'molino', qty: 1 }, { id: 'cafe', qty: 2 }] }]
   }
 };
@@ -242,7 +242,8 @@ function precioExtra(e){ if (e.tipo === 'opcion') { var O = e.opciones || []; if
 function totalCombo(clase, items, personas){
   var cc = costoClase(clase), n = Math.max(1, personas || 1);
   var precio = cc.precio + (n - 1) * cc.precioExtra, costo = cc.total + (n - 1) * cc.extraCosto, pe = 0, ce = 0, cuenta = 0;
-  (items || []).forEach(function(it){ var e = extra(it.id); if (!e) return; var v = precioExtra(e); pe += v.precio * it.qty; ce += v.costo * it.qty; cuenta += it.qty; });
+  var mult = clase.extrasPorPersona ? n : 1;
+  (items || []).forEach(function(it){ var e = extra(it.id); if (!e) return; var v = precioExtra(e); pe += v.precio * it.qty * mult; ce += v.costo * it.qty * mult; cuenta += it.qty; });
   var d = S.cfg.descuento, desc = cuenta >= (d.minExtras || 99) ? Math.round(pe * (d.pct || 0) / 100) : 0;
   var total = precio + pe - desc, costoT = costo + ce;
   return { clase: precio, extras: pe, descuento: desc, total: total, costo: costoT, ganancia: total - costoT, margen: total ? (total - costoT) / total * 100 : 0 };
@@ -260,8 +261,9 @@ function cargar(){
     if (c) Object.keys(c).forEach(function(k){ S.cfg[k] = c[k]; });
     if (c && !c.mig) { S.cfg.mig = 0; var kc = copia(DEF.extras.filter(function(e){ return e.id === 'kit_completo'; })[0]); if (!S.cfg.extras.some(function(e){ return e.id === 'kit_completo'; })) S.cfg.extras.splice(3, 0, kc); if (S.cfg.combos.filtrados && !S.cfg.combos.filtrados.some(function(x){ return x.nombre === 'Barra en casa'; })) S.cfg.combos.filtrados.push(copia(DEF.combos.filtrados[3])); if (!S.cfg.disponibilidad) S.cfg.disponibilidad = DEF.disponibilidad; S.cfg.mig = 1; S.existe = false; }
     if (c && (c.mig || 0) < 3) { if (!S.cfg.clases.some(function(k){ return k.id === 'empresas'; })) S.cfg.clases.push(copia(DEF.clases.filter(function(k){ return k.id === 'empresas'; })[0])); if (!S.cfg.combos.empresas) S.cfg.combos.empresas = copia(DEF.combos.empresas); S.existe = false; }
-    if (c && (c.mig || 0) < 4) { S.cfg.clases.forEach(function(k){ if (k.id === 'empresas' && !k.porGrupo) { k.porGrupo = 15; if ((k.maxPersonas || 0) < 100) k.maxPersonas = 100; } }); S.cfg.mig = 4; S.existe = false; }
-    if (c && (c.mig || 0) < 2) { S.cfg.clases.forEach(function(k){ if (!k.estado) k.estado = k.id === 'barismo' ? 'pronto' : 'disponible'; }); S.cfg.mig = 4; S.existe = false; }
+    if (c && (c.mig || 0) < 4) { S.cfg.clases.forEach(function(k){ if (k.id === 'empresas' && !k.porGrupo) { k.porGrupo = 15; if ((k.maxPersonas || 0) < 100) k.maxPersonas = 100; } }); S.existe = false; }
+    if (c && (c.mig || 0) < 5) { S.cfg.clases.forEach(function(k){ if (k.id === 'empresas') { k.extrasPorPersona = true; if ((k.precioExtra || 0) < 120000) k.precioExtra = 120000; if ((k.precio || 0) < 475000) k.precio = 475000; } }); (S.cfg.combos.empresas || []).forEach(function(cb){ cb.items.forEach(function(it){ if (it.id === 'cafe' && it.qty > 1) it.qty = 1; }); }); S.cfg.mig = 5; S.existe = false; }
+    if (c && (c.mig || 0) < 2) { S.cfg.clases.forEach(function(k){ if (!k.estado) k.estado = k.id === 'barismo' ? 'pronto' : 'disponible'; }); S.cfg.mig = 5; S.existe = false; }
     S.cat = (r[1] && r[1][0] && r[1][0].catalogo) || [];
     S.res = r[2] || [];
   });
@@ -270,7 +272,7 @@ function publico(){
   var C = S.cfg;
   return {
     actualizado: new Date().toISOString(), wa: C.wa, descuento: C.descuento, disponibilidad: C.disponibilidad || '', agenda: agCfg(),
-    clases: C.clases.filter(function(c){ return c.activa !== false; }).map(function(c){ var k = costoClase(c); return { id: c.id, porGrupo: c.porGrupo || 0, minPersonas: Math.max(1, c.minPersonas || 1), incluye: c.kitPersonaTxt || '', estado: c.estado || 'disponible', nombre: c.nombre, corto: c.corto, desc: c.desc, duracion: c.duracion, maxPersonas: c.maxPersonas, precio: k.precio, precioExtra: k.precioExtra, img: c.img || '' }; }),
+    clases: C.clases.filter(function(c){ return c.activa !== false; }).map(function(c){ var k = costoClase(c); return { id: c.id, extrasPorPersona: !!c.extrasPorPersona, porGrupo: c.porGrupo || 0, minPersonas: Math.max(1, c.minPersonas || 1), incluye: c.kitPersonaTxt || '', estado: c.estado || 'disponible', nombre: c.nombre, corto: c.corto, desc: c.desc, duracion: c.duracion, maxPersonas: c.maxPersonas, precio: k.precio, precioExtra: k.precioExtra, img: c.img || '' }; }),
     extras: C.extras.filter(function(e){ return e.activo !== false; }).map(function(e){ return { id: e.id, nombre: e.nombre, desc: e.desc, precio: e.tipo === 'cafe' ? 0 : e.precio, tipo: e.tipo, opciones: e.tipo === 'opcion' ? (e.opciones || []).map(function(o){ return { nombre: o.nombre, precio: o.precio || 0 }; }) : undefined }; }),
     cafes: cafesCatalogo().filter(function(c){ return c.stock > 0; }).sort(function(a, b){ return b.stock - a.stock; }).map(function(c){ return { nombre: c.nombre, presentacion: c.presentacion, precio: c.precio, notas: c.notas, img: c.img }; }),
     combos: C.combos
@@ -307,6 +309,7 @@ function tarjetaClase(k, i){
   return '<div class="row"><h3 style="flex:1">' + esc(k.nombre) + '</h3><label class="f chk"><input type="checkbox" data-p="' + b + 'activa"' + (k.activa !== false ? ' checked' : '') + '> Visible en la web</label></div>' +
     '<div class="row" style="margin:6px 0 10px"><span class="small muted">Estado en la web:</span><select data-p="' + b + 'estado" style="width:auto">' + [['disponible', '✅ Disponible (se puede reservar)'], ['pronto', '⏳ Disponible pronto (solo lista de espera)']].map(function(o){ return '<option value="' + o[0] + '"' + ((k.estado || 'disponible') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></div>' +
     '<div class="grid g3">' + campo('Nombre en la web', b + 'nombre', k.nombre, 'text') + campo('Duración (horas)', b + 'duracion', k.duracion) + campo('Máximo de personas', b + 'maxPersonas', k.maxPersonas) + campo('Mínimo de personas', b + 'minPersonas', k.minPersonas || 1) + campo('Personas por grupo / sesión (0 = un solo grupo)', b + 'porGrupo', k.porGrupo || 0) + campo('Regalo por asistente (costo)', b + 'kitPersona', k.kitPersona || 0) + campo('Qué incluye cada asistente (sale en la web)', b + 'kitPersonaTxt', k.kitPersonaTxt || '', 'text', ' placeholder="Ej. Una bolsa de café de 250 g y 5 drip bags"') + '</div>' +
+    '<label class="f chk" style="margin-top:8px"><input type="checkbox" data-p="' + b + 'extrasPorPersona"' + (k.extrasPorPersona ? ' checked' : '') + '> Los kits y extras que se agregan son por persona (se multiplican por el número de asistentes)</label>' +
     '<label class="f" style="margin-top:8px">Descripción<textarea data-p="' + b + 'desc" style="min-height:60px">' + esc(k.desc) + '</textarea></label>' +
     campo('Foto (URL de imagen)', b + 'img', k.img, 'text', ' placeholder="https://res.cloudinary.com/…"') +
     '<div class="sec">Costos por clase (1 persona)</div><div class="grid g4">' + campo('Horas del instructor', b + 'horas', k.horas) + campo('Valor hora instructor', b + 'valorHora', k.valorHora) + campo('Café usado (g)', b + 'cafeG', k.cafeG) + campo('Leche y otros alimentos', b + 'leche', k.leche) +
@@ -350,8 +353,8 @@ function renderCombos(c){
     S.cfg.clases.map(function(k){
       var L = S.cfg.combos[k.id] || (S.cfg.combos[k.id] = []);
       return '<div class="card" style="margin-bottom:12px"><div class="row"><h3 style="flex:1">' + esc(k.corto || k.nombre) + '</h3><button class="btn sm" data-addc="' + k.id + '">+ Combo</button></div>' +
-        '<div class="tbl-w" style="margin-top:8px"><table class="t"><thead><tr><th>Combo</th><th>Incluye</th><th class="num">Precio (1 persona)</th><th class="num">Costo</th><th class="num">Ganancia</th><th class="num">Margen</th><th></th></tr></thead><tbody>' +
-        L.map(function(cb, j){ var t = totalCombo(k, cb.items, 1);
+        '<div class="tbl-w" style="margin-top:8px"><table class="t"><thead><tr><th>Combo</th><th>Incluye</th><th class="num">Precio (' + (k.extrasPorPersona ? Math.max(1, k.minPersonas || 1) + ' personas, extras por persona' : '1 persona') + ')</th><th class="num">Costo</th><th class="num">Ganancia</th><th class="num">Margen</th><th></th></tr></thead><tbody>' +
+        L.map(function(cb, j){ var t = totalCombo(k, cb.items, k.extrasPorPersona ? Math.max(1, k.minPersonas || 1) : 1);
           return '<tr><td style="min-width:150px"><input type="text" data-cn="' + k.id + '|' + j + '" value="' + esc(cb.nombre) + '"></td><td style="min-width:260px">' + cb.items.map(function(it){ var e = extra(it.id); if (!e) return '';
               return '<span class="chipq on">' + esc(e.nombre) + ' <button data-q="' + k.id + '|' + j + '|' + e.id + '|-1">−</button><b>' + it.qty + '</b><button data-q="' + k.id + '|' + j + '|' + e.id + '|1">+</button></span>'; }).join('') + (cb.items.length ? '' : '<span class="small muted">Solo la clase </span>') +
               '<select data-add="' + k.id + '|' + j + '" style="width:auto;padding:3px 6px;font-size:12px;margin:2px"><option value="">+ agregar…</option>' + S.cfg.extras.filter(function(e){ return e.activo !== false && !cb.items.some(function(x){ return x.id === e.id; }); }).map(function(e){ return '<option value="' + e.id + '">' + esc(e.nombre) + '</option>'; }).join('') + '</select></td>' +
