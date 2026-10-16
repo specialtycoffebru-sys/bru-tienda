@@ -154,7 +154,7 @@ var SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
 var T = 'bru_conta';
 var S = { tab: 'costeo', cfg: null, cat: [], res: [], sub: {} };
 var DEF = {
-  costoG: 100, margen: 40, redondeo: 5000, wa: '573044927790', mig: 1,
+  costoG: 100, margen: 40, redondeo: 5000, wa: '573044927790', mig: 4,
   disponibilidad: 'Principalmente sábados y domingos. Entre semana, pregúntanos disponibilidad.',
   descuento: { pct: 10, minExtras: 2 },
   clases: [
@@ -163,7 +163,9 @@ var DEF = {
     { id: 'catacion', nombre: 'Clase personalizada de Catación', corto: 'Catación', desc: 'Cata como un profesional con el protocolo SCA: fragancia, aroma, sabor, acidez y cuerpo. Comparamos cafés de distintos orígenes y procesos, y entrenas tu paladar.', duracion: 2.5, maxPersonas: 6,
       horas: 2.5, valorHora: 40000, cafeG: 150, leche: 0, insumos: 12000, equipos: 30000, material: 8000, extraCafeG: 60, extraInsumos: 6000, precio: 0, precioExtra: 0, img: '', activa: true },
     { id: 'barismo', nombre: 'Clase personalizada de Barismo', corto: 'Barismo', desc: 'Espresso de principio a fin: dosis, molienda, extracción y calibración. Texturiza leche y da tus primeros pasos en arte latte con máquina profesional.', duracion: 3, maxPersonas: 3,
-      horas: 3, valorHora: 45000, cafeG: 300, leche: 13500, insumos: 10000, equipos: 60000, material: 8000, extraCafeG: 150, extraInsumos: 12000, precio: 0, precioExtra: 0, img: '', activa: true }
+      horas: 3, valorHora: 45000, cafeG: 300, leche: 13500, insumos: 10000, equipos: 60000, material: 8000, extraCafeG: 150, extraInsumos: 12000, precio: 0, precioExtra: 0, img: '', activa: true, estado: 'pronto' },
+    { id: 'empresas', nombre: 'Taller de café para empresas', corto: 'Empresas', desc: 'Una experiencia de café para tu equipo en tu oficina: preparación de filtrados, cata guiada y la historia detrás de cada taza. Ideal para integraciones, clientes y celebraciones.', duracion: 2, maxPersonas: 100, minPersonas: 5, porGrupo: 15,
+      horas: 2, valorHora: 60000, cafeG: 300, leche: 0, insumos: 30000, equipos: 40000, material: 8000, extraCafeG: 30, extraInsumos: 4000, kitPersona: 37500, kitPersonaTxt: 'Una bolsa de café de 250 g y 5 drip bags', precio: 0, precioExtra: 0, img: '', activa: true, estado: 'disponible' }
   ],
   extras: [
     { id: 'kit_v60', nombre: 'Kit de filtrado en casa', desc: 'Gotero V60 02, 40 filtros, cuchara medidora y guía de recetas', costo: 62000, precio: 105000, tipo: 'item', activo: true },
@@ -181,6 +183,7 @@ var DEF = {
   combos: {
     filtrados: [{ nombre: 'Esencial', items: [] }, { nombre: 'Filtra en casa', items: [{ id: 'kit_v60', qty: 1 }, { id: 'cafe', qty: 1 }] }, { nombre: 'Completo', items: [{ id: 'kit_v60', qty: 1 }, { id: 'cafe', qty: 1 }, { id: 'drip5', qty: 1 }] }, { nombre: 'Barra en casa', items: [{ id: 'kit_completo', qty: 1 }, { id: 'cafe', qty: 1 }, { id: 'drip5', qty: 1 }] }],
     catacion: [{ nombre: 'Esencial', items: [] }, { nombre: 'Catador', items: [{ id: 'cafe', qty: 2 }] }, { nombre: 'Explorador', items: [{ id: 'cafe', qty: 2 }, { id: 'drip10', qty: 1 }] }],
+    empresas: [{ nombre: 'Esencial', items: [] }, { nombre: 'Oficina con método', items: [{ id: 'kit_v60', qty: 1 }, { id: 'cafe', qty: 2 }] }, { nombre: 'Barra para la oficina', items: [{ id: 'kit_completo', qty: 1 }, { id: 'cafe', qty: 3 }] }],
     barismo: [{ nombre: 'Esencial', items: [] }, { nombre: 'Barista en casa', items: [{ id: 'kit_barista', qty: 1 }, { id: 'cafe', qty: 1 }, { id: 'drip5', qty: 1 }] }, { nombre: 'Barista Pro', items: [{ id: 'kit_barista', qty: 1 }, { id: 'molino', qty: 1 }, { id: 'cafe', qty: 2 }] }]
   }
 };
@@ -206,9 +209,9 @@ function upsert(fila){ return sb(T + '?on_conflict=id', { method: 'POST', prefer
 function redondear(v){ var r = S.cfg.redondeo || 1000; return Math.ceil(v / r) * r; }
 function costoClase(c){
   var g = S.cfg.costoG || 0;
-  var partes = { instructor: c.horas * c.valorHora, cafe: c.cafeG * g, leche: c.leche || 0, insumos: c.insumos || 0, equipos: c.equipos || 0, transporte: c.transporte || 0, material: c.material || 0 };
+  var partes = { instructor: c.horas * c.valorHora, cafe: c.cafeG * g, leche: c.leche || 0, insumos: c.insumos || 0, equipos: c.equipos || 0, transporte: c.transporte || 0, material: c.material || 0, regalo: c.kitPersona || 0 };
   var total = 0; for (var k in partes) total += partes[k];
-  var extra = (c.extraCafeG || 0) * g + (c.extraInsumos || 0) + (c.material || 0);
+  var extra = (c.extraCafeG || 0) * g + (c.extraInsumos || 0) + (c.material || 0) + (c.kitPersona || 0);
   var m = Math.min(90, S.cfg.margen || 0) / 100;
   var sug = redondear(total / (1 - m)), sugExtra = redondear(extra / (1 - m));
   var precio = c.precio || sug, precioExtra = c.precioExtra || sugExtra;
@@ -242,7 +245,10 @@ function cargar(){
     var c = r[0] && r[0][0] ? r[0][0].data : null;
     S.cfg = copia(DEF); S.existe = !!c;
     if (c) Object.keys(c).forEach(function(k){ S.cfg[k] = c[k]; });
-    if (c && !c.mig) { var kc = copia(DEF.extras.filter(function(e){ return e.id === 'kit_completo'; })[0]); if (!S.cfg.extras.some(function(e){ return e.id === 'kit_completo'; })) S.cfg.extras.splice(3, 0, kc); if (S.cfg.combos.filtrados && !S.cfg.combos.filtrados.some(function(x){ return x.nombre === 'Barra en casa'; })) S.cfg.combos.filtrados.push(copia(DEF.combos.filtrados[3])); if (!S.cfg.disponibilidad) S.cfg.disponibilidad = DEF.disponibilidad; S.cfg.mig = 1; S.existe = false; }
+    if (c && !c.mig) { S.cfg.mig = 0; var kc = copia(DEF.extras.filter(function(e){ return e.id === 'kit_completo'; })[0]); if (!S.cfg.extras.some(function(e){ return e.id === 'kit_completo'; })) S.cfg.extras.splice(3, 0, kc); if (S.cfg.combos.filtrados && !S.cfg.combos.filtrados.some(function(x){ return x.nombre === 'Barra en casa'; })) S.cfg.combos.filtrados.push(copia(DEF.combos.filtrados[3])); if (!S.cfg.disponibilidad) S.cfg.disponibilidad = DEF.disponibilidad; S.cfg.mig = 1; S.existe = false; }
+    if (c && (c.mig || 0) < 3) { if (!S.cfg.clases.some(function(k){ return k.id === 'empresas'; })) S.cfg.clases.push(copia(DEF.clases.filter(function(k){ return k.id === 'empresas'; })[0])); if (!S.cfg.combos.empresas) S.cfg.combos.empresas = copia(DEF.combos.empresas); S.existe = false; }
+    if (c && (c.mig || 0) < 4) { S.cfg.clases.forEach(function(k){ if (k.id === 'empresas' && !k.porGrupo) { k.porGrupo = 15; if ((k.maxPersonas || 0) < 100) k.maxPersonas = 100; } }); S.cfg.mig = 4; S.existe = false; }
+    if (c && (c.mig || 0) < 2) { S.cfg.clases.forEach(function(k){ if (!k.estado) k.estado = k.id === 'barismo' ? 'pronto' : 'disponible'; }); S.cfg.mig = 4; S.existe = false; }
     S.cat = (r[1] && r[1][0] && r[1][0].catalogo) || [];
     S.res = r[2] || [];
   });
@@ -251,7 +257,7 @@ function publico(){
   var C = S.cfg;
   return {
     actualizado: new Date().toISOString(), wa: C.wa, descuento: C.descuento, disponibilidad: C.disponibilidad || '',
-    clases: C.clases.filter(function(c){ return c.activa !== false; }).map(function(c){ var k = costoClase(c); return { id: c.id, nombre: c.nombre, corto: c.corto, desc: c.desc, duracion: c.duracion, maxPersonas: c.maxPersonas, precio: k.precio, precioExtra: k.precioExtra, img: c.img || '' }; }),
+    clases: C.clases.filter(function(c){ return c.activa !== false; }).map(function(c){ var k = costoClase(c); return { id: c.id, porGrupo: c.porGrupo || 0, minPersonas: Math.max(1, c.minPersonas || 1), incluye: c.kitPersonaTxt || '', estado: c.estado || 'disponible', nombre: c.nombre, corto: c.corto, desc: c.desc, duracion: c.duracion, maxPersonas: c.maxPersonas, precio: k.precio, precioExtra: k.precioExtra, img: c.img || '' }; }),
     extras: C.extras.filter(function(e){ return e.activo !== false; }).map(function(e){ return { id: e.id, nombre: e.nombre, desc: e.desc, precio: e.tipo === 'cafe' ? 0 : e.precio, tipo: e.tipo, opciones: e.tipo === 'opcion' ? (e.opciones || []).map(function(o){ return { nombre: o.nombre, precio: o.precio || 0 }; }) : undefined }; }),
     cafes: cafesCatalogo().filter(function(c){ return c.stock > 0; }).sort(function(a, b){ return b.stock - a.stock; }).map(function(c){ return { nombre: c.nombre, presentacion: c.presentacion, precio: c.precio, notas: c.notas, img: c.img }; }),
     combos: C.combos
@@ -286,7 +292,8 @@ function renderCosteo(c){
 function tarjetaClase(k, i){
   var b = 'clases.' + i + '.';
   return '<div class="row"><h3 style="flex:1">' + esc(k.nombre) + '</h3><label class="f chk"><input type="checkbox" data-p="' + b + 'activa"' + (k.activa !== false ? ' checked' : '') + '> Visible en la web</label></div>' +
-    '<div class="grid g3">' + campo('Nombre en la web', b + 'nombre', k.nombre, 'text') + campo('Duración (horas)', b + 'duracion', k.duracion) + campo('Máximo de personas', b + 'maxPersonas', k.maxPersonas) + '</div>' +
+    '<div class="row" style="margin:6px 0 10px"><span class="small muted">Estado en la web:</span><select data-p="' + b + 'estado" style="width:auto">' + [['disponible', '✅ Disponible (se puede reservar)'], ['pronto', '⏳ Disponible pronto (solo lista de espera)']].map(function(o){ return '<option value="' + o[0] + '"' + ((k.estado || 'disponible') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></div>' +
+    '<div class="grid g3">' + campo('Nombre en la web', b + 'nombre', k.nombre, 'text') + campo('Duración (horas)', b + 'duracion', k.duracion) + campo('Máximo de personas', b + 'maxPersonas', k.maxPersonas) + campo('Mínimo de personas', b + 'minPersonas', k.minPersonas || 1) + campo('Personas por grupo / sesión (0 = un solo grupo)', b + 'porGrupo', k.porGrupo || 0) + campo('Regalo por asistente (costo)', b + 'kitPersona', k.kitPersona || 0) + campo('Qué incluye cada asistente (sale en la web)', b + 'kitPersonaTxt', k.kitPersonaTxt || '', 'text', ' placeholder="Ej. Una bolsa de café de 250 g y 5 drip bags"') + '</div>' +
     '<label class="f" style="margin-top:8px">Descripción<textarea data-p="' + b + 'desc" style="min-height:60px">' + esc(k.desc) + '</textarea></label>' +
     campo('Foto (URL de imagen)', b + 'img', k.img, 'text', ' placeholder="https://res.cloudinary.com/…"') +
     '<div class="sec">Costos por clase (1 persona)</div><div class="grid g4">' + campo('Horas del instructor', b + 'horas', k.horas) + campo('Valor hora instructor', b + 'valorHora', k.valorHora) + campo('Café usado (g)', b + 'cafeG', k.cafeG) + campo('Leche y otros alimentos', b + 'leche', k.leche) +
@@ -297,7 +304,8 @@ function tarjetaClase(k, i){
 function resumenClase(k){
   var r = costoClase(k), p = r.partes;
   return '<div class="kpis" style="margin-top:12px"><div class="kpi"><b>' + fmt(r.total) + '</b><span>costo de la clase</span></div><div class="kpi"><b>' + fmt(r.sugerido) + '</b><span>precio sugerido (' + S.cfg.margen + ' %)</span></div><div class="kpi ' + (r.margen < 30 ? 'bad' : 'ok') + '"><b>' + fmt(r.precio) + '</b><span>precio en la web · margen ' + pct(r.margen) + '</span></div><div class="kpi"><b>' + fmt(r.precioExtra) + '</b><span>por persona adicional · costo ' + fmt(r.extraCosto) + '</span></div></div>' +
-    '<div class="small muted">Instructor ' + fmt(p.instructor) + ' · café ' + fmt(p.cafe) + (p.leche ? ' · leche ' + fmt(p.leche) : '') + ' · insumos ' + fmt(p.insumos) + ' · equipos ' + fmt(p.equipos) + (p.transporte ? ' · transporte ' + fmt(p.transporte) : '') + ' · material ' + fmt(p.material) + ' · ganancia por clase ' + fmt(r.precio - r.total) + '</div>';
+    (k.porGrupo ? '<div class="banner info" style="margin:6px 0">Precio para empresas = <b>' + fmt(r.precio - r.precioExtra) + ' por grupo</b> (sesión de hasta ' + k.porGrupo + ' personas) + <b>' + fmt(r.precioExtra) + ' por persona</b>. Ej.: 10 personas = ' + fmt((r.precio - r.precioExtra) + 10 * r.precioExtra) + ' · 30 personas (2 grupos) = ' + fmt(2 * (r.precio - r.precioExtra) + 30 * r.precioExtra) + '.</div>' : '') +
+    '<div class="small muted">Instructor ' + fmt(p.instructor) + ' · café ' + fmt(p.cafe) + (p.leche ? ' · leche ' + fmt(p.leche) : '') + ' · insumos ' + fmt(p.insumos) + ' · equipos ' + fmt(p.equipos) + (p.transporte ? ' · transporte ' + fmt(p.transporte) : '') + ' · material ' + fmt(p.material) + (p.regalo ? ' · regalo por asistente ' + fmt(p.regalo) : '') + ' · ganancia por clase ' + fmt(r.precio - r.total) + '</div>';
 }
 function renderExtras(c){
   var E = S.cfg.extras, cafes = cafesCatalogo();
@@ -351,7 +359,7 @@ function renderReservas(c){
   c.innerHTML = '<div class="row" style="margin-bottom:10px"><span class="small muted">Solicitudes que llegan desde la página de clases. Escríbele a la persona para confirmar fecha y pago.</span><span class="sp"></span><button class="btn sm" id="rRef">Actualizar</button><a class="btn sm" href="/clases.html" target="_blank">Ver página ↗</a></div>' +
     (R.length ? R.map(function(r){ var x = r.data, tel = String(x.telefono || '').replace(/\D/g, ''); if (tel.length === 10) tel = '57' + tel;
       return '<div class="card" style="margin-bottom:8px"><div class="row"><b>' + esc(x.nombre || 'Sin nombre') + '</b><span class="pill">' + esc(x.clase || '') + '</span><span class="small muted">' + fFecha(String(r.created_at || '').slice(0, 10)) + '</span><span class="sp"></span><select data-est="' + r.id + '">' + EST.map(function(s){ return '<option value="' + s[0] + '"' + ((x.estado || 'nueva') === s[0] ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select></div>' +
-        '<div class="small" style="margin-top:6px">' + esc(x.personas || 1) + ' persona(s) · ' + (x.fechaPref ? 'prefiere ' + fFecha(x.fechaPref) + (x.horaPref ? ' ' + esc(x.horaPref) : '') + ' · ' : '') + (x.combo ? 'combo ' + esc(x.combo) + ' · ' : '') + '<b>' + fmt(x.total) + '</b></div>' + (x.direccion ? '<div class="small" style="margin-top:4px">📍 ' + esc(x.direccion) + '</div>' : '') +
+        '<div class="small" style="margin-top:6px">' + esc(x.personas || 1) + ' persona(s) · ' + (x.fechaPref ? 'prefiere ' + fFecha(x.fechaPref) + (x.horaPref ? ' ' + esc(x.horaPref) : '') + ' · ' : '') + (x.combo ? 'combo ' + esc(x.combo) + ' · ' : '') + '<b>' + fmt(x.total) + '</b></div>' + (x.direccion ? '<div class="small" style="margin-top:4px">📍 ' + esc(x.direccion) + '</div>' : '') + (x.empresa ? '<div class="small" style="margin-top:4px">🏢 ' + esc(x.empresa) + '</div>' : '') +
         (x.items && x.items.length ? '<div class="small muted" style="margin-top:4px">' + x.items.map(function(i){ return esc(i.qty + ' × ' + i.nombre + (i.cafe ? ' (' + i.cafe + ')' : '')); }).join(' · ') + '</div>' : '') + (x.nota ? '<div class="small" style="margin-top:4px">“' + esc(x.nota) + '”</div>' : '') +
         '<div class="row" style="margin-top:8px">' + (tel ? '<a class="btn sm pri" target="_blank" rel="noopener" href="https://wa.me/' + tel + '?text=' + encodeURIComponent('Hola ' + String(x.nombre || '').split(' ')[0] + ', soy Camilo de B.R.U ☕ Recibí tu solicitud para la ' + (x.clase || 'clase') + '. ¿Te queda bien ' + (x.fechaPref ? fFecha(x.fechaPref) : 'esta semana') + '?') + '">WhatsApp ' + esc(x.telefono) + '</a>' : '') + (x.email ? '<span class="small muted">' + esc(x.email) + '</span>' : '') + '</div></div>'; }).join('') : '<div class="empty">Aún no hay reservas. Comparte la página <b>brucoffeeshop.online/clases.html</b>.</div>');
   $('rRef').onclick = function(){ sb(T + '?tipo=eq.clase_res&select=id,fecha,data,created_at&order=created_at.desc&limit=200').then(function(r){ S.res = r || []; render(); }); };
