@@ -116,7 +116,7 @@ footer{border-top:1px solid var(--bd);padding:26px 0;color:var(--muted);font-siz
   <section class="hero wrap">
     <div class="eyebrow">Clases personalizadas</div>
     <h1>Aprende el oficio<br><i>del buen café</i></h1>
-    <p>Clases uno a uno o en grupo pequeño, a tu ritmo y con cafés de especialidad colombianos. Elige la clase, arma tu combo y llévate todo para seguir preparando en casa.</p>
+    <p>Clases a domicilio, uno a uno o en grupo pequeño: vamos a tu casa u oficina con todos los equipos y cafés de especialidad colombianos. Elige la clase, arma tu combo y quédate con todo para seguir preparando.</p>
     <div class="steps"><span><b>1</b>Elige tu clase</span><span><b>2</b>Arma tu combo</span><span><b>3</b>Reserva por WhatsApp</span></div>
   </section>
   <section class="wrap"><div class="clases" id="clases"><div class="vacio">Cargando clases…</div></div></section>
@@ -126,18 +126,18 @@ footer{border-top:1px solid var(--bd);padding:26px 0;color:var(--muted);font-siz
         <div class="blk"><div class="eyebrow">Paso 2</div><h2 id="a-titulo">Arma tu combo</h2><div class="a-dur" id="a-dur"></div><div class="sub">Empieza con un combo y cámbialo como quieras: quita, agrega o elige tu café.</div><div class="combos" id="combos"></div></div>
         <div class="blk"><h2>Agrega a tu clase</h2><div class="sub" id="d-nota"></div><div class="exs" id="extras"></div></div>
         <div class="blk"><h2>¿Cuántas personas?</h2><div class="pers"><button type="button" id="pm" aria-label="Menos">−</button><input type="number" id="personas" min="1" value="1"><button type="button" id="pp" aria-label="Más">+</button></div><div class="nota" id="p-nota"></div></div>
-        <form class="blk" id="form"><div id="datos"></div><div class="eyebrow">Paso 3</div><h2>Tus datos</h2><div class="sub">Te escribimos para confirmar la fecha y el pago. Las clases son en Bogotá.</div>
+        <form class="blk" id="form"><div id="datos"></div><div class="eyebrow">Paso 3</div><h2>Tus datos</h2><div class="sub">Te escribimos para confirmar la fecha y el pago. Vamos a tu casa u oficina en Bogotá con todos los equipos.</div>
           <div class="grid2"><label>Nombre<input id="f-nombre" autocomplete="name" required></label><label>WhatsApp<input id="f-tel" type="tel" autocomplete="tel" placeholder="300 000 0000" required></label>
           <label>Fecha preferida<input id="f-fecha" type="date"></label><label>Horario<select id="f-hora"><option value="">Cualquiera</option><option>Mañana</option><option>Tarde</option><option>Noche</option><option>Fin de semana</option></select></label>
-          <label>Correo (opcional)<input id="f-email" type="email" autocomplete="email"></label><label>¿Algo que debamos saber?<input id="f-nota" placeholder="Nivel, máquina que tienes, si es un regalo…"></label></div>
+          <label>Barrio o dirección de la clase<input id="f-dir" autocomplete="street-address" placeholder="Ej. Chapinero, Calle 60 # 5-20"></label><label>Correo (opcional)<input id="f-email" type="email" autocomplete="email"></label><label>¿Algo que debamos saber?<input id="f-nota" placeholder="Nivel, si es un regalo, piso o parqueadero…"></label></div>
           <button class="btn" id="f-btn">Reservar por WhatsApp</button><div class="err" id="f-err"></div>
           <div class="ok hide" id="f-ok">¡Listo! Recibimos tu solicitud. Si WhatsApp no se abrió, escríbenos al 304 492 7790.</div>
         </form>
       </div>
-      <aside class="resumen"><div class="eyebrow">Tu clase</div><h3>Resumen</h3><div class="rs-combo" id="rs-combo"></div><div id="rs-lineas"></div><div class="rs-t"><span>Total</span><b id="rs-total">$0</b></div><button class="btn" type="button" onclick="document.getElementById('datos').scrollIntoView({behavior:'smooth'})">Continuar</button><div class="small">El pago se confirma por WhatsApp. Puedes cambiar la fecha avisando con 48 horas.</div></aside>
+      <aside class="resumen"><div class="eyebrow">Tu clase</div><h3>Resumen</h3><div class="rs-combo" id="rs-combo"></div><div id="rs-lineas"></div><div class="rs-t"><span>Total</span><b id="rs-total">$0</b></div><button class="btn" type="button" onclick="document.getElementById('datos').scrollIntoView({behavior:'smooth'})">Continuar</button><div class="small">La clase es en tu casa u oficina: llevamos todos los equipos. El pago se confirma por WhatsApp y puedes cambiar la fecha avisando con 48 horas.</div></aside>
     </div>
   </section>
-  <section class="wrap faq"><div><h4>¿Dónde son las clases?</h4><p>En Bogotá, en nuestro espacio de tostión o en tu casa u oficina si tienes los equipos. Lo acordamos al confirmar.</p></div><div><h4>¿Necesito experiencia?</h4><p>No. Cada clase es personalizada: empezamos desde tu nivel y lo que quieres aprender.</p></div><div><h4>¿Sirve como regalo?</h4><p>Sí. Cuéntanos en la nota y te enviamos una tarjeta de regalo con la clase y el combo.</p></div></section>
+  <section class="wrap faq"><div><h4>¿Dónde son las clases?</h4><p>En tu casa u oficina, en Bogotá. Nosotros llevamos todos los equipos: molino, métodos de filtrado, tazas de catación o máquina de espresso. Solo necesitas una mesa y una toma de corriente.</p></div><div><h4>¿Necesito experiencia?</h4><p>No. Cada clase es personalizada: empezamos desde tu nivel y lo que quieres aprender.</p></div><div><h4>¿Sirve como regalo?</h4><p>Sí. Cuéntanos en la nota y te enviamos una tarjeta de regalo con la clase y el combo.</p></div></section>
 </main>
 <div id="bar" class="hide"><span>Total de tu clase<b id="bar-total">$0</b></span><button class="btn" id="bar-btn" type="button">Reservar</button></div>
 <footer>B.R.U · Brew Respect Unite · Bogotá, Colombia</footer>
@@ -232,17 +232,18 @@ function mensaje(r, f){
   if (r.descuento) L.push('• Descuento combo — −' + fmt(r.descuento));
   L.push('', 'Total: ' + fmt(r.total), 'Combo: ' + comboActual());
   if (f.fecha) L.push('Fecha preferida: ' + f.fecha.split('-').reverse().join('/') + (f.hora ? ' · ' + f.hora : ''));
-  L.push('Nombre: ' + f.nombre); if (f.nota) L.push('Nota: ' + f.nota);
+  L.push('Lugar: ' + f.direccion); L.push('Nombre: ' + f.nombre); if (f.nota) L.push('Nota: ' + f.nota);
   return L.join('\n');
 }
 function enviar(ev){
   ev.preventDefault();
   var r = calcular(); if (!r) return;
-  var f = { nombre: $('f-nombre').value.trim(), telefono: $('f-tel').value.trim(), email: $('f-email').value.trim(), fecha: $('f-fecha').value, hora: $('f-hora').value, nota: $('f-nota').value.trim() };
+  var f = { nombre: $('f-nombre').value.trim(), telefono: $('f-tel').value.trim(), email: $('f-email').value.trim(), direccion: $('f-dir').value.trim(), fecha: $('f-fecha').value, hora: $('f-hora').value, nota: $('f-nota').value.trim() };
   if (!f.nombre || f.telefono.replace(/\D/g, '').length < 7) { $('f-err').textContent = 'Escribe tu nombre y un teléfono de WhatsApp.'; return; }
+  if (!f.direccion) { $('f-err').textContent = 'Escribe el barrio o la dirección donde será la clase.'; return; }
   $('f-err').textContent = ''; var b = $('f-btn'); b.disabled = true; b.textContent = 'Enviando…';
   var id = 'res_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  var datos = { estado: 'nueva', clase: r.clase.nombre, claseId: r.clase.id, combo: comboActual(), personas: st.personas, items: r.lineas, base: r.base, extras: r.extras, descuento: r.descuento, total: r.total, nombre: f.nombre, telefono: f.telefono, email: f.email, fechaPref: f.fecha, horaPref: f.hora, nota: f.nota, origen: 'web' };
+  var datos = { estado: 'nueva', clase: r.clase.nombre, claseId: r.clase.id, combo: comboActual(), personas: st.personas, items: r.lineas, base: r.base, extras: r.extras, descuento: r.descuento, total: r.total, nombre: f.nombre, telefono: f.telefono, email: f.email, direccion: f.direccion, fechaPref: f.fecha, horaPref: f.hora, nota: f.nota, origen: 'web' };
   var wa = 'https://wa.me/' + (P.wa || '573044927790') + '?text=' + encodeURIComponent(mensaje(r, f));
   var win = window.open('', '_blank');
   sb('bru_conta', { method: 'POST', prefer: 'return=minimal', body: [{ id: id, tipo: 'clase_res', fecha: hoy(), data: datos }] }).catch(function(){}).then(function(){
