@@ -166,17 +166,17 @@ var SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
 var T = 'bru_conta';
 var S = { tab: 'costeo', cfg: null, cat: [], res: [], sub: {} };
 var DEF = {
-  costoG: 100, margen: 40, redondeo: 5000, wa: '573044927790', mig: 5,
+  costoG: 100, margen: 40, redondeo: 5000, wa: '573044927790', mig: 6,
   disponibilidad: 'Principalmente sábados y domingos. Entre semana, pregúntanos disponibilidad.',
   descuento: { pct: 10, minExtras: 2 },
   agenda: { horarios: ['9:00 a.m.', '2:00 p.m.'], dias: [6, 0], semanas: 8, anticipacion: 2, bloq: [], extra: [] },
   clases: [
     { id: 'filtrados', nombre: 'Clase personalizada de Filtrados', corto: 'Filtrados', desc: 'Aprende a preparar café de especialidad en casa: V60, Chemex, prensa francesa y AeroPress. Molienda, proporciones, temperatura y cómo ajustar cada receta a tu gusto.', duracion: 2, maxPersonas: 4,
-      horas: 2, valorHora: 40000, cafeG: 80, leche: 0, insumos: 10000, equipos: 25000, material: 8000, extraCafeG: 40, extraInsumos: 5000, precio: 0, precioExtra: 0, img: '', activa: true },
+      horas: 2, valorHora: 40000, cafeG: 80, leche: 0, insumos: 10000, equipos: 25000, material: 8000, extraCafeG: 40, extraInsumos: 5000, precio: 0, precioExtra: 0, img: '', activa: true, extrasPorPersona: true },
     { id: 'catacion', nombre: 'Clase personalizada de Catación', corto: 'Catación', desc: 'Cata como un profesional con el protocolo SCA: fragancia, aroma, sabor, acidez y cuerpo. Comparamos cafés de distintos orígenes y procesos, y entrenas tu paladar.', duracion: 2.5, maxPersonas: 6,
-      horas: 2.5, valorHora: 40000, cafeG: 150, leche: 0, insumos: 12000, equipos: 30000, material: 8000, extraCafeG: 60, extraInsumos: 6000, precio: 0, precioExtra: 0, img: '', activa: true },
+      horas: 2.5, valorHora: 40000, cafeG: 150, leche: 0, insumos: 12000, equipos: 30000, material: 8000, extraCafeG: 60, extraInsumos: 6000, precio: 0, precioExtra: 0, img: '', activa: true, extrasPorPersona: true },
     { id: 'barismo', nombre: 'Clase personalizada de Barismo', corto: 'Barismo', desc: 'Espresso de principio a fin: dosis, molienda, extracción y calibración. Texturiza leche y da tus primeros pasos en arte latte con máquina profesional.', duracion: 3, maxPersonas: 3,
-      horas: 3, valorHora: 45000, cafeG: 300, leche: 13500, insumos: 10000, equipos: 60000, material: 8000, extraCafeG: 150, extraInsumos: 12000, precio: 0, precioExtra: 0, img: '', activa: true, estado: 'pronto' },
+      horas: 3, valorHora: 45000, cafeG: 300, leche: 13500, insumos: 10000, equipos: 60000, material: 8000, extraCafeG: 150, extraInsumos: 12000, precio: 0, precioExtra: 0, img: '', activa: true, estado: 'pronto', extrasPorPersona: true },
     { id: 'empresas', nombre: 'Taller de café para empresas', corto: 'Empresas', desc: 'Una experiencia de café para tu equipo en tu oficina: preparación de filtrados, cata guiada y la historia detrás de cada taza. Ideal para integraciones, clientes y celebraciones.', duracion: 2, maxPersonas: 100, minPersonas: 5, porGrupo: 15,
       horas: 2, valorHora: 60000, cafeG: 300, leche: 0, insumos: 30000, equipos: 40000, material: 8000, extraCafeG: 30, extraInsumos: 4000, kitPersona: 37500, kitPersonaTxt: 'Una bolsa de café de 250 g y 5 drip bags', extrasPorPersona: true, precio: 475000, precioExtra: 120000, img: '', activa: true, estado: 'disponible' }
   ],
@@ -262,8 +262,9 @@ function cargar(){
     if (c && !c.mig) { S.cfg.mig = 0; var kc = copia(DEF.extras.filter(function(e){ return e.id === 'kit_completo'; })[0]); if (!S.cfg.extras.some(function(e){ return e.id === 'kit_completo'; })) S.cfg.extras.splice(3, 0, kc); if (S.cfg.combos.filtrados && !S.cfg.combos.filtrados.some(function(x){ return x.nombre === 'Barra en casa'; })) S.cfg.combos.filtrados.push(copia(DEF.combos.filtrados[3])); if (!S.cfg.disponibilidad) S.cfg.disponibilidad = DEF.disponibilidad; S.cfg.mig = 1; S.existe = false; }
     if (c && (c.mig || 0) < 3) { if (!S.cfg.clases.some(function(k){ return k.id === 'empresas'; })) S.cfg.clases.push(copia(DEF.clases.filter(function(k){ return k.id === 'empresas'; })[0])); if (!S.cfg.combos.empresas) S.cfg.combos.empresas = copia(DEF.combos.empresas); S.existe = false; }
     if (c && (c.mig || 0) < 4) { S.cfg.clases.forEach(function(k){ if (k.id === 'empresas' && !k.porGrupo) { k.porGrupo = 15; if ((k.maxPersonas || 0) < 100) k.maxPersonas = 100; } }); S.existe = false; }
-    if (c && (c.mig || 0) < 5) { S.cfg.clases.forEach(function(k){ if (k.id === 'empresas') { k.extrasPorPersona = true; if ((k.precioExtra || 0) < 120000) k.precioExtra = 120000; if ((k.precio || 0) < 475000) k.precio = 475000; } }); (S.cfg.combos.empresas || []).forEach(function(cb){ cb.items.forEach(function(it){ if (it.id === 'cafe' && it.qty > 1) it.qty = 1; }); }); S.cfg.mig = 5; S.existe = false; }
-    if (c && (c.mig || 0) < 2) { S.cfg.clases.forEach(function(k){ if (!k.estado) k.estado = k.id === 'barismo' ? 'pronto' : 'disponible'; }); S.cfg.mig = 5; S.existe = false; }
+    if (c && (c.mig || 0) < 5) { S.cfg.clases.forEach(function(k){ if (k.id === 'empresas') { k.extrasPorPersona = true; if ((k.precioExtra || 0) < 120000) k.precioExtra = 120000; if ((k.precio || 0) < 475000) k.precio = 475000; } }); (S.cfg.combos.empresas || []).forEach(function(cb){ cb.items.forEach(function(it){ if (it.id === 'cafe' && it.qty > 1) it.qty = 1; }); }); S.existe = false; }
+    if (c && (c.mig || 0) < 6) { S.cfg.clases.forEach(function(k){ k.extrasPorPersona = true; if (k.id !== 'empresas' && !k.precioExtra) { var cc = costoClase(k); k.precioExtra = Math.max(cc.precioExtra, redondear(cc.precio * 0.5)); } }); S.cfg.mig = 6; S.existe = false; }
+    if (c && (c.mig || 0) < 2) { S.cfg.clases.forEach(function(k){ if (!k.estado) k.estado = k.id === 'barismo' ? 'pronto' : 'disponible'; }); S.cfg.mig = 6; S.existe = false; }
     S.cat = (r[1] && r[1][0] && r[1][0].catalogo) || [];
     S.res = r[2] || [];
   });
