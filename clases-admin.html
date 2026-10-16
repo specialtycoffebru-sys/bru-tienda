@@ -85,6 +85,18 @@ table.t td.num,table.t th.num{text-align:right}
 .sec{margin:16px 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--dim)}
 .empty{padding:34px 16px;text-align:center;color:var(--mut)}
 .hide{display:none!important}
+.agn-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.agn-dw{font-size:11px;color:var(--mut);text-align:center;text-transform:uppercase;letter-spacing:.08em}
+.agn-d{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:7px;min-height:92px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.agn-d.pas{opacity:.3}.agn-d.vac{background:transparent}.agn-d.cer{background:rgba(243,139,139,.06);border-color:rgba(243,139,139,.25)}
+.agn-n{font-size:12px;color:var(--mut)}.agn-n b{color:var(--txt);font-size:14px}
+.agn-s{display:flex;justify-content:space-between;gap:4px;align-items:baseline;border:1px solid var(--line2);background:var(--gold3);color:var(--gold2);border-radius:7px;padding:4px 6px;font-size:12px;cursor:pointer;text-align:left;width:100%;overflow:hidden}
+.agn-s i{font-style:normal;font-size:10px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agn-s.bl{background:transparent;border-color:var(--line);color:var(--mut);text-decoration:line-through}
+.agn-s.res{background:rgba(95,211,148,.12);border-color:rgba(95,211,148,.4);color:#8be0b0}.agn-s.res i{color:#8be0b0}
+.agn-a{display:flex;flex-wrap:wrap;gap:2px 8px;margin-top:auto}
+.lnk{background:none;border:none;padding:0;color:var(--gold2);font-size:11px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+@media(max-width:760px){.agn-g{grid-template-columns:repeat(2,minmax(0,1fr))}.agn-dw{display:none}.agn-d.pas{display:none}}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;display:none}
 .ov.on{display:block}
 .drawer{position:fixed;top:0;right:0;height:100dvh;width:min(760px,100vw);background:var(--bg2);border-left:1px solid var(--line);z-index:41;transform:translateX(105%);visibility:hidden;transition:transform .22s,visibility 0s .22s;display:flex;flex-direction:column}
@@ -157,6 +169,7 @@ var DEF = {
   costoG: 100, margen: 40, redondeo: 5000, wa: '573044927790', mig: 4,
   disponibilidad: 'Principalmente sábados y domingos. Entre semana, pregúntanos disponibilidad.',
   descuento: { pct: 10, minExtras: 2 },
+  agenda: { horarios: ['9:00 a.m.', '2:00 p.m.'], dias: [6, 0], semanas: 8, anticipacion: 2, bloq: [], extra: [] },
   clases: [
     { id: 'filtrados', nombre: 'Clase personalizada de Filtrados', corto: 'Filtrados', desc: 'Aprende a preparar café de especialidad en casa: V60, Chemex, prensa francesa y AeroPress. Molienda, proporciones, temperatura y cómo ajustar cada receta a tu gusto.', duracion: 2, maxPersonas: 4,
       horas: 2, valorHora: 40000, cafeG: 80, leche: 0, insumos: 10000, equipos: 25000, material: 8000, extraCafeG: 40, extraInsumos: 5000, precio: 0, precioExtra: 0, img: '', activa: true },
@@ -256,7 +269,7 @@ function cargar(){
 function publico(){
   var C = S.cfg;
   return {
-    actualizado: new Date().toISOString(), wa: C.wa, descuento: C.descuento, disponibilidad: C.disponibilidad || '',
+    actualizado: new Date().toISOString(), wa: C.wa, descuento: C.descuento, disponibilidad: C.disponibilidad || '', agenda: agCfg(),
     clases: C.clases.filter(function(c){ return c.activa !== false; }).map(function(c){ var k = costoClase(c); return { id: c.id, porGrupo: c.porGrupo || 0, minPersonas: Math.max(1, c.minPersonas || 1), incluye: c.kitPersonaTxt || '', estado: c.estado || 'disponible', nombre: c.nombre, corto: c.corto, desc: c.desc, duracion: c.duracion, maxPersonas: c.maxPersonas, precio: k.precio, precioExtra: k.precioExtra, img: c.img || '' }; }),
     extras: C.extras.filter(function(e){ return e.activo !== false; }).map(function(e){ return { id: e.id, nombre: e.nombre, desc: e.desc, precio: e.tipo === 'cafe' ? 0 : e.precio, tipo: e.tipo, opciones: e.tipo === 'opcion' ? (e.opciones || []).map(function(o){ return { nombre: o.nombre, precio: o.precio || 0 }; }) : undefined }; }),
     cafes: cafesCatalogo().filter(function(c){ return c.stock > 0; }).sort(function(a, b){ return b.stock - a.stock; }).map(function(c){ return { nombre: c.nombre, presentacion: c.presentacion, precio: c.precio, notas: c.notas, img: c.img }; }),
@@ -272,10 +285,10 @@ function guardar(){
 var guardarLuego = (function(){ var t; return function(){ clearTimeout(t); $('estado').textContent = 'Guardando…'; t = setTimeout(function(){ guardar().then(function(){ $('estado').textContent = 'Publicado ✓'; }); }, 900); }; })();
 
 // =============== UI ===============
-var TABS = [['costeo', 'Costeo de clases'], ['extras', 'Kits y extras'], ['combos', 'Combos'], ['reservas', 'Reservas'], ['ajustes', 'Ajustes']];
+var TABS = [['costeo', 'Costeo de clases'], ['extras', 'Kits y extras'], ['combos', 'Combos'], ['agenda', 'Agenda'], ['reservas', 'Reservas'], ['ajustes', 'Ajustes']];
 function render(){
   $('tabs').innerHTML = TABS.map(function(t){ var n = t[0] === 'reservas' ? S.res.filter(function(r){ return (r.data.estado || 'nueva') === 'nueva'; }).length : 0; return '<button data-t="' + t[0] + '" class="' + (S.tab === t[0] ? 'on' : '') + '">' + t[1] + (n ? ' <span class="cnt">' + n + '</span>' : '') + '</button>'; }).join('');
-  var fn = { costeo: renderCosteo, extras: renderExtras, combos: renderCombos, reservas: renderReservas, ajustes: renderAjustes }[S.tab];
+  var fn = { costeo: renderCosteo, extras: renderExtras, combos: renderCombos, agenda: renderAgenda, reservas: renderReservas, ajustes: renderAjustes }[S.tab];
   try { fn($('main')); } catch (e) { console.error(e); $('main').innerHTML = '<div class="banner bad">Error: ' + esc(e.message) + '</div>'; }
 }
 function campo(lbl, path, v, tipo, extraAttr){ return '<label class="f">' + esc(lbl) + '<input type="' + (tipo || 'number') + '" data-p="' + path + '" value="' + esc(v == null ? '' : v) + '"' + (extraAttr || '') + '></label>'; }
@@ -353,15 +366,69 @@ function renderCombos(c){
   c.onchange = function(e){ var a = e.target.getAttribute('data-add'); if (!a || !e.target.value) return; var p = a.split('|'); S.cfg.combos[p[0]][Number(p[1])].items.push({ id: e.target.value, qty: 1 }); guardarLuego(); render(); };
   c.oninput = function(e){ var n = e.target.getAttribute('data-cn'); if (!n) return; var p = n.split('|'); S.cfg.combos[p[0]][Number(p[1])].nombre = e.target.value; guardarLuego(); };
 }
+
+// =============== AGENDA ===============
+var MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'], DIAS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'], DIASL = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+function agCfg(){ var a = S.cfg.agenda || (S.cfg.agenda = copia(DEF.agenda)); Object.keys(DEF.agenda).forEach(function(k){ if (a[k] == null) a[k] = copia(DEF.agenda[k]); }); return a; }
+function ymd(d){ return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function horaMin(h){ var m = /(\d{1,2})(?::(\d{2}))?\s*([ap])?/i.exec(h || '') || [0, 0, 0, '']; var hh = Number(m[1]) % 12; if ((m[3] || '').toLowerCase() === 'p') hh += 12; else if (!m[3] && Number(m[1]) === 12) hh = 12; return hh * 60 + Number(m[2] || 0); }
+function slotsDia(f){ var A = agCfg(), d = new Date(f + 'T12:00:00'), L = A.dias.indexOf(d.getDay()) >= 0 ? A.horarios.slice() : [];
+  A.extra.forEach(function(x){ var p = x.split('|'); if (p[0] === f && L.indexOf(p[1]) < 0) L.push(p[1]); });
+  return L.sort(function(a, b){ return horaMin(a) - horaMin(b); }); }
+function slotLargo(k){ var p = String(k).split('|'), d = new Date(p[0] + 'T12:00:00'); return DIASL[d.getDay()] + ' ' + d.getDate() + ' ' + MESES[d.getMonth()] + (p[1] ? ' · ' + p[1] : ''); }
+function ocupados(){ var o = {}; S.res.forEach(function(r){ var x = r.data || {}; if (x.slot && x.estado !== 'cancelada') o[x.slot] = r; }); return o; }
+function toggle(arr, v){ var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
+function renderAgenda(c){
+  var A = agCfg();
+  c.innerHTML = '<div class="card" style="margin-bottom:12px"><div class="small muted" style="margin-bottom:10px">La página de clases muestra un calendario con estos cupos. Cuando alguien reserva, esa hora queda ocupada para los demás. Si cancelas la reserva, la hora se libera.</div>' +
+    '<div class="grid g3"><label class="f">Horas de clase (separadas por coma)<input type="text" id="agH" value="' + esc(A.horarios.join(', ')) + '" placeholder="9:00 a.m., 2:00 p.m."></label>' + campo('Semanas que se muestran', 'agenda.semanas', A.semanas) + campo('Días de anticipación mínima', 'agenda.anticipacion', A.anticipacion) + '</div>' +
+    '<div class="small muted" style="margin:12px 0 6px">Días que se abren cada semana:</div><div class="row">' + [1, 2, 3, 4, 5, 6, 0].map(function(d){ return '<label class="chipq' + (A.dias.indexOf(d) >= 0 ? ' on' : '') + '" style="padding:5px 12px;cursor:pointer"><input type="checkbox" data-dsem="' + d + '"' + (A.dias.indexOf(d) >= 0 ? ' checked' : '') + ' style="display:none">' + DIASL[d] + '</label>'; }).join('') + '</div></div>' +
+    '<div class="row" style="margin-bottom:8px"><span class="small muted">Toca una hora para bloquearla o liberarla. En un día cerrado, “+ Abrir” lo habilita con tus horas.</span><span class="sp"></span><a class="btn sm" href="/clases.html" target="_blank">Ver en la web ↗</a></div><div id="agCal"></div>';
+  pintarCal();
+  c.oninput = function(e){ var el = e.target;
+    if (el.id === 'agH') { A.horarios = el.value.split(',').map(function(x){ return x.trim(); }).filter(Boolean); guardarLuego(); pintarCal(); return; }
+    if (el.getAttribute('data-dsem') != null) { toggle(A.dias, Number(el.getAttribute('data-dsem'))); guardarLuego(); renderAgenda(c); return; }
+    if (el.getAttribute('data-p')) { setPath(el.getAttribute('data-p'), num(el.value)); guardarLuego(); pintarCal(); } };
+  c.onchange = null;
+  c.onclick = function(e){ var b = e.target.closest('[data-ag]'); if (!b) return; var p = b.getAttribute('data-ag').split('~'), act = p[0], f = p[1], h = p[2];
+    if (act === 'slot') toggle(A.bloq, f + '|' + h);
+    if (act === 'cerrar') toggle(A.bloq, f);
+    if (act === 'abrir') { A.horarios.forEach(function(x){ if (A.extra.indexOf(f + '|' + x) < 0) A.extra.push(f + '|' + x); }); A.bloq = A.bloq.filter(function(x){ return x !== f && x.indexOf(f + '|') !== 0; }); }
+    if (act === 'quitar') A.extra = A.extra.filter(function(x){ return x.indexOf(f + '|') !== 0; });
+    if (act === 'hora') { var n = prompt('Hora extra para el ' + slotLargo(f) + ' (ej. 4:00 p.m.)'); if (!n || !n.trim()) return; if (A.extra.indexOf(f + '|' + n.trim()) < 0) A.extra.push(f + '|' + n.trim()); }
+    if (act === 'res') { S.tab = 'reservas'; render(); return; }
+    guardarLuego(); pintarCal(); };
+}
+function pintarCal(){
+  var A = agCfg(), box = $('agCal'); if (!box) return; var O = ocupados(), hoyD = new Date(); hoyD.setHours(12, 0, 0, 0);
+  var ini = new Date(hoyD); ini.setDate(ini.getDate() - ((ini.getDay() + 6) % 7)); var fin = new Date(hoyD); fin.setDate(fin.getDate() + (A.semanas || 8) * 7);
+  var lim = new Date(hoyD); lim.setDate(lim.getDate() + (A.anticipacion || 0));
+  var h = '<div class="agn-g">' + [1, 2, 3, 4, 5, 6, 0].map(function(d){ return '<div class="agn-dw">' + DIAS[d] + '</div>'; }).join('');
+  for (var d = new Date(ini); d <= fin; d.setDate(d.getDate() + 1)) {
+    var f = ymd(d), pas = d < hoyD, L = slotsDia(f), cer = A.bloq.indexOf(f) >= 0, esExtra = A.extra.some(function(x){ return x.indexOf(f + '|') === 0; }), base = A.dias.indexOf(d.getDay()) >= 0;
+    h += '<div class="agn-d' + (pas ? ' pas' : '') + (cer ? ' cer' : '') + (!L.length ? ' vac' : '') + '"><div class="agn-n"><b>' + d.getDate() + '</b> ' + MESES[d.getMonth()] + (d < lim && !pas ? ' <span class="dim" title="Dentro de la anticipación mínima: no se muestra en la web">·</span>' : '') + '</div>';
+    if (!pas) {
+      if (cer) h += '<div class="small muted">Cerrado</div><button class="btn sm" data-ag="cerrar~' + f + '">Reabrir</button>';
+      else {
+        h += L.map(function(x){ var k = f + '|' + x, r = O[k], bl = A.bloq.indexOf(k) >= 0;
+          if (r) return '<button class="agn-s res" data-ag="res~' + f + '" title="' + esc((r.data.nombre || '') + ' · ' + (r.data.clase || '')) + '">' + esc(x) + '<i>' + esc(String(r.data.nombre || 'Reservado').split(' ')[0]) + '</i></button>';
+          return '<button class="agn-s' + (bl ? ' bl' : '') + '" data-ag="slot~' + f + '~' + esc(x) + '">' + esc(x) + '<i>' + (bl ? 'bloqueada' : 'libre') + '</i></button>'; }).join('');
+        h += '<div class="agn-a">' + (L.length ? '<button class="lnk" data-ag="hora~' + f + '">+ hora</button>' + (base ? '<button class="lnk" data-ag="cerrar~' + f + '">cerrar día</button>' : '') + (esExtra ? '<button class="lnk" data-ag="quitar~' + f + '">quitar</button>' : '') : '<button class="lnk" data-ag="abrir~' + f + '">+ Abrir</button>') + '</div>';
+      }
+    }
+    h += '</div>';
+  }
+  box.innerHTML = h + '</div>';
+}
 var EST = [['nueva', 'Nueva'], ['confirmada', 'Confirmada'], ['pagada', 'Pagada'], ['realizada', 'Realizada'], ['cancelada', 'Cancelada']];
 function renderReservas(c){
   var R = S.res;
   c.innerHTML = '<div class="row" style="margin-bottom:10px"><span class="small muted">Solicitudes que llegan desde la página de clases. Escríbele a la persona para confirmar fecha y pago.</span><span class="sp"></span><button class="btn sm" id="rRef">Actualizar</button><a class="btn sm" href="/clases.html" target="_blank">Ver página ↗</a></div>' +
     (R.length ? R.map(function(r){ var x = r.data, tel = String(x.telefono || '').replace(/\D/g, ''); if (tel.length === 10) tel = '57' + tel;
       return '<div class="card" style="margin-bottom:8px"><div class="row"><b>' + esc(x.nombre || 'Sin nombre') + '</b><span class="pill">' + esc(x.clase || '') + '</span><span class="small muted">' + fFecha(String(r.created_at || '').slice(0, 10)) + '</span><span class="sp"></span><select data-est="' + r.id + '">' + EST.map(function(s){ return '<option value="' + s[0] + '"' + ((x.estado || 'nueva') === s[0] ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select></div>' +
-        '<div class="small" style="margin-top:6px">' + esc(x.personas || 1) + ' persona(s) · ' + (x.fechaPref ? 'prefiere ' + fFecha(x.fechaPref) + (x.horaPref ? ' ' + esc(x.horaPref) : '') + ' · ' : '') + (x.combo ? 'combo ' + esc(x.combo) + ' · ' : '') + '<b>' + fmt(x.total) + '</b></div>' + (x.direccion ? '<div class="small" style="margin-top:4px">📍 ' + esc(x.direccion) + '</div>' : '') + (x.empresa ? '<div class="small" style="margin-top:4px">🏢 ' + esc(x.empresa) + '</div>' : '') +
+        '<div class="small" style="margin-top:6px">' + esc(x.personas || 1) + ' persona(s) · ' + (x.slot ? '📅 <b>' + esc(slotLargo(x.slot)) + '</b> · ' : (x.fechaPref ? 'propone ' + fFecha(x.fechaPref) + (x.horaPref ? ' ' + esc(x.horaPref) : '') + ' · ' : '')) + (x.combo ? 'combo ' + esc(x.combo) + ' · ' : '') + '<b>' + fmt(x.total) + '</b></div>' + (x.direccion ? '<div class="small" style="margin-top:4px">📍 ' + esc(x.direccion) + '</div>' : '') + (x.empresa ? '<div class="small" style="margin-top:4px">🏢 ' + esc(x.empresa) + '</div>' : '') +
         (x.items && x.items.length ? '<div class="small muted" style="margin-top:4px">' + x.items.map(function(i){ return esc(i.qty + ' × ' + i.nombre + (i.cafe ? ' (' + i.cafe + ')' : '')); }).join(' · ') + '</div>' : '') + (x.nota ? '<div class="small" style="margin-top:4px">“' + esc(x.nota) + '”</div>' : '') +
-        '<div class="row" style="margin-top:8px">' + (tel ? '<a class="btn sm pri" target="_blank" rel="noopener" href="https://wa.me/' + tel + '?text=' + encodeURIComponent('Hola ' + String(x.nombre || '').split(' ')[0] + ', soy Camilo de B.R.U ☕ Recibí tu solicitud para la ' + (x.clase || 'clase') + '. ¿Te queda bien ' + (x.fechaPref ? fFecha(x.fechaPref) : 'esta semana') + '?') + '">WhatsApp ' + esc(x.telefono) + '</a>' : '') + (x.email ? '<span class="small muted">' + esc(x.email) + '</span>' : '') + '</div></div>'; }).join('') : '<div class="empty">Aún no hay reservas. Comparte la página <b>brucoffeeshop.online/clases.html</b>.</div>');
+        '<div class="row" style="margin-top:8px">' + (tel ? '<a class="btn sm pri" target="_blank" rel="noopener" href="https://wa.me/' + tel + '?text=' + encodeURIComponent('Hola ' + String(x.nombre || '').split(' ')[0] + ', soy Camilo de B.R.U ☕ Recibí tu solicitud para la ' + (x.clase || 'clase') + (x.slot ? ' para el ' + slotLargo(x.slot) + '. Te confirmo la reserva y te paso los datos de pago.' : '. ¿Te queda bien ' + (x.fechaPref ? fFecha(x.fechaPref) : 'esta semana') + '?')) + '">WhatsApp ' + esc(x.telefono) + '</a>' : '') + (x.email ? '<span class="small muted">' + esc(x.email) + '</span>' : '') + '</div></div>'; }).join('') : '<div class="empty">Aún no hay reservas. Comparte la página <b>brucoffeeshop.online/clases.html</b>.</div>');
   $('rRef').onclick = function(){ sb(T + '?tipo=eq.clase_res&select=id,fecha,data,created_at&order=created_at.desc&limit=200').then(function(r){ S.res = r || []; render(); }); };
   c.onchange = function(e){ var id = e.target.getAttribute('data-est'); if (!id) return; var r = S.res.filter(function(x){ return x.id === id; })[0]; r.data.estado = e.target.value; upsert({ id: r.id, tipo: 'clase_res', fecha: r.fecha, data: r.data }).then(function(){ toast('Estado actualizado'); render(); }); };
 }
