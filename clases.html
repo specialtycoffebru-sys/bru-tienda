@@ -70,6 +70,34 @@ header nav a:hover,header nav a.on{color:var(--gold2)}
 .armar{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px;align-items:start}
 @media(max-width:960px){.armar{grid-template-columns:1fr}}
 .blk{margin-bottom:28px}
+.fc{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;max-width:520px}
+.fc-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.fc-h b{font-family:var(--serif);font-weight:400;font-size:22px;text-transform:capitalize}
+.fc-h button{width:36px;height:36px;border-radius:50%;border:1px solid var(--bd2);background:transparent;color:var(--gold2);font-size:20px;line-height:1;cursor:pointer}
+.fc-h button:disabled{opacity:.2;cursor:default}
+.fc-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.fc-dw{font-size:11px;color:var(--muted);text-align:center;padding:4px 0;letter-spacing:.12em}
+.fc-d{aspect-ratio:1;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--muted);font-size:15px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;opacity:.35;padding:0}
+.fc-d.ok{opacity:1;color:var(--cream);border-color:var(--bd2);background:var(--gold3);cursor:pointer;font-weight:600}
+.fc-d.ok:hover{border-color:var(--gold)}
+.fc-d.on{background:var(--gold);color:#1a1406;border-color:var(--gold)}
+.fc-d.full{opacity:.6;color:var(--cream2)}
+.fc-d i{font-style:normal;font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.fc-ley{display:flex;gap:16px;margin-top:10px;font-size:12px;color:var(--muted)}
+.fc-ley i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.fc-ley i.l-ok{background:var(--gold3);border:1px solid var(--bd2)}.fc-ley i.l-full{background:var(--bg3);border:1px solid var(--bd)}
+.fc-s{margin-top:14px;padding-top:14px;border-top:1px solid var(--bd);display:flex;flex-wrap:wrap;gap:8px}
+.fc-sl{width:100%;font-size:14px;color:var(--cream2)}
+.fc-sl::first-letter{text-transform:uppercase}
+.fc-t{border:1px solid var(--bd2);background:transparent;color:var(--cream);border-radius:999px;padding:10px 18px;cursor:pointer;font-size:15px}
+.fc-t:hover{border-color:var(--gold)}
+.fc-t.on{background:var(--gold);color:#1a1406;border-color:var(--gold);font-weight:700}
+.fc-t:disabled{opacity:.4;cursor:not-allowed;text-decoration:line-through}
+.fc-otra{display:block;margin-top:14px;background:none;border:none;color:var(--gold2);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-size:14px;padding:0}
+.fc-otra.on{color:var(--gold);font-weight:600}
+.fc-ok{margin-top:12px;max-width:520px;background:rgba(95,211,148,.1);border:1px solid rgba(95,211,148,.35);border-radius:12px;padding:11px 14px;font-size:15px}
+.fc-ok::first-letter{text-transform:uppercase}
+.rs-fecha{font-size:14px;color:var(--gold2);margin:-4px 0 8px}
 .blk h2{font-family:var(--serif);font-weight:300;font-size:30px;margin:6px 0 4px}
 .blk .sub{color:var(--muted);font-size:14px;margin-bottom:14px}
 .combos{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
@@ -140,9 +168,10 @@ footer{border-top:1px solid var(--bd);padding:26px 0;color:var(--muted);font-siz
         <div class="blk"><div class="eyebrow">Paso 2</div><h2 id="a-titulo">Arma tu combo</h2><div class="a-dur" id="a-dur"></div><div class="sub">Empieza con un combo y cámbialo como quieras: quita, agrega o elige tu café.</div><div class="combos" id="combos"></div></div>
         <div class="blk"><h2>Agrega a tu clase</h2><div class="sub" id="d-nota"></div><div class="exs" id="extras"></div></div>
         <div class="blk"><h2>¿Cuántas personas?</h2><div class="pers"><button type="button" id="pm" aria-label="Menos">−</button><input type="number" id="personas" min="1" value="1"><button type="button" id="pp" aria-label="Más">+</button></div><div class="nota" id="p-nota"></div><div id="g-blk" class="hide" style="margin-top:16px"><h2 style="font-size:24px">¿Cuántos grupos?</h2><div class="pers"><button type="button" id="gm" aria-label="Menos">−</button><input type="number" id="grupos" min="1" value="1"><button type="button" id="gp" aria-label="Más">+</button></div><div class="nota" id="g-nota"></div></div></div>
-        <form class="blk" id="form"><div id="datos"></div><div class="eyebrow">Paso 3</div><h2>Tus datos</h2><div class="sub">Te escribimos para confirmar la fecha y el pago. Vamos a tu casa u oficina en Bogotá con todos los equipos. <span class="js-disp"></span></div>
+        <div class="blk" id="fc-blk"><div id="datos"></div><div class="eyebrow">Paso 3</div><h2>Elige fecha y hora</h2><div class="sub">Estos son los cupos libres. Vamos a tu casa u oficina en Bogotá con todos los equipos. <span class="js-disp"></span></div><div class="fc" id="agenda"><div class="fc-sl">Cargando fechas…</div></div><div class="fc-ok hide" id="fc-ok"></div>
+          <div class="grid2 hide" id="fc-otra-blk" style="margin-top:12px;max-width:520px"><label>Fecha que propones<input id="f-fecha" type="date"><span class="fnota" id="f-fnota"></span></label><label>Horario<select id="f-hora"><option value="">Cualquiera</option><option>En la mañana</option><option>En la tarde</option><option>En la noche</option></select></label></div></div>
+        <form class="blk" id="form"><div class="eyebrow">Paso 4</div><h2>Tus datos</h2><div class="sub">Te escribimos por WhatsApp para confirmar la reserva y el pago.</div>
           <div class="grid2"><label>Nombre<input id="f-nombre" autocomplete="name" required></label><label>WhatsApp<input id="f-tel" type="tel" autocomplete="tel" placeholder="300 000 0000" required></label>
-          <label>Fecha preferida<input id="f-fecha" type="date"><span class="fnota" id="f-fnota"></span></label><label>Horario<select id="f-hora"><option value="">Cualquiera</option><option>Sábado en la mañana</option><option>Sábado en la tarde</option><option>Domingo en la mañana</option><option>Domingo en la tarde</option><option>Entre semana (consultar disponibilidad)</option></select></label>
           <label>Empresa (si aplica)<input id="f-emp" autocomplete="organization"></label><label>Barrio o dirección de la clase<input id="f-dir" autocomplete="street-address" placeholder="Ej. Chapinero, Calle 60 # 5-20"></label><label>Correo (opcional)<input id="f-email" type="email" autocomplete="email"></label><label>¿Algo que debamos saber?<input id="f-nota" placeholder="Nivel, si es un regalo, piso o parqueadero…"></label></div>
           <button class="btn" id="f-btn">Reservar por WhatsApp</button><div class="err" id="f-err"></div>
           <div class="ok hide" id="f-ok">¡Listo! Recibimos tu solicitud. Si WhatsApp no se abrió, escríbenos al 304 492 7790.</div>
@@ -168,6 +197,37 @@ function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 function fmt(n){ return '$' + Math.round(Number(n) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
 function hoy(){ var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+// ---- Agenda: fechas y horas disponibles ----
+var AG = { ocup: {}, dia: '', sel: '', mes: 0 };
+var MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'], DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+function agCfg(){ var a = (P && P.agenda) || {}; return { horarios: a.horarios && a.horarios.length ? a.horarios : ['9:00 a.m.', '2:00 p.m.'], dias: a.dias || [6, 0], semanas: a.semanas || 8, anticipacion: a.anticipacion == null ? 2 : a.anticipacion, bloq: a.bloq || [], extra: a.extra || [] }; }
+function ymd(d){ return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function horaMin(h){ var m = /(\d{1,2})(?::(\d{2}))?\s*([ap])?/i.exec(h || '') || [0, 0, 0, '']; var hh = Number(m[1]) % 12; if ((m[3] || '').toLowerCase() === 'p') hh += 12; else if (!m[3] && Number(m[1]) === 12) hh = 12; return hh * 60 + Number(m[2] || 0); }
+function slotsDe(f){ var A = agCfg(), d = new Date(f + 'T12:00:00'), L = []; if (A.bloq.indexOf(f) >= 0) return [];
+  if (A.dias.indexOf(d.getDay()) >= 0) L = A.horarios.slice();
+  A.extra.forEach(function(x){ var p = x.split('|'); if (p[0] === f && L.indexOf(p[1]) < 0) L.push(p[1]); });
+  return L.filter(function(h){ return A.bloq.indexOf(f + '|' + h) < 0; }).sort(function(a, b){ return horaMin(a) - horaMin(b); }); }
+function rango(){ var A = agCfg(), i = new Date(), f = new Date(); i.setHours(12, 0, 0, 0); f.setHours(12, 0, 0, 0); i.setDate(i.getDate() + A.anticipacion); f.setDate(f.getDate() + A.semanas * 7); return [i, f]; }
+function fechaLarga(f){ var d = new Date(f + 'T12:00:00'); return DIAS[d.getDay()] + ' ' + d.getDate() + ' de ' + MESES[d.getMonth()]; }
+function slotTxt(k){ var p = k.split('|'); return fechaLarga(p[0]) + ' · ' + p[1]; }
+function cargarOcup(){ return sb('bru_conta?tipo=eq.clase_res&select=s:data->>slot,e:data->>estado&data->>slot=gte.' + hoy()).then(function(r){ AG.ocup = {}; (r || []).forEach(function(x){ if (x.s && x.e !== 'cancelada') AG.ocup[x.s] = 1; }); }).catch(function(){}); }
+function pintarAgenda(){
+  var box = $('agenda'); if (!box || !P) return;
+  var R = rango(), ini = R[0], fin = R[1], m0 = new Date(ini.getFullYear(), ini.getMonth() + AG.mes, 1, 12), maxMes = (fin.getFullYear() - ini.getFullYear()) * 12 + fin.getMonth() - ini.getMonth();
+  var first = (m0.getDay() + 6) % 7, nd = new Date(m0.getFullYear(), m0.getMonth() + 1, 0).getDate(), hayLibre = false;
+  var h = '<div class="fc-h"><button type="button" data-mes="-1" aria-label="Mes anterior"' + (AG.mes <= 0 ? ' disabled' : '') + '>‹</button><b>' + MESES[m0.getMonth()] + ' ' + m0.getFullYear() + '</b><button type="button" data-mes="1" aria-label="Mes siguiente"' + (AG.mes >= maxMes ? ' disabled' : '') + '>›</button></div><div class="fc-g">' + ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(function(x){ return '<span class="fc-dw">' + x + '</span>'; }).join('');
+  for (var i = 0; i < first; i++) h += '<span></span>';
+  for (var dd = 1; dd <= nd; dd++) { var d = new Date(m0.getFullYear(), m0.getMonth(), dd, 12), f = ymd(d), L = (d >= ini && d <= fin) ? slotsDe(f) : [], lib = L.filter(function(x){ return !AG.ocup[f + '|' + x]; }).length, cl = !L.length ? 'off' : (lib ? 'ok' : 'full'); if (lib) hayLibre = true;
+    h += '<button type="button" class="fc-d ' + cl + (AG.dia === f ? ' on' : '') + '"' + (cl === 'ok' ? ' data-dia="' + f + '" aria-label="' + fechaLarga(f) + '"' : ' disabled') + '>' + dd + (cl === 'full' ? '<i>lleno</i>' : '') + '</button>'; }
+  h += '</div><div class="fc-ley"><span><i class="l-ok"></i>Con cupo</span><span><i class="l-full"></i>Lleno</span></div>';
+  if (AG.dia) h += '<div class="fc-s"><div class="fc-sl">' + esc(fechaLarga(AG.dia)) + ' · elige la hora</div>' + slotsDe(AG.dia).map(function(x){ var k = AG.dia + '|' + x, oc = AG.ocup[k]; return '<button type="button" class="fc-t' + (AG.sel === k ? ' on' : '') + '"' + (oc ? ' disabled' : ' data-slot="' + esc(k) + '"') + '>' + esc(x) + (oc ? ' · reservado' : '') + '</button>'; }).join('') + '</div>';
+  else if (!hayLibre) h += '<div class="fc-sl" style="margin-top:12px">' + (AG.mes < maxMes ? 'Este mes ya no tiene cupos. Mira el siguiente →' : 'No hay cupos en estas fechas.') + '</div>';
+  h += '<button type="button" class="fc-otra' + (AG.sel === 'otra' ? ' on' : '') + '" data-slot="otra">¿Ninguna fecha te sirve? Propón otra</button>';
+  box.innerHTML = h;
+  $('fc-otra-blk').classList.toggle('hide', AG.sel !== 'otra');
+  var ok = $('fc-ok'); ok.classList.toggle('hide', !AG.sel || AG.sel === 'otra'); if (AG.sel && AG.sel !== 'otra') ok.textContent = '✓ Tu clase: ' + slotTxt(AG.sel);
+}
+function primerMes(){ var R = rango(), ini = R[0], fin = R[1], d = new Date(ini); while (d <= fin) { var f = ymd(d); if (slotsDe(f).some(function(x){ return !AG.ocup[f + '|' + x]; })) return (d.getFullYear() - ini.getFullYear()) * 12 + d.getMonth() - ini.getMonth(); d.setDate(d.getDate() + 1); } return 0; }
 var ICON = {
   filtrados: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12h28l-10 16h-8z"/><path d="M20 28v6M28 28v6"/><path d="M14 38h20"/><path d="M24 4v4M18 6l1 3M30 6l-1 3"/></svg>',
   catacion: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22h26a0 0 0 0 1 0 0c0 8-6 14-13 14S8 30 8 22z"/><path d="M34 25h3a4 4 0 0 1 0 8h-5"/><path d="M6 40h30"/><path d="M38 6L24 18"/><circle cx="40" cy="5" r="2.5"/></svg>',
@@ -241,7 +301,7 @@ function pintarArmador(){
 }
 function pintarResumen(){
   var r = calcular(); if (!r) return;
-  var html = '<div class="rs-dur">' + RELOJ + esc(dur(r.clase.duracion)) + ' de clase</div><div class="rs-l"><span>' + esc(r.clase.corto || r.clase.nombre) + (st.personas > 1 ? ' · ' + st.personas + ' personas' : '') + (r.clase.porGrupo ? ' · ' + r.grupos + (r.grupos > 1 ? ' grupos' : ' grupo') : '') + '</span><b>' + fmt(r.base) + '</b></div>' + (r.clase.incluye ? '<div class="rs-l"><span>🎁 ' + esc(r.clase.incluye) + ' × ' + Math.max(r.clase.minPersonas || 1, st.personas) + '</span><b>Incluido</b></div>' : '') +
+  var html = '<div class="rs-dur">' + RELOJ + esc(dur(r.clase.duracion)) + ' de clase</div>' + (AG.sel && AG.sel !== 'otra' ? '<div class="rs-fecha">📅 ' + esc(slotTxt(AG.sel)) + '</div>' : '') + '<div class="rs-l"><span>' + esc(r.clase.corto || r.clase.nombre) + (st.personas > 1 ? ' · ' + st.personas + ' personas' : '') + (r.clase.porGrupo ? ' · ' + r.grupos + (r.grupos > 1 ? ' grupos' : ' grupo') : '') + '</span><b>' + fmt(r.base) + '</b></div>' + (r.clase.incluye ? '<div class="rs-l"><span>🎁 ' + esc(r.clase.incluye) + ' × ' + Math.max(r.clase.minPersonas || 1, st.personas) + '</span><b>Incluido</b></div>' : '') +
     r.lineas.map(function(l){ return '<div class="rs-l"><span>' + (l.qty > 1 ? l.qty + ' × ' : '') + esc(l.nombre) + (l.cafe ? ' <i>' + esc(l.cafe) + '</i>' : '') + '</span><b>' + fmt(l.precio) + '</b></div>'; }).join('') +
     (r.descuento ? '<div class="rs-l desc"><span>Descuento combo</span><b>−' + fmt(r.descuento) + '</b></div>' : (r.cuenta && r.faltan ? '<div class="rs-hint">Agrega ' + r.faltan + ' elemento' + (r.faltan > 1 ? 's' : '') + ' más y obtienes ' + P.descuento.pct + ' % de descuento</div>' : ''));
   $('rs-lineas').innerHTML = html; $('rs-total').textContent = fmt(r.total); $('bar-total').textContent = fmt(r.total); $('rs-combo').textContent = comboActual();
@@ -253,7 +313,7 @@ function mensaje(r, f){
   r.lineas.forEach(function(l){ L.push('• ' + (l.qty > 1 ? l.qty + ' × ' : '') + l.nombre + (l.cafe ? ' (' + l.cafe + ')' : '') + ' — ' + fmt(l.precio)); });
   if (r.descuento) L.push('• Descuento combo — −' + fmt(r.descuento));
   L.push('', 'Total: ' + fmt(r.total), 'Combo: ' + comboActual());
-  if (f.fecha) L.push('Fecha preferida: ' + f.fecha.split('-').reverse().join('/') + (f.hora ? ' · ' + f.hora : '')); else if (f.hora) L.push('Horario: ' + f.hora);
+  if (f.slot) L.push('Fecha: ' + slotTxt(f.slot)); else if (f.fecha) L.push('Fecha propuesta: ' + f.fecha.split('-').reverse().join('/') + (f.hora ? ' · ' + f.hora : '')); else if (f.hora) L.push('Horario propuesto: ' + f.hora);
   if (f.empresa) L.push('Empresa: ' + f.empresa); L.push('Lugar: ' + f.direccion); L.push('Nombre: ' + f.nombre); if (f.nota) L.push('Nota: ' + f.nota);
   return L.join('\n');
 }
@@ -263,15 +323,25 @@ function enviar(ev){
   var f = { nombre: $('f-nombre').value.trim(), telefono: $('f-tel').value.trim(), email: $('f-email').value.trim(), direccion: $('f-dir').value.trim(), empresa: ($('f-emp') || { value: '' }).value.trim(), fecha: $('f-fecha').value, hora: $('f-hora').value, nota: $('f-nota').value.trim() };
   if (!f.nombre || f.telefono.replace(/\D/g, '').length < 7) { $('f-err').textContent = 'Escribe tu nombre y un teléfono de WhatsApp.'; return; }
   if (!f.direccion) { $('f-err').textContent = 'Escribe el barrio o la dirección donde será la clase.'; return; }
+  if (!AG.sel) { $('f-err').textContent = 'Elige una fecha y hora en el calendario (o propón otra).'; $('fc-blk').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+  if (AG.sel === 'otra' && !f.fecha) { $('f-err').textContent = 'Escribe la fecha que propones.'; return; }
+  if (AG.sel !== 'otra') { var sp = AG.sel.split('|'); f.slot = AG.sel; f.fecha = sp[0]; f.hora = sp[1]; }
   $('f-err').textContent = ''; var b = $('f-btn'); b.disabled = true; b.textContent = 'Enviando…';
-  var id = 'res_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  var datos = { estado: 'nueva', clase: r.clase.nombre, claseId: r.clase.id, combo: comboActual(), personas: st.personas, grupos: r.grupos, items: r.lineas, base: r.base, extras: r.extras, descuento: r.descuento, total: r.total, nombre: f.nombre, telefono: f.telefono, email: f.email, direccion: f.direccion, empresa: f.empresa, fechaPref: f.fecha, horaPref: f.hora, nota: f.nota, origen: 'web' };
-  var wa = 'https://wa.me/' + (P.wa || '573044927790') + '?text=' + encodeURIComponent(mensaje(r, f));
   var win = window.open('', '_blank');
+  cargarOcup().then(function(){
+    if (f.slot && AG.ocup[f.slot]) { if (win) win.close(); AG.sel = ''; AG.dia = ''; pintarAgenda(); pintarResumen(); b.disabled = false; b.textContent = 'Reservar por WhatsApp'; $('f-err').textContent = 'Uy, alguien acaba de reservar esa hora. Elige otra, por favor.'; $('fc-blk').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    guardarRes(r, f, b, win);
+  });
+}
+function guardarRes(r, f, b, win){
+  var id = 'res_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  var datos = { estado: 'nueva', clase: r.clase.nombre, claseId: r.clase.id, combo: comboActual(), personas: st.personas, grupos: r.grupos, items: r.lineas, base: r.base, extras: r.extras, descuento: r.descuento, total: r.total, nombre: f.nombre, telefono: f.telefono, email: f.email, direccion: f.direccion, empresa: f.empresa, fechaPref: f.fecha, horaPref: f.hora, slot: f.slot || '', nota: f.nota, origen: 'web' };
+  var wa = 'https://wa.me/' + (P.wa || '573044927790') + '?text=' + encodeURIComponent(mensaje(r, f));
   sb('bru_conta', { method: 'POST', prefer: 'return=minimal', body: [{ id: id, tipo: 'clase_res', fecha: hoy(), data: datos }] }).catch(function(){}).then(function(){
     if (win) win.location.href = wa; else location.href = wa;
     b.disabled = false; b.textContent = 'Reservar por WhatsApp';
     $('f-ok').classList.remove('hide');
+    if (f.slot) { AG.ocup[f.slot] = 1; pintarAgenda(); }
   });
 }
 function irArmar(){ var a = $('armar'); if (a) setTimeout(function(){ a.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); }
@@ -283,12 +353,16 @@ function irArmar(){ var a = $('armar'); if (a) setTimeout(function(){ a.scrollIn
     if (P.disponibilidad) { Array.prototype.forEach.call(document.querySelectorAll('.js-disp'), function(n){ n.textContent = P.disponibilidad; }); Array.prototype.forEach.call(document.querySelectorAll('.js-disp-box'), function(n){ n.classList.remove('hide'); }); }
     var q = /[?&]clase=([a-z]+)/.exec(location.search);
     pintarClases();
+    cargarOcup().then(function(){ AG.mes = primerMes(); pintarAgenda(); });
     if (q && P.clases.some(function(c){ return c.id === q[1] && c.estado !== 'pronto'; })) { st.clase = q[1]; st.personas = (claseAct() || {}).minPersonas || 1; var L = P.combos[st.clase] || []; aplicarCombo(L[1] ? L[1].nombre : (L[0] ? L[0].nombre : '')); pintarClases(); pintarArmador(); irArmar(); }
   }).catch(function(e){ $('clases').innerHTML = '<div class="vacio">' + esc(e.message) + '</div>'; });
   document.addEventListener('click', function(e){
     var c = e.target.closest('[data-clase]'); if (c) { st.clase = c.getAttribute('data-clase'); st.personas = (claseAct() || {}).minPersonas || 1; st.grupos = 1; var L = P.combos[st.clase] || []; aplicarCombo(L[1] ? L[1].nombre : (L[0] ? L[0].nombre : '')); pintarClases(); pintarArmador(); irArmar(); return; }
     var cb = e.target.closest('[data-combo]'); if (cb) { aplicarCombo(cb.getAttribute('data-combo')); pintarArmador(); return; }
     var q = e.target.closest('[data-q]'); if (q) { var p = q.getAttribute('data-q').split('|'); st.items[p[0]] = Math.max(0, Math.min(50, (st.items[p[0]] || 0) + Number(p[1]))); if (st.cafes[p[0]]) st.cafes[p[0]].length = st.items[p[0]]; pintarArmador(); return; }
+    var mb = e.target.closest('[data-mes]'); if (mb) { AG.mes += Number(mb.getAttribute('data-mes')); AG.dia = ''; pintarAgenda(); return; }
+    var db = e.target.closest('[data-dia]'); if (db) { AG.dia = db.getAttribute('data-dia'); if (AG.sel.indexOf(AG.dia) !== 0) AG.sel = ''; var L = slotsDe(AG.dia).filter(function(x){ return !AG.ocup[AG.dia + '|' + x]; }); if (L.length === 1) AG.sel = AG.dia + '|' + L[0]; pintarAgenda(); pintarResumen(); return; }
+    var sl = e.target.closest('[data-slot]'); if (sl) { AG.sel = sl.getAttribute('data-slot'); if (AG.sel === 'otra') AG.dia = ''; pintarAgenda(); pintarResumen(); if (AG.sel !== 'otra') setTimeout(function(){ $('form').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 250); return; }
     if (e.target.closest('#bar-btn')) { $('datos').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   });
   document.addEventListener('change', function(e){ var s = e.target.getAttribute('data-cafe'); if (s) { var p = s.split('|'); (st.cafes[p[0]] = st.cafes[p[0]] || [])[Number(p[1])] = e.target.value; pintarArmador(); } });
