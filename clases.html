@@ -247,11 +247,12 @@ function precioCafe(nombre){ var c = P.cafes.filter(function(x){ return x.nombre
 function calcular(){
   var c = claseAct(); if (!c) return null;
   var n = Math.max(c.minPersonas || 1, st.personas), g = c.porGrupo ? Math.max(gruposMin(c), st.grupos || 1) : 1, base = g * (c.precio - c.precioExtra) + n * c.precioExtra, lineas = [], ext = 0, cuenta = 0;
+  var mult = c.extrasPorPersona ? n : 1, xp = mult > 1 ? ' × ' + mult + ' personas' : '';
   Object.keys(st.items).forEach(function(id){
     var q = st.items[id], e = extraPor(id); if (!q || !e) return;
-    if (e.tipo === 'opcion') { for (var j = 0; j < q; j++) { var O = e.opciones || [], on = (st.cafes[id] || [])[j] || (O[0] && O[0].nombre) || '', op = O.filter(function(o){ return o.nombre === on; })[0] || O[0] || { precio: 0 }; var pz = e.precio + (op.precio || 0); lineas.push({ nombre: e.nombre, cafe: on, qty: 1, precio: pz }); ext += pz; } }
-    else if (e.tipo === 'cafe') { for (var i = 0; i < q; i++) { var nom = (st.cafes[id] || [])[i] || (P.cafes[0] && P.cafes[0].nombre) || ''; var pr = precioCafe(nom); lineas.push({ nombre: e.nombre, cafe: nom, qty: 1, precio: pr }); ext += pr; } }
-    else { lineas.push({ nombre: e.nombre, qty: q, precio: e.precio * q }); ext += e.precio * q; }
+    if (e.tipo === 'opcion') { for (var j = 0; j < q; j++) { var O = e.opciones || [], on = (st.cafes[id] || [])[j] || (O[0] && O[0].nombre) || '', op = O.filter(function(o){ return o.nombre === on; })[0] || O[0] || { precio: 0 }; var pz = (e.precio + (op.precio || 0)) * mult; lineas.push({ nombre: e.nombre + xp, cafe: on, qty: 1, precio: pz }); ext += pz; } }
+    else if (e.tipo === 'cafe') { for (var i = 0; i < q; i++) { var nom = (st.cafes[id] || [])[i] || (P.cafes[0] && P.cafes[0].nombre) || ''; var pr = precioCafe(nom) * mult; lineas.push({ nombre: e.nombre + xp, cafe: nom, qty: 1, precio: pr }); ext += pr; } }
+    else { lineas.push({ nombre: e.nombre + xp, qty: q, precio: e.precio * q * mult }); ext += e.precio * q * mult; }
     cuenta += q;
   });
   var d = P.descuento || {}, desc = cuenta >= (d.minExtras || 99) ? Math.round(ext * (d.pct || 0) / 100) : 0;
@@ -296,7 +297,7 @@ function pintarArmador(){
   $('g-blk').classList.toggle('hide', !c.porGrupo); if (c.porGrupo) { st.grupos = Math.max(gruposMin(c), st.grupos || 1); $('grupos').value = st.grupos; notaGrupos(c); }
   $('personas').max = c.maxPersonas; $('personas').min = c.minPersonas || 1; if (st.personas < (c.minPersonas || 1)) st.personas = c.minPersonas || 1; $('personas').value = st.personas;
   $('p-nota').textContent = ((c.minPersonas || 1) > 1 ? 'Mínimo ' + c.minPersonas + ' personas. ' : '') + (c.precioExtra ? 'Cada persona adicional: ' + fmt(c.precioExtra) + (c.incluye ? ' (con su regalo incluido)' : '') : '');
-  $('d-nota').textContent = d.pct ? 'Suma ' + d.minExtras + ' o más elementos y obtienes ' + d.pct + ' % de descuento en ellos.' : '';
+  $('d-nota').textContent = (c.extrasPorPersona ? 'Todo lo que agregues es por persona: cada asistente recibe su kit o su café, y el precio se multiplica por el número de personas. ' : '') + (d.pct ? 'Suma ' + d.minExtras + ' o más elementos y obtienes ' + d.pct + ' % de descuento en ellos.' : '');
   pintarResumen();
 }
 function pintarResumen(){
@@ -366,7 +367,7 @@ function irArmar(){ var a = $('armar'); if (a) setTimeout(function(){ a.scrollIn
     if (e.target.closest('#bar-btn')) { $('datos').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   });
   document.addEventListener('change', function(e){ var s = e.target.getAttribute('data-cafe'); if (s) { var p = s.split('|'); (st.cafes[p[0]] = st.cafes[p[0]] || [])[Number(p[1])] = e.target.value; pintarArmador(); } });
-  $('personas').oninput = function(){ var c = claseAct(); st.personas = Math.max(c ? (c.minPersonas || 1) : 1, Math.min(c ? c.maxPersonas : 10, Number(this.value) || 1)); if (c && c.porGrupo) { st.grupos = Math.max(gruposMin(c), st.grupos || 1); $('grupos').value = st.grupos; notaGrupos(c); } pintarResumen(); };
+  $('personas').oninput = function(){ var c = claseAct(); st.personas = Math.max(c ? (c.minPersonas || 1) : 1, Math.min(c ? c.maxPersonas : 10, Number(this.value) || 1)); if (c && c.porGrupo) { st.grupos = Math.max(gruposMin(c), st.grupos || 1); $('grupos').value = st.grupos; notaGrupos(c); } if (c && c.extrasPorPersona) pintarArmador(); else pintarResumen(); };
   $('pm').onclick = function(){ $('personas').value = st.personas - 1; $('personas').oninput(); $('personas').value = st.personas; };
   $('pp').onclick = function(){ $('personas').value = st.personas + 1; $('personas').oninput(); $('personas').value = st.personas; };
   $('grupos').oninput = function(){ var c = claseAct(); st.grupos = Math.max(gruposMin(c), Math.min(20, Number(this.value) || 1)); pintarResumen(); };
