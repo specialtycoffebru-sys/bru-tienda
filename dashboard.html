@@ -388,6 +388,10 @@ textarea.inp{resize:vertical;min-height:60px}
       <svg viewBox="0 0 24 24"><path d="M3 11l14-6v14L3 13z"/><path d="M7 13v5a2 2 0 0 0 4 0v-4"/><path d="M20 9v6"/></svg>
       <span>Marketing</span>
     </div>
+    <div class="sb-a" onclick="go('clases',this)">
+      <svg viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/><path d="M22 9v6"/></svg>
+      <span>Clases</span>
+    </div>
     <div class="sb-grp">Tienda</div>
     <div class="sb-a" onclick="go('catalogo',this)">
       <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
@@ -3742,6 +3746,20 @@ textarea.inp{resize:vertical;min-height:60px}
 </div>
 
 <!-- ══ PÁGINA DE PLANES ══ -->
+<!-- CLASES (módulo en /clases-admin.html: costeo, combos y reservas; guarda en bru_conta clasescfg/clasespub/clase_res, nunca modifica bru_store) -->
+<div class="pg" id="page-clases">
+  <div style="margin:-.25rem 0 0;border:.5px solid var(--bd);border-radius:10px;overflow:hidden;background:var(--bg)">
+    <iframe id="clases-frame" title="Clases personalizadas" style="display:block;width:100%;height:calc(100dvh - 92px);min-height:560px;border:0;background:var(--bg)"></iframe>
+  </div>
+  <div style="font-size:10.5px;color:var(--muted);margin-top:.5rem"><a href="/clases-admin.html" target="_blank" style="color:var(--gold)">Abrir en pestaña aparte ↗</a> · <a href="/clases.html" target="_blank" style="color:var(--gold)">Ver la página pública ↗</a></div>
+</div>
+<script>
+function clasesAbrir(){
+  var f = document.getElementById('clases-frame');
+  if(f && !f.getAttribute('src')) f.setAttribute('src', '/clases-admin.html?embed=1');
+}
+</script>
+
 <!-- MARKETING (módulo en /marketing.html: lee ventas de bru_store, guarda planes en bru_conta tipos mkt_*, nunca modifica bru_store) -->
 <div class="pg" id="page-marketing">
   <div style="margin:-.25rem 0 0;border:.5px solid var(--bd);border-radius:10px;overflow:hidden;background:var(--bg)">
@@ -5509,7 +5527,7 @@ var TITLES = {eventos:'Propuestas de eventos',resumen:'Resumen',pedidos:'Pedidos
   finanzas:'Ingresos / Gastos',inventario:'Inventario',ventas:'Ventas',facturas:'Facturas',
   cotizaciones:'Cotizaciones',inversiones:'Inversiones',reportes:'Reportes',
   produccion:'Producción',blends:'Blends & Recetas',inversionistas:'Inversionistas',
-  suscripciones:'Suscripciones',insumos:'Insumos',nomina:'Nómina',horas:'Mi jornada',usuarios:'Usuarios y accesos',respaldo:'Datos y Respaldo',empresas:'Página Empresas (/empresas)',planes:'Página Planes',leads:'Leads / Ferias',prospectos:'Prospectos · clientes nuevos',contabilidad:'Contabilidad · DIAN',marketing:'Marketing · ventas',propuestas:'Propuestas comerciales',config:'⚙ Configuración / Datos'};
+  suscripciones:'Suscripciones',insumos:'Insumos',nomina:'Nómina',horas:'Mi jornada',usuarios:'Usuarios y accesos',respaldo:'Datos y Respaldo',empresas:'Página Empresas (/empresas)',planes:'Página Planes',leads:'Leads / Ferias',prospectos:'Prospectos · clientes nuevos',contabilidad:'Contabilidad · DIAN',marketing:'Marketing · ventas',clases:'Clases personalizadas',propuestas:'Propuestas comerciales',config:'⚙ Configuración / Datos'};
 
 /* ═══ LEADS / FERIAS ═════════════════════════════════════════════════════
    El QR del stand manda a la tienda (#captura), que ya guarda cada contacto
@@ -5681,6 +5699,7 @@ function go(page,el) {
   if(page==='prospectos'){ try{ prosAbrir(); }catch(e){} }
   if(page==='contabilidad'){ try{ contaAbrir(); }catch(e){} }
   if(page==='marketing'){ try{ mktAbrir(); }catch(e){} }
+  if(page==='clases'){ try{ clasesAbrir(); }catch(e){} }
   if(page==='eventos'){ try{ renderEventos(); }catch(e){} }
   if(page==='propuestas') propRender();
   if(page==='pedidos'){syncPeds();renderPeds();}
@@ -14763,7 +14782,7 @@ var UPAGES = [
   {k:'reportes',n:'Reportes'},{k:'costos',n:'Costos y Gastos'},{k:'ganancias',n:'Ganancias'},
   {k:'produccion',n:'Producción'},{k:'blends',n:'Blends & Recetas'},{k:'inversionistas',n:'Inversionistas'},
   {k:'suscripciones',n:'Suscripciones'},{k:'nomina',n:'Nómina'},{k:'insumos',n:'Insumos'},{k:'usuarios',n:'Usuarios y accesos'},
-  {k:'respaldo',n:'Datos y Respaldo'},{k:'empresas',n:'Página Empresas'},{k:'planes',n:'Página Planes'},{k:'leads',n:'Leads / Ferias'},{k:'prospectos',n:'Prospectos'},{k:'contabilidad',n:'Contabilidad'},{k:'marketing',n:'Marketing'},{k:'propuestas',n:'Propuestas'},
+  {k:'respaldo',n:'Datos y Respaldo'},{k:'empresas',n:'Página Empresas'},{k:'planes',n:'Página Planes'},{k:'leads',n:'Leads / Ferias'},{k:'prospectos',n:'Prospectos'},{k:'contabilidad',n:'Contabilidad'},{k:'marketing',n:'Marketing'},{k:'clases',n:'Clases'},{k:'propuestas',n:'Propuestas'},
   {k:'config',n:'Configuración / Datos'}
 ];
 
