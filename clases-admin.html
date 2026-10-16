@@ -154,7 +154,8 @@ var SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
 var T = 'bru_conta';
 var S = { tab: 'costeo', cfg: null, cat: [], res: [], sub: {} };
 var DEF = {
-  costoG: 100, margen: 40, redondeo: 5000, wa: '573044927790',
+  costoG: 100, margen: 40, redondeo: 5000, wa: '573044927790', mig: 1,
+  disponibilidad: 'Principalmente sábados y domingos. Entre semana, pregúntanos disponibilidad.',
   descuento: { pct: 10, minExtras: 2 },
   clases: [
     { id: 'filtrados', nombre: 'Clase personalizada de Filtrados', corto: 'Filtrados', desc: 'Aprende a preparar café de especialidad en casa: V60, Chemex, prensa francesa y AeroPress. Molienda, proporciones, temperatura y cómo ajustar cada receta a tu gusto.', duracion: 2, maxPersonas: 4,
@@ -168,6 +169,8 @@ var DEF = {
     { id: 'kit_v60', nombre: 'Kit de filtrado en casa', desc: 'Gotero V60 02, 40 filtros, cuchara medidora y guía de recetas', costo: 62000, precio: 105000, tipo: 'item', activo: true },
     { id: 'kit_prensa', nombre: 'Kit prensa francesa', desc: 'Prensa francesa de 600 ml, cuchara y guía de recetas', costo: 48000, precio: 85000, tipo: 'item', activo: true },
     { id: 'kit_barista', nombre: 'Kit de barismo en casa', desc: 'Jarra para leche de 350 ml, termómetro, tamper y guía', costo: 85000, precio: 145000, tipo: 'item', activo: true },
+    { id: 'kit_completo', nombre: 'Kit completo de preparación', desc: 'Báscula digital con temporizador, tetera cuello de ganso, el método que elijas, cuchara dosificadora, filtros y guía de recetas', costo: 168000, precio: 280000, tipo: 'opcion', activo: true,
+      opciones: [{ nombre: 'V60', costo: 35000, precio: 60000 }, { nombre: 'Origami', costo: 110000, precio: 180000 }, { nombre: 'Orea', costo: 160000, precio: 260000 }, { nombre: 'Prensa francesa', costo: 40000, precio: 70000 }, { nombre: 'AeroPress', costo: 130000, precio: 210000 }] },
     { id: 'cafe', nombre: 'Café de tu elección', desc: 'Una bolsa del café B.R.U que prefieras', costo: 0, precio: 0, tipo: 'cafe', activo: true },
     { id: 'drip5', nombre: 'Drip bags x5', desc: 'Cinco sobres listos para preparar en cualquier lugar', costo: 12500, precio: 32000, tipo: 'item', activo: true },
     { id: 'drip10', nombre: 'Drip bags x10', desc: 'Diez sobres listos para preparar en cualquier lugar', costo: 24000, precio: 58000, tipo: 'item', activo: true },
@@ -176,7 +179,7 @@ var DEF = {
   ],
   cafes: {},
   combos: {
-    filtrados: [{ nombre: 'Esencial', items: [] }, { nombre: 'Filtra en casa', items: [{ id: 'kit_v60', qty: 1 }, { id: 'cafe', qty: 1 }] }, { nombre: 'Completo', items: [{ id: 'kit_v60', qty: 1 }, { id: 'cafe', qty: 1 }, { id: 'drip5', qty: 1 }] }],
+    filtrados: [{ nombre: 'Esencial', items: [] }, { nombre: 'Filtra en casa', items: [{ id: 'kit_v60', qty: 1 }, { id: 'cafe', qty: 1 }] }, { nombre: 'Completo', items: [{ id: 'kit_v60', qty: 1 }, { id: 'cafe', qty: 1 }, { id: 'drip5', qty: 1 }] }, { nombre: 'Barra en casa', items: [{ id: 'kit_completo', qty: 1 }, { id: 'cafe', qty: 1 }, { id: 'drip5', qty: 1 }] }],
     catacion: [{ nombre: 'Esencial', items: [] }, { nombre: 'Catador', items: [{ id: 'cafe', qty: 2 }] }, { nombre: 'Explorador', items: [{ id: 'cafe', qty: 2 }, { id: 'drip10', qty: 1 }] }],
     barismo: [{ nombre: 'Esencial', items: [] }, { nombre: 'Barista en casa', items: [{ id: 'kit_barista', qty: 1 }, { id: 'cafe', qty: 1 }, { id: 'drip5', qty: 1 }] }, { nombre: 'Barista Pro', items: [{ id: 'kit_barista', qty: 1 }, { id: 'molino', qty: 1 }, { id: 'cafe', qty: 2 }] }]
   }
@@ -218,7 +221,8 @@ function cafesCatalogo(){
   });
 }
 function extra(id){ return S.cfg.extras.filter(function(e){ return e.id === id; })[0]; }
-function precioExtra(e){ if (e.tipo !== 'cafe') return { precio: e.precio, costo: e.costo }; var L = cafesCatalogo(); if (!L.length) return { precio: e.precio, costo: e.costo }; var p = L.reduce(function(s, c){ return s + c.precio; }, 0) / L.length, k = L.reduce(function(s, c){ return s + c.costo; }, 0) / L.length; return { precio: Math.round(p), costo: Math.round(k), promedio: true }; }
+function precioExtra(e){ if (e.tipo === 'opcion') { var O = e.opciones || []; if (!O.length) return { precio: e.precio, costo: e.costo }; return { precio: Math.round(e.precio + O.reduce(function(s, o){ return s + (o.precio || 0); }, 0) / O.length), costo: Math.round(e.costo + O.reduce(function(s, o){ return s + (o.costo || 0); }, 0) / O.length), promedio: true }; }
+  if (e.tipo !== 'cafe') return { precio: e.precio, costo: e.costo }; var L = cafesCatalogo(); if (!L.length) return { precio: e.precio, costo: e.costo }; var p = L.reduce(function(s, c){ return s + c.precio; }, 0) / L.length, k = L.reduce(function(s, c){ return s + c.costo; }, 0) / L.length; return { precio: Math.round(p), costo: Math.round(k), promedio: true }; }
 function totalCombo(clase, items, personas){
   var cc = costoClase(clase), n = Math.max(1, personas || 1);
   var precio = cc.precio + (n - 1) * cc.precioExtra, costo = cc.total + (n - 1) * cc.extraCosto, pe = 0, ce = 0, cuenta = 0;
@@ -238,6 +242,7 @@ function cargar(){
     var c = r[0] && r[0][0] ? r[0][0].data : null;
     S.cfg = copia(DEF); S.existe = !!c;
     if (c) Object.keys(c).forEach(function(k){ S.cfg[k] = c[k]; });
+    if (c && !c.mig) { var kc = copia(DEF.extras.filter(function(e){ return e.id === 'kit_completo'; })[0]); if (!S.cfg.extras.some(function(e){ return e.id === 'kit_completo'; })) S.cfg.extras.splice(3, 0, kc); if (S.cfg.combos.filtrados && !S.cfg.combos.filtrados.some(function(x){ return x.nombre === 'Barra en casa'; })) S.cfg.combos.filtrados.push(copia(DEF.combos.filtrados[3])); if (!S.cfg.disponibilidad) S.cfg.disponibilidad = DEF.disponibilidad; S.cfg.mig = 1; S.existe = false; }
     S.cat = (r[1] && r[1][0] && r[1][0].catalogo) || [];
     S.res = r[2] || [];
   });
@@ -245,9 +250,9 @@ function cargar(){
 function publico(){
   var C = S.cfg;
   return {
-    actualizado: new Date().toISOString(), wa: C.wa, descuento: C.descuento,
+    actualizado: new Date().toISOString(), wa: C.wa, descuento: C.descuento, disponibilidad: C.disponibilidad || '',
     clases: C.clases.filter(function(c){ return c.activa !== false; }).map(function(c){ var k = costoClase(c); return { id: c.id, nombre: c.nombre, corto: c.corto, desc: c.desc, duracion: c.duracion, maxPersonas: c.maxPersonas, precio: k.precio, precioExtra: k.precioExtra, img: c.img || '' }; }),
-    extras: C.extras.filter(function(e){ return e.activo !== false; }).map(function(e){ return { id: e.id, nombre: e.nombre, desc: e.desc, precio: e.tipo === 'cafe' ? 0 : e.precio, tipo: e.tipo }; }),
+    extras: C.extras.filter(function(e){ return e.activo !== false; }).map(function(e){ return { id: e.id, nombre: e.nombre, desc: e.desc, precio: e.tipo === 'cafe' ? 0 : e.precio, tipo: e.tipo, opciones: e.tipo === 'opcion' ? (e.opciones || []).map(function(o){ return { nombre: o.nombre, precio: o.precio || 0 }; }) : undefined }; }),
     cafes: cafesCatalogo().filter(function(c){ return c.stock > 0; }).sort(function(a, b){ return b.stock - a.stock; }).map(function(c){ return { nombre: c.nombre, presentacion: c.presentacion, precio: c.precio, notas: c.notas, img: c.img }; }),
     combos: C.combos
   };
@@ -301,7 +306,11 @@ function renderExtras(c){
     E.map(function(e, i){ var b = 'extras.' + i + '.', v = precioExtra(e), m = v.precio ? (v.precio - v.costo) / v.precio * 100 : 0;
       return '<tr><td><input type="checkbox" data-p="' + b + 'activo"' + (e.activo !== false ? ' checked' : '') + '></td><td style="min-width:160px"><input type="text" data-p="' + b + 'nombre" value="' + esc(e.nombre) + '"></td><td style="min-width:220px"><input type="text" data-p="' + b + 'desc" value="' + esc(e.desc) + '"></td>' +
         (e.tipo === 'cafe' ? '<td class="num" colspan="2"><span class="small muted">Según el café elegido (abajo) · promedio ' + fmt(v.precio) + '</span></td>' : '<td class="num"><input type="number" data-p="' + b + 'costo" value="' + e.costo + '" style="width:110px"></td><td class="num"><input type="number" data-p="' + b + 'precio" value="' + e.precio + '" style="width:110px"></td>') +
-        '<td class="num"><span class="st ' + (m < 30 ? 'bad' : 'ok') + '">' + pct(m) + '</span></td><td>' + (e.tipo === 'cafe' ? '' : '<button class="btn sm ghost" data-del="' + i + '">✕</button>') + '</td></tr>'; }).join('') +
+        '<td class="num"><span class="st ' + (m < 30 ? 'bad' : 'ok') + '">' + pct(m) + '</span></td><td>' + (e.tipo === 'cafe' ? '' : '<button class="btn sm ghost" data-del="' + i + '">✕</button>') + '</td></tr>' +
+        (e.tipo === 'opcion' ? '<tr><td></td><td colspan="6"><div class="small muted" style="margin-bottom:4px">Costo y precio de arriba = kit sin el método. A eso se le suma el método que elija la persona:</div><table class="t" style="background:var(--bg2)"><thead><tr><th>Método a elección</th><th class="num">Costo</th><th class="num">Precio</th><th class="num">Kit completo</th><th class="num">Margen</th><th></th></tr></thead><tbody>' +
+          (e.opciones || []).map(function(o, j){ var ob = b + 'opciones.' + j + '.', pt = e.precio + (o.precio || 0), ct = e.costo + (o.costo || 0), mo = pt ? (pt - ct) / pt * 100 : 0;
+            return '<tr><td><input type="text" data-p="' + ob + 'nombre" value="' + esc(o.nombre) + '"></td><td class="num"><input type="number" data-p="' + ob + 'costo" value="' + (o.costo || 0) + '" style="width:100px"></td><td class="num"><input type="number" data-p="' + ob + 'precio" value="' + (o.precio || 0) + '" style="width:100px"></td><td class="num">' + fmt(pt) + '</td><td class="num"><span class="st ' + (mo < 30 ? 'bad' : 'ok') + '">' + pct(mo) + '</span></td><td><button class="btn sm ghost" data-delo="' + i + '|' + j + '">✕</button></td></tr>'; }).join('') +
+          '</tbody></table><button class="btn sm" data-addo="' + i + '" style="margin-top:6px">+ Método</button></td></tr>' : ''); }).join('') +
     '</tbody></table></div><div class="row" style="margin:10px 0 18px"><button class="btn" id="exNew">+ Agregar elemento</button></div>' +
     '<h3 style="margin-bottom:8px">Cafés para «café de tu elección»</h3><div class="small muted" style="margin-bottom:8px">Salen del catálogo de la tienda con su precio de venta. Pon el costo real de cada bolsa para que el margen del combo sea exacto. Solo se ofrecen los que tienen stock.</div>' +
     '<div class="tbl-w"><table class="t"><thead><tr><th>Café</th><th>Presentación</th><th class="num">Stock</th><th class="num">Precio venta</th><th class="num">Costo bolsa</th><th class="num">Margen</th></tr></thead><tbody>' +
@@ -309,7 +318,10 @@ function renderExtras(c){
   enlazar(c);
   c.onchange = function(e){ var k = e.target.getAttribute('data-cafe'); if (k) { S.cfg.cafes[k] = num(e.target.value); guardarLuego(); render(); } else if (e.target.getAttribute('data-p')) { c.oninput(e); render(); } };
   $('exNew').onclick = function(){ S.cfg.extras.push({ id: uid('ex'), nombre: 'Nuevo elemento', desc: '', costo: 0, precio: 0, tipo: 'item', activo: true }); guardarLuego(); render(); };
-  c.onclick = function(e){ var d = e.target.closest('[data-del]'); if (!d) return; var i = Number(d.getAttribute('data-del')), id = S.cfg.extras[i].id; if (!confirm('¿Quitar «' + S.cfg.extras[i].nombre + '»?')) return; S.cfg.extras.splice(i, 1); Object.keys(S.cfg.combos).forEach(function(k){ S.cfg.combos[k].forEach(function(cb){ cb.items = cb.items.filter(function(it){ return it.id !== id; }); }); }); guardarLuego(); render(); };
+  c.onclick = function(e){ var ao = e.target.closest('[data-addo]'), dlo = e.target.closest('[data-delo]');
+    if (ao) { var ex = S.cfg.extras[Number(ao.getAttribute('data-addo'))]; (ex.opciones = ex.opciones || []).push({ nombre: 'Nuevo método', costo: 0, precio: 0 }); guardarLuego(); render(); return; }
+    if (dlo) { var pz = dlo.getAttribute('data-delo').split('|'); S.cfg.extras[Number(pz[0])].opciones.splice(Number(pz[1]), 1); guardarLuego(); render(); return; }
+    var d = e.target.closest('[data-del]'); if (!d) return; var i = Number(d.getAttribute('data-del')), id = S.cfg.extras[i].id; if (!confirm('¿Quitar «' + S.cfg.extras[i].nombre + '»?')) return; S.cfg.extras.splice(i, 1); Object.keys(S.cfg.combos).forEach(function(k){ S.cfg.combos[k].forEach(function(cb){ cb.items = cb.items.filter(function(it){ return it.id !== id; }); }); }); guardarLuego(); render(); };
 }
 function renderCombos(c){
   var d = S.cfg.descuento;
@@ -348,7 +360,7 @@ function renderReservas(c){
 function renderAjustes(c){
   var C = S.cfg;
   c.innerHTML = '<div class="card"><div class="grid g3">' + campo('Costo del café tostado por gramo', 'costoG', C.costoG) + campo('Margen objetivo (%)', 'margen', C.margen) + campo('Redondear precios a', 'redondeo', C.redondeo) +
-    campo('Descuento por combo (%)', 'descuento.pct', C.descuento.pct) + campo('Desde cuántos elementos aplica', 'descuento.minExtras', C.descuento.minExtras) + campo('WhatsApp para reservas', 'wa', C.wa, 'text') + '</div>' +
+    campo('Descuento por combo (%)', 'descuento.pct', C.descuento.pct) + campo('Desde cuántos elementos aplica', 'descuento.minExtras', C.descuento.minExtras) + campo('WhatsApp para reservas', 'wa', C.wa, 'text') + '</div>' + '<label class="f" style="margin-top:10px">Disponibilidad (sale en la web)<input type="text" data-p="disponibilidad" value="' + esc(C.disponibilidad || '') + '"></label>' +
     '<div class="small muted" style="margin-top:10px">El costo por gramo incluye café verde, merma de tostión y gas. Con un verde de unos $' + '35.000/kg y 16 % de merma, más tostión, queda alrededor de $90–110 por gramo.</div>' +
     '<div class="row" style="margin-top:12px"><button class="btn" id="aRes">Volver a los valores iniciales</button><a class="btn" href="/clases.html" target="_blank">Ver la página de clases ↗</a></div></div>';
   enlazar(c);
