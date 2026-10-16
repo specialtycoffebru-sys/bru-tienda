@@ -51,6 +51,12 @@ header nav a:hover,header nav a.on{color:var(--gold2)}
 .cl-dur{border:1px solid var(--bd2);border-radius:999px;padding:4px 11px;background:var(--gold3)}
 .a-dur{margin:2px 0 8px}
 .rs-dur{font-size:14px;margin-bottom:8px}
+.disp{display:inline-flex;align-items:center;gap:8px;margin-top:18px;color:var(--gold2);font-size:15px}
+.disp svg{width:18px;height:18px}
+.fnota{font-size:12px;color:var(--gold2)}
+.opl{font-size:12px}
+.faq{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+@media(max-width:900px){.faq{grid-template-columns:1fr!important}}
 .cl-cta{color:var(--gold2);font-weight:600;font-size:14px}
 .vacio{grid-column:1/-1;text-align:center;color:var(--cream2);padding:40px;border:1px dashed var(--bd2);border-radius:16px}
 #armar{scroll-margin-top:80px;margin-bottom:60px}
@@ -118,6 +124,7 @@ footer{border-top:1px solid var(--bd);padding:26px 0;color:var(--muted);font-siz
     <h1>Aprende el oficio<br><i>del buen café</i></h1>
     <p>Clases a domicilio, uno a uno o en grupo pequeño: vamos a tu casa u oficina con todos los equipos y cafés de especialidad colombianos. Elige la clase, arma tu combo y quédate con todo para seguir preparando.</p>
     <div class="steps"><span><b>1</b>Elige tu clase</span><span><b>2</b>Arma tu combo</span><span><b>3</b>Reserva por WhatsApp</span></div>
+    <div class="disp js-disp-box hide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></svg><span class="js-disp"></span></div>
   </section>
   <section class="wrap"><div class="clases" id="clases"><div class="vacio">Cargando clases…</div></div></section>
   <section class="wrap hide" id="armar">
@@ -126,9 +133,9 @@ footer{border-top:1px solid var(--bd);padding:26px 0;color:var(--muted);font-siz
         <div class="blk"><div class="eyebrow">Paso 2</div><h2 id="a-titulo">Arma tu combo</h2><div class="a-dur" id="a-dur"></div><div class="sub">Empieza con un combo y cámbialo como quieras: quita, agrega o elige tu café.</div><div class="combos" id="combos"></div></div>
         <div class="blk"><h2>Agrega a tu clase</h2><div class="sub" id="d-nota"></div><div class="exs" id="extras"></div></div>
         <div class="blk"><h2>¿Cuántas personas?</h2><div class="pers"><button type="button" id="pm" aria-label="Menos">−</button><input type="number" id="personas" min="1" value="1"><button type="button" id="pp" aria-label="Más">+</button></div><div class="nota" id="p-nota"></div></div>
-        <form class="blk" id="form"><div id="datos"></div><div class="eyebrow">Paso 3</div><h2>Tus datos</h2><div class="sub">Te escribimos para confirmar la fecha y el pago. Vamos a tu casa u oficina en Bogotá con todos los equipos.</div>
+        <form class="blk" id="form"><div id="datos"></div><div class="eyebrow">Paso 3</div><h2>Tus datos</h2><div class="sub">Te escribimos para confirmar la fecha y el pago. Vamos a tu casa u oficina en Bogotá con todos los equipos. <span class="js-disp"></span></div>
           <div class="grid2"><label>Nombre<input id="f-nombre" autocomplete="name" required></label><label>WhatsApp<input id="f-tel" type="tel" autocomplete="tel" placeholder="300 000 0000" required></label>
-          <label>Fecha preferida<input id="f-fecha" type="date"></label><label>Horario<select id="f-hora"><option value="">Cualquiera</option><option>Mañana</option><option>Tarde</option><option>Noche</option><option>Fin de semana</option></select></label>
+          <label>Fecha preferida<input id="f-fecha" type="date"><span class="fnota" id="f-fnota"></span></label><label>Horario<select id="f-hora"><option value="">Cualquiera</option><option>Sábado en la mañana</option><option>Sábado en la tarde</option><option>Domingo en la mañana</option><option>Domingo en la tarde</option><option>Entre semana (consultar disponibilidad)</option></select></label>
           <label>Barrio o dirección de la clase<input id="f-dir" autocomplete="street-address" placeholder="Ej. Chapinero, Calle 60 # 5-20"></label><label>Correo (opcional)<input id="f-email" type="email" autocomplete="email"></label><label>¿Algo que debamos saber?<input id="f-nota" placeholder="Nivel, si es un regalo, piso o parqueadero…"></label></div>
           <button class="btn" id="f-btn">Reservar por WhatsApp</button><div class="err" id="f-err"></div>
           <div class="ok hide" id="f-ok">¡Listo! Recibimos tu solicitud. Si WhatsApp no se abrió, escríbenos al 304 492 7790.</div>
@@ -137,7 +144,7 @@ footer{border-top:1px solid var(--bd);padding:26px 0;color:var(--muted);font-siz
       <aside class="resumen"><div class="eyebrow">Tu clase</div><h3>Resumen</h3><div class="rs-combo" id="rs-combo"></div><div id="rs-lineas"></div><div class="rs-t"><span>Total</span><b id="rs-total">$0</b></div><button class="btn" type="button" onclick="document.getElementById('datos').scrollIntoView({behavior:'smooth'})">Continuar</button><div class="small">La clase es en tu casa u oficina: llevamos todos los equipos. El pago se confirma por WhatsApp y puedes cambiar la fecha avisando con 48 horas.</div></aside>
     </div>
   </section>
-  <section class="wrap faq"><div><h4>¿Dónde son las clases?</h4><p>En tu casa u oficina, en Bogotá. Nosotros llevamos todos los equipos: molino, métodos de filtrado, tazas de catación o máquina de espresso. Solo necesitas una mesa y una toma de corriente.</p></div><div><h4>¿Necesito experiencia?</h4><p>No. Cada clase es personalizada: empezamos desde tu nivel y lo que quieres aprender.</p></div><div><h4>¿Sirve como regalo?</h4><p>Sí. Cuéntanos en la nota y te enviamos una tarjeta de regalo con la clase y el combo.</p></div></section>
+  <section class="wrap faq"><div><h4>¿Dónde son las clases?</h4><p>En tu casa u oficina, en Bogotá. Nosotros llevamos todos los equipos: molino, métodos de filtrado, tazas de catación o máquina de espresso. Solo necesitas una mesa y una toma de corriente.</p></div><div class="js-disp-box hide"><h4>¿Qué días hay clases?</h4><p class="js-disp"></p></div><div><h4>¿Necesito experiencia?</h4><p>No. Cada clase es personalizada: empezamos desde tu nivel y lo que quieres aprender.</p></div><div><h4>¿Sirve como regalo?</h4><p>Sí. Cuéntanos en la nota y te enviamos una tarjeta de regalo con la clase y el combo.</p></div></section>
 </main>
 <div id="bar" class="hide"><span>Total de tu clase<b id="bar-total">$0</b></span><button class="btn" id="bar-btn" type="button">Reservar</button></div>
 <footer>B.R.U · Brew Respect Unite · Bogotá, Colombia</footer>
@@ -173,7 +180,8 @@ function calcular(){
   var n = Math.max(1, st.personas), base = c.precio + (n - 1) * c.precioExtra, lineas = [], ext = 0, cuenta = 0;
   Object.keys(st.items).forEach(function(id){
     var q = st.items[id], e = extraPor(id); if (!q || !e) return;
-    if (e.tipo === 'cafe') { for (var i = 0; i < q; i++) { var nom = (st.cafes[id] || [])[i] || (P.cafes[0] && P.cafes[0].nombre) || ''; var pr = precioCafe(nom); lineas.push({ nombre: e.nombre, cafe: nom, qty: 1, precio: pr }); ext += pr; } }
+    if (e.tipo === 'opcion') { for (var j = 0; j < q; j++) { var O = e.opciones || [], on = (st.cafes[id] || [])[j] || (O[0] && O[0].nombre) || '', op = O.filter(function(o){ return o.nombre === on; })[0] || O[0] || { precio: 0 }; var pz = e.precio + (op.precio || 0); lineas.push({ nombre: e.nombre, cafe: on, qty: 1, precio: pz }); ext += pz; } }
+    else if (e.tipo === 'cafe') { for (var i = 0; i < q; i++) { var nom = (st.cafes[id] || [])[i] || (P.cafes[0] && P.cafes[0].nombre) || ''; var pr = precioCafe(nom); lineas.push({ nombre: e.nombre, cafe: nom, qty: 1, precio: pr }); ext += pr; } }
     else { lineas.push({ nombre: e.nombre, qty: q, precio: e.precio * q }); ext += e.precio * q; }
     cuenta += q;
   });
@@ -208,8 +216,9 @@ function pintarArmador(){
     (actual === 'Mi combo' ? '<div class="cb on mine"><b>Mi combo</b><span>Lo armaste a tu gusto</span></div>' : '');
   $('extras').innerHTML = P.extras.map(function(e){
     var q = st.items[e.id] || 0, sel = '';
+    if (e.tipo === 'opcion' && q) { var ar2 = st.cafes[e.id] || (st.cafes[e.id] = []); sel = '<div class="cafes">' + Array.apply(null, Array(q)).map(function(_, i){ var O = e.opciones || []; if (!ar2[i]) ar2[i] = O[0] ? O[0].nombre : ''; return '<label class="opl">Método' + (q > 1 ? ' ' + (i + 1) : '') + '<select data-cafe="' + e.id + '|' + i + '">' + O.map(function(o){ return '<option value="' + esc(o.nombre) + '"' + (ar2[i] === o.nombre ? ' selected' : '') + '>' + esc(o.nombre + ' · kit ' + fmt(e.precio + (o.precio || 0))) + '</option>'; }).join('') + '</select></label>'; }).join('') + '</div>'; }
     if (e.tipo === 'cafe' && q) { var arr = st.cafes[e.id] || (st.cafes[e.id] = []); sel = '<div class="cafes">' + Array.apply(null, Array(q)).map(function(_, i){ if (!arr[i]) arr[i] = P.cafes[0] ? P.cafes[0].nombre : ''; return '<select data-cafe="' + e.id + '|' + i + '">' + P.cafes.map(function(k){ return '<option value="' + esc(k.nombre) + '"' + (arr[i] === k.nombre ? ' selected' : '') + '>' + esc(k.nombre + ' · ' + k.presentacion + ' · ' + fmt(k.precio)) + '</option>'; }).join('') + '</select>'; }).join('') + '</div>'; }
-    var pr = e.tipo === 'cafe' ? (P.cafes.length ? 'desde ' + fmt(Math.min.apply(null, P.cafes.map(function(k){ return k.precio; }))) : 'Sin stock') : fmt(e.precio);
+    var pr = e.tipo === 'opcion' ? ((e.opciones || []).length ? 'desde ' + fmt(e.precio + Math.min.apply(null, e.opciones.map(function(o){ return o.precio || 0; }))) : fmt(e.precio)) : e.tipo === 'cafe' ? (P.cafes.length ? 'desde ' + fmt(Math.min.apply(null, P.cafes.map(function(k){ return k.precio; }))) : 'Sin stock') : fmt(e.precio);
     var dis = e.tipo === 'cafe' && !P.cafes.length;
     return '<div class="ex' + (q ? ' on' : '') + '"><div class="ex-tx"><b>' + esc(e.nombre) + '</b><span>' + esc(e.desc) + '</span></div><div class="ex-pr">' + pr + '</div><div class="qty"><button data-q="' + e.id + '|-1"' + (q ? '' : ' disabled') + ' aria-label="Quitar">−</button><b>' + q + '</b><button data-q="' + e.id + '|1"' + (dis ? ' disabled' : '') + ' aria-label="Agregar">+</button></div>' + sel + '</div>';
   }).join('');
@@ -231,7 +240,7 @@ function mensaje(r, f){
   r.lineas.forEach(function(l){ L.push('• ' + (l.qty > 1 ? l.qty + ' × ' : '') + l.nombre + (l.cafe ? ' (' + l.cafe + ')' : '') + ' — ' + fmt(l.precio)); });
   if (r.descuento) L.push('• Descuento combo — −' + fmt(r.descuento));
   L.push('', 'Total: ' + fmt(r.total), 'Combo: ' + comboActual());
-  if (f.fecha) L.push('Fecha preferida: ' + f.fecha.split('-').reverse().join('/') + (f.hora ? ' · ' + f.hora : ''));
+  if (f.fecha) L.push('Fecha preferida: ' + f.fecha.split('-').reverse().join('/') + (f.hora ? ' · ' + f.hora : '')); else if (f.hora) L.push('Horario: ' + f.hora);
   L.push('Lugar: ' + f.direccion); L.push('Nombre: ' + f.nombre); if (f.nota) L.push('Nota: ' + f.nota);
   return L.join('\n');
 }
@@ -258,6 +267,7 @@ function irArmar(){ var a = $('armar'); if (a) setTimeout(function(){ a.scrollIn
     P = r && r[0] && r[0].data;
     if (!P || !P.clases || !P.clases.length) { $('clases').innerHTML = '<div class="vacio">Muy pronto abriremos las clases. Escríbenos por WhatsApp para apartar tu cupo.</div>'; return; }
     P.combos = P.combos || {}; P.cafes = P.cafes || [];
+    if (P.disponibilidad) { Array.prototype.forEach.call(document.querySelectorAll('.js-disp'), function(n){ n.textContent = P.disponibilidad; }); Array.prototype.forEach.call(document.querySelectorAll('.js-disp-box'), function(n){ n.classList.remove('hide'); }); }
     var q = /[?&]clase=([a-z]+)/.exec(location.search);
     pintarClases();
     if (q && P.clases.some(function(c){ return c.id === q[1]; })) { st.clase = q[1]; var L = P.combos[st.clase] || []; aplicarCombo(L[1] ? L[1].nombre : (L[0] ? L[0].nombre : '')); pintarClases(); pintarArmador(); irArmar(); }
@@ -273,6 +283,7 @@ function irArmar(){ var a = $('armar'); if (a) setTimeout(function(){ a.scrollIn
   $('pm').onclick = function(){ $('personas').value = Math.max(1, st.personas - 1); $('personas').oninput(); };
   $('pp').onclick = function(){ $('personas').value = st.personas + 1; $('personas').oninput(); $('personas').value = st.personas; };
   $('f-fecha').min = hoy();
+  $('f-fecha').onchange = function(){ var v = this.value, n = $('f-fnota'); if (!v) { n.textContent = ''; return; } var d = new Date(v + 'T12:00:00').getDay(); n.textContent = (d === 0 || d === 6) ? 'Fin de semana: es nuestro horario principal.' : 'Entre semana: sujeto a disponibilidad, te confirmamos por WhatsApp.'; };
   $('form').onsubmit = enviar;
 })();
 
