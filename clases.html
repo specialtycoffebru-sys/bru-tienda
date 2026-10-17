@@ -214,7 +214,7 @@ function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(
 function fmt(n){ return '$' + Math.round(Number(n) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
 function hoy(){ var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
 // ---- Agenda: fechas y horas disponibles ----
-var AG = { ocup: {}, dia: '', sel: '', mes: 0 };
+var AG = { res: [], dia: '', sel: '', mes: 0 };
 var MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'], DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
 function agCfg(){ var a = (P && P.agenda) || {}; return { horarios: a.horarios && a.horarios.length ? a.horarios : ['9:00 a.m.', '2:00 p.m.'], dias: a.dias || [6, 0], semanas: a.semanas || 8, anticipacion: a.anticipacion == null ? 2 : a.anticipacion, bloq: a.bloq || [], extra: a.extra || [] }; }
 function ymd(d){ return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
@@ -226,24 +226,27 @@ function slotsDe(f){ var A = agCfg(), d = new Date(f + 'T12:00:00'), L = []; if 
 function rango(){ var A = agCfg(), i = new Date(), f = new Date(); i.setHours(12, 0, 0, 0); f.setHours(12, 0, 0, 0); i.setDate(i.getDate() + A.anticipacion); f.setDate(f.getDate() + A.semanas * 7); return [i, f]; }
 function fechaLarga(f){ var d = new Date(f + 'T12:00:00'); return DIAS[d.getDay()] + ' ' + d.getDate() + ' de ' + MESES[d.getMonth()]; }
 function slotTxt(k){ var p = k.split('|'); return fechaLarga(p[0]) + ' · ' + p[1]; }
-function cargarOcup(){ return sb('bru_conta?tipo=eq.clase_res&select=s:data->>slot,e:data->>estado&data->>slot=gte.' + hoy()).then(function(r){ AG.ocup = {}; (r || []).forEach(function(x){ if (x.s && x.e !== 'cancelada') AG.ocup[x.s] = 1; }); }).catch(function(){}); }
+var BUF = 60;
+function durAct(){ var c = P && st.clase ? claseAct() : null; return c ? Number(c.duracion) || 2 : 2; }
+function oc(k){ var p = k.split('|'), a = horaMin(p[1]), b = a + durAct() * 60 + BUF; return AG.res.some(function(r){ var q = r.k.split('|'); if (q[0] !== p[0]) return false; var ra = horaMin(q[1]), rb = ra + (r.d || 3) * 60 + BUF; return a < rb && ra < b; }); }
+function cargarOcup(){ return sb('bru_conta?tipo=eq.clase_res&select=s:data->>slot,e:data->>estado,d:data->>dur&data->>slot=gte.' + hoy()).then(function(r){ AG.res = []; (r || []).forEach(function(x){ if (x.s && x.e !== 'cancelada') AG.res.push({ k: x.s, d: Number(x.d) || 3 }); }); }).catch(function(){}); }
 function pintarAgenda(){
   var box = $('agenda'); if (!box || !P) return;
   var R = rango(), ini = R[0], fin = R[1], m0 = new Date(ini.getFullYear(), ini.getMonth() + AG.mes, 1, 12), maxMes = (fin.getFullYear() - ini.getFullYear()) * 12 + fin.getMonth() - ini.getMonth();
   var first = (m0.getDay() + 6) % 7, nd = new Date(m0.getFullYear(), m0.getMonth() + 1, 0).getDate(), hayLibre = false;
   var h = '<div class="fc-h"><button type="button" data-mes="-1" aria-label="Mes anterior"' + (AG.mes <= 0 ? ' disabled' : '') + '>‹</button><b>' + MESES[m0.getMonth()] + ' ' + m0.getFullYear() + '</b><button type="button" data-mes="1" aria-label="Mes siguiente"' + (AG.mes >= maxMes ? ' disabled' : '') + '>›</button></div><div class="fc-g">' + ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(function(x){ return '<span class="fc-dw">' + x + '</span>'; }).join('');
   for (var i = 0; i < first; i++) h += '<span></span>';
-  for (var dd = 1; dd <= nd; dd++) { var d = new Date(m0.getFullYear(), m0.getMonth(), dd, 12), f = ymd(d), L = (d >= ini && d <= fin) ? slotsDe(f) : [], lib = L.filter(function(x){ return !AG.ocup[f + '|' + x]; }).length, cl = !L.length ? 'off' : (lib ? 'ok' : 'full'); if (lib) hayLibre = true;
+  for (var dd = 1; dd <= nd; dd++) { var d = new Date(m0.getFullYear(), m0.getMonth(), dd, 12), f = ymd(d), L = (d >= ini && d <= fin) ? slotsDe(f) : [], lib = L.filter(function(x){ return !oc(f + '|' + x); }).length, cl = !L.length ? 'off' : (lib ? 'ok' : 'full'); if (lib) hayLibre = true;
     h += '<button type="button" class="fc-d ' + cl + (AG.dia === f ? ' on' : '') + '"' + (cl === 'ok' ? ' data-dia="' + f + '" aria-label="' + fechaLarga(f) + '"' : ' disabled') + '>' + dd + (cl === 'full' ? '<i>lleno</i>' : '') + '</button>'; }
   h += '</div><div class="fc-ley"><span><i class="l-ok"></i>Con cupo</span><span><i class="l-full"></i>Lleno</span></div>';
-  if (AG.dia) h += '<div class="fc-s"><div class="fc-sl">' + esc(fechaLarga(AG.dia)) + ' · elige la hora</div>' + slotsDe(AG.dia).map(function(x){ var k = AG.dia + '|' + x, oc = AG.ocup[k]; return '<button type="button" class="fc-t' + (AG.sel === k ? ' on' : '') + '"' + (oc ? ' disabled' : ' data-slot="' + esc(k) + '"') + '>' + esc(x) + (oc ? ' · reservado' : '') + '</button>'; }).join('') + '</div>';
+  if (AG.dia) h += '<div class="fc-s"><div class="fc-sl">' + esc(fechaLarga(AG.dia)) + ' · elige la hora</div>' + slotsDe(AG.dia).map(function(x){ var k = AG.dia + '|' + x, ocu = oc(k); return '<button type="button" class="fc-t' + (AG.sel === k ? ' on' : '') + '"' + (ocu ? ' disabled' : ' data-slot="' + esc(k) + '"') + '>' + esc(x) + (ocu ? ' · ocupado' : '') + '</button>'; }).join('') + '</div>';
   else if (!hayLibre) h += '<div class="fc-sl" style="margin-top:12px">' + (AG.mes < maxMes ? 'Este mes ya no tiene cupos. Mira el siguiente →' : 'No hay cupos en estas fechas.') + '</div>';
   h += '<button type="button" class="fc-otra' + (AG.sel === 'otra' ? ' on' : '') + '" data-slot="otra">¿Ninguna fecha te sirve? Propón otra</button>';
   box.innerHTML = h;
   $('fc-otra-blk').classList.toggle('hide', AG.sel !== 'otra');
   var ok = $('fc-ok'); ok.classList.toggle('hide', !AG.sel || AG.sel === 'otra'); if (AG.sel && AG.sel !== 'otra') ok.textContent = '✓ Tu clase: ' + slotTxt(AG.sel);
 }
-function primerMes(){ var R = rango(), ini = R[0], fin = R[1], d = new Date(ini); while (d <= fin) { var f = ymd(d); if (slotsDe(f).some(function(x){ return !AG.ocup[f + '|' + x]; })) return (d.getFullYear() - ini.getFullYear()) * 12 + d.getMonth() - ini.getMonth(); d.setDate(d.getDate() + 1); } return 0; }
+function primerMes(){ var R = rango(), ini = R[0], fin = R[1], d = new Date(ini); while (d <= fin) { var f = ymd(d); if (slotsDe(f).some(function(x){ return !oc(f + '|' + x); })) return (d.getFullYear() - ini.getFullYear()) * 12 + d.getMonth() - ini.getMonth(); d.setDate(d.getDate() + 1); } return 0; }
 var ICON = {
   filtrados: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12h28l-10 16h-8z"/><path d="M20 28v6M28 28v6"/><path d="M14 38h20"/><path d="M24 4v4M18 6l1 3M30 6l-1 3"/></svg>',
   catacion: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22h26a0 0 0 0 1 0 0c0 8-6 14-13 14S8 30 8 22z"/><path d="M34 25h3a4 4 0 0 1 0 8h-5"/><path d="M6 40h30"/><path d="M38 6L24 18"/><circle cx="40" cy="5" r="2.5"/></svg>',
@@ -319,6 +322,7 @@ function pintarArmador(){
   $('g-blk').classList.toggle('hide', !c.porGrupo); if (c.porGrupo) { fijarGrupos(c); $('grupos').value = st.grupos; notaGrupos(c); }
   $('personas').max = c.maxPersonas; $('personas').min = c.minPersonas || 1; if (st.personas < (c.minPersonas || 1)) st.personas = c.minPersonas || 1; $('personas').value = st.personas;
   $('p-nota').textContent = ((c.minPersonas || 1) > 1 ? 'Mínimo ' + c.minPersonas + ' personas. ' : '') + (c.precioExtra && c.precio === c.precioExtra ? 'Precio por persona: ' + fmt(c.precioExtra) + ', todo incluido. Máximo ' + c.maxPersonas + ' personas.' : c.precioExtra ? 'Cada persona adicional: ' + fmt(c.precioExtra) + (c.incluye ? ' (con su regalo incluido)' : '') + '. Máximo ' + c.maxPersonas + ' personas.' : '');
+  if (AG.sel && AG.sel !== 'otra' && oc(AG.sel)) AG.sel = ''; pintarAgenda();
   $('d-nota').textContent = (c.incluye ? 'El café del taller ya viene incluido; agrega más solo si quieren café adicional. ' : '') + (c.extrasPorPersona ? 'Todo lo que agregues es por persona: cada asistente recibe su kit o su café, y el precio se multiplica por el número de personas. ' : '') + (d.pct ? 'Suma ' + d.minExtras + ' o más elementos y obtienes ' + d.pct + ' % de descuento en ellos.' : '');
   pintarResumen();
 }
@@ -352,19 +356,19 @@ function enviar(ev){
   $('f-err').textContent = ''; var b = $('f-btn'); b.disabled = true; b.textContent = 'Enviando…';
   var win = window.open('', '_blank');
   cargarOcup().then(function(){
-    if (f.slot && AG.ocup[f.slot]) { if (win) win.close(); AG.sel = ''; AG.dia = ''; pintarAgenda(); pintarResumen(); b.disabled = false; b.textContent = 'Reservar por WhatsApp'; $('f-err').textContent = 'Uy, alguien acaba de reservar esa hora. Elige otra, por favor.'; $('fc-blk').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    if (f.slot && oc(f.slot)) { if (win) win.close(); AG.sel = ''; AG.dia = ''; pintarAgenda(); pintarResumen(); b.disabled = false; b.textContent = 'Reservar por WhatsApp'; $('f-err').textContent = 'Uy, alguien acaba de reservar esa hora. Elige otra, por favor.'; $('fc-blk').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
     guardarRes(r, f, b, win);
   });
 }
 function guardarRes(r, f, b, win){
   var id = 'res_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  var datos = { estado: 'nueva', clase: r.clase.nombre, claseId: r.clase.id, combo: comboActual(), personas: st.personas, grupos: r.grupos, reparto: r.clase.porGrupo ? reparto(nPers(r.clase), r.grupos) : '', items: r.lineas, base: r.base, extras: r.extras, descuento: r.descuento, total: r.total, nombre: f.nombre, telefono: f.telefono, email: f.email, direccion: f.direccion, empresa: f.empresa, fechaPref: f.fecha, horaPref: f.hora, slot: f.slot || '', nota: f.nota, origen: 'web' };
+  var datos = { estado: 'nueva', clase: r.clase.nombre, claseId: r.clase.id, combo: comboActual(), personas: st.personas, grupos: r.grupos, reparto: r.clase.porGrupo ? reparto(nPers(r.clase), r.grupos) : '', items: r.lineas, base: r.base, extras: r.extras, descuento: r.descuento, total: r.total, nombre: f.nombre, telefono: f.telefono, email: f.email, direccion: f.direccion, empresa: f.empresa, fechaPref: f.fecha, horaPref: f.hora, slot: f.slot || '', dur: r.clase.duracion, nota: f.nota, origen: 'web' };
   var wa = 'https://wa.me/' + (P.wa || '573044927790') + '?text=' + encodeURIComponent(mensaje(r, f));
   sb('bru_conta', { method: 'POST', prefer: 'return=minimal', body: [{ id: id, tipo: 'clase_res', fecha: hoy(), data: datos }] }).catch(function(){}).then(function(){
     if (win) win.location.href = wa; else location.href = wa;
     b.disabled = false; b.textContent = 'Reservar por WhatsApp';
     $('f-ok').classList.remove('hide');
-    if (f.slot) { AG.ocup[f.slot] = 1; pintarAgenda(); }
+    if (f.slot) { AG.res.push({ k: f.slot, d: durAct() }); pintarAgenda(); }
   });
 }
 function irArmar(){ var a = $('armar'); if (a) setTimeout(function(){ a.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); }
@@ -384,7 +388,7 @@ function irArmar(){ var a = $('armar'); if (a) setTimeout(function(){ a.scrollIn
     var cb = e.target.closest('[data-combo]'); if (cb) { aplicarCombo(cb.getAttribute('data-combo')); pintarArmador(); return; }
     var q = e.target.closest('[data-q]'); if (q) { var p = q.getAttribute('data-q').split('|'); st.items[p[0]] = Math.max(0, Math.min(50, (st.items[p[0]] || 0) + Number(p[1]))); if (st.cafes[p[0]]) st.cafes[p[0]].length = st.items[p[0]]; pintarArmador(); return; }
     var mb = e.target.closest('[data-mes]'); if (mb) { AG.mes += Number(mb.getAttribute('data-mes')); AG.dia = ''; pintarAgenda(); return; }
-    var db = e.target.closest('[data-dia]'); if (db) { AG.dia = db.getAttribute('data-dia'); if (AG.sel.indexOf(AG.dia) !== 0) AG.sel = ''; var L = slotsDe(AG.dia).filter(function(x){ return !AG.ocup[AG.dia + '|' + x]; }); if (L.length === 1) AG.sel = AG.dia + '|' + L[0]; pintarAgenda(); pintarResumen(); return; }
+    var db = e.target.closest('[data-dia]'); if (db) { AG.dia = db.getAttribute('data-dia'); if (AG.sel.indexOf(AG.dia) !== 0) AG.sel = ''; var L = slotsDe(AG.dia).filter(function(x){ return !oc(AG.dia + '|' + x); }); if (L.length === 1) AG.sel = AG.dia + '|' + L[0]; pintarAgenda(); pintarResumen(); return; }
     var sl = e.target.closest('[data-slot]'); if (sl) { AG.sel = sl.getAttribute('data-slot'); if (AG.sel === 'otra') AG.dia = ''; pintarAgenda(); pintarResumen(); if (AG.sel !== 'otra') setTimeout(function(){ $('form').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 250); return; }
     if (e.target.closest('#bar-btn')) { $('datos').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   });
