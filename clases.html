@@ -193,7 +193,12 @@ var SB_URL = 'https://dzgtyazvqpdmwvwqpvco.supabase.co';
 var SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
 var P = null, st = { clase: null, combo: '', items: {}, cafes: {}, personas: 1, grupos: 1 };
 function gruposMin(c){ return c && c.porGrupo ? Math.max(1, Math.ceil(Math.max(c.minPersonas || 1, st.personas) / c.porGrupo)) : 1; }
-function notaGrupos(c){ $('g-nota').textContent = 'Cada grupo es una sesión de hasta ' + c.porGrupo + ' personas. Con ' + Math.max(c.minPersonas || 1, st.personas) + ' personas necesitas mínimo ' + gruposMin(c) + '. Puedes pedir más grupos si prefieres grupos pequeños.'; }
+var MINXG = 3;
+function nPers(c){ return Math.max((c && c.minPersonas) || 1, st.personas); }
+function gruposMax(c){ return Math.max(gruposMin(c), Math.floor(nPers(c) / MINXG)); }
+function fijarGrupos(c){ st.grupos = Math.min(gruposMax(c), Math.max(gruposMin(c), st.grupos || 1)); return st.grupos; }
+function reparto(n, g){ g = Math.max(1, g); var b = Math.floor(n / g), r = n % g; if (g === 1) return '1 grupo de ' + n + ' personas'; if (!r) return g + ' grupos de ' + b + ' personas'; var L = []; for (var i = 0; i < g; i++) L.push(b + (i < r ? 1 : 0)); return g + ' grupos: ' + L.join(' + ') + ' personas'; }
+function notaGrupos(c){ var n = nPers(c), mn = gruposMin(c), mx = gruposMax(c); $('g-nota').innerHTML = '<b style="color:var(--gold2)">Así quedan: ' + esc(reparto(n, st.grupos)) + '.</b> Cada grupo es una sesión aparte, de hasta ' + c.porGrupo + ' personas. Con ' + n + ' personas puedes armar ' + (mn === mx ? mn + (mn > 1 ? ' grupos' : ' grupo') : 'de ' + mn + ' a ' + mx + ' grupos') + ' (mínimo ' + MINXG + ' personas por grupo).'; $('gm').disabled = st.grupos <= mn; $('gp').disabled = st.grupos >= mx; }
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 function fmt(n){ return '$' + Math.round(Number(n) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
@@ -247,7 +252,7 @@ function extraPor(id){ return P.extras.filter(function(e){ return e.id === id; }
 function precioCafe(nombre){ var c = P.cafes.filter(function(x){ return x.nombre === nombre; })[0]; return c ? c.precio : 0; }
 function calcular(){
   var c = claseAct(); if (!c) return null;
-  var n = Math.max(c.minPersonas || 1, st.personas), g = c.porGrupo ? Math.max(gruposMin(c), st.grupos || 1) : 1, base = g * (c.precio - c.precioExtra) + n * c.precioExtra, lineas = [], ext = 0, cuenta = 0;
+  var n = Math.max(c.minPersonas || 1, st.personas), g = c.porGrupo ? fijarGrupos(c) : 1, base = g * (c.precio - c.precioExtra) + n * c.precioExtra, lineas = [], ext = 0, cuenta = 0;
   var mult = c.extrasPorPersona ? n : 1, xp = mult > 1 ? ' × ' + mult + ' personas' : '';
   Object.keys(st.items).forEach(function(id){
     var q = st.items[id], e = extraPor(id); if (!q || !e) return;
@@ -295,7 +300,7 @@ function pintarArmador(){
     var dis = e.tipo === 'cafe' && !P.cafes.length;
     return '<div class="ex' + (q ? ' on' : '') + '"><div class="ex-tx"><b>' + esc(e.nombre) + '</b><span>' + esc(e.desc) + '</span></div><div class="ex-pr">' + pr + '</div><div class="qty"><button data-q="' + e.id + '|-1"' + (q ? '' : ' disabled') + ' aria-label="Quitar">−</button><b>' + q + '</b><button data-q="' + e.id + '|1"' + (dis ? ' disabled' : '') + ' aria-label="Agregar">+</button></div>' + sel + '</div>';
   }).join('');
-  $('g-blk').classList.toggle('hide', !c.porGrupo); if (c.porGrupo) { st.grupos = Math.max(gruposMin(c), st.grupos || 1); $('grupos').value = st.grupos; notaGrupos(c); }
+  $('g-blk').classList.toggle('hide', !c.porGrupo); if (c.porGrupo) { fijarGrupos(c); $('grupos').value = st.grupos; notaGrupos(c); }
   $('personas').max = c.maxPersonas; $('personas').min = c.minPersonas || 1; if (st.personas < (c.minPersonas || 1)) st.personas = c.minPersonas || 1; $('personas').value = st.personas;
   $('p-nota').textContent = ((c.minPersonas || 1) > 1 ? 'Mínimo ' + c.minPersonas + ' personas. ' : '') + (c.precioExtra ? 'Cada persona adicional: ' + fmt(c.precioExtra) + (c.incluye ? ' (con su regalo incluido)' : '') + '. Máximo ' + c.maxPersonas + ' personas.' : '');
   $('d-nota').textContent = (c.extrasPorPersona ? 'Todo lo que agregues es por persona: cada asistente recibe su kit o su café, y el precio se multiplica por el número de personas. ' : '') + (d.pct ? 'Suma ' + d.minExtras + ' o más elementos y obtienes ' + d.pct + ' % de descuento en ellos.' : '');
@@ -303,14 +308,14 @@ function pintarArmador(){
 }
 function pintarResumen(){
   var r = calcular(); if (!r) return;
-  var html = '<div class="rs-dur">' + RELOJ + esc(dur(r.clase.duracion)) + ' de clase</div>' + (AG.sel && AG.sel !== 'otra' ? '<div class="rs-fecha">📅 ' + esc(slotTxt(AG.sel)) + '</div>' : '') + '<div class="rs-l"><span>' + esc(r.clase.corto || r.clase.nombre) + (st.personas > 1 ? ' · ' + st.personas + ' personas' : '') + (r.clase.porGrupo ? ' · ' + r.grupos + (r.grupos > 1 ? ' grupos' : ' grupo') : '') + '</span><b>' + fmt(r.base) + '</b></div>' + (r.clase.incluye ? '<div class="rs-l"><span>🎁 ' + esc(r.clase.incluye) + ' × ' + Math.max(r.clase.minPersonas || 1, st.personas) + '</span><b>Incluido</b></div>' : '') +
+  var html = '<div class="rs-dur">' + RELOJ + esc(dur(r.clase.duracion)) + ' de clase</div>' + (AG.sel && AG.sel !== 'otra' ? '<div class="rs-fecha">📅 ' + esc(slotTxt(AG.sel)) + '</div>' : '') + (r.clase.porGrupo ? '<div class="rs-l"><span>' + esc(r.clase.corto || r.clase.nombre) + ' · ' + r.grupos + (r.grupos > 1 ? ' sesiones' : ' sesión') + ' × ' + fmt(r.clase.precio - r.clase.precioExtra) + '<i style="display:block">' + esc(reparto(nPers(r.clase), r.grupos)) + '</i></span><b>' + fmt(r.grupos * (r.clase.precio - r.clase.precioExtra)) + '</b></div><div class="rs-l"><span>' + nPers(r.clase) + ' personas × ' + fmt(r.clase.precioExtra) + '</span><b>' + fmt(nPers(r.clase) * r.clase.precioExtra) + '</b></div>' : '<div class="rs-l"><span>' + esc(r.clase.corto || r.clase.nombre) + (st.personas > 1 ? ' · ' + st.personas + ' personas' : '') + (r.clase.porGrupo ? ' · ' + r.grupos + (r.grupos > 1 ? ' grupos' : ' grupo') : '') + '</span><b>' + fmt(r.base) + '</b></div>') + (r.clase.incluye ? '<div class="rs-l"><span>🎁 ' + esc(r.clase.incluye) + ' × ' + Math.max(r.clase.minPersonas || 1, st.personas) + '</span><b>Incluido</b></div>' : '') +
     r.lineas.map(function(l){ return '<div class="rs-l"><span>' + (l.qty > 1 ? l.qty + ' × ' : '') + esc(l.nombre) + (l.cafe ? ' <i>' + esc(l.cafe) + '</i>' : '') + '</span><b>' + fmt(l.precio) + '</b></div>'; }).join('') +
     (r.descuento ? '<div class="rs-l desc"><span>Descuento combo</span><b>−' + fmt(r.descuento) + '</b></div>' : (r.cuenta && r.faltan ? '<div class="rs-hint">Agrega ' + r.faltan + ' elemento' + (r.faltan > 1 ? 's' : '') + ' más y obtienes ' + P.descuento.pct + ' % de descuento</div>' : ''));
   $('rs-lineas').innerHTML = html; $('rs-total').textContent = fmt(r.total); var nn = Math.max(r.clase.minPersonas || 1, st.personas); $('rs-pp').textContent = nn > 1 ? 'Equivale a ' + fmt(Math.round(r.total / nn)) + ' por persona' : 'Precio por persona'; $('bar-total').textContent = fmt(r.total); $('rs-combo').textContent = comboActual();
   $('bar').classList.remove('hide');
 }
 function mensaje(r, f){
-  var L = ['Hola B.R.U ☕ Quiero reservar una clase:', '', '• ' + r.clase.nombre + ' · ' + dur(r.clase.duracion) + ' (' + st.personas + ' persona' + (st.personas > 1 ? 's' : '') + (r.clase.porGrupo ? ', ' + r.grupos + (r.grupos > 1 ? ' grupos' : ' grupo') : '') + ') — ' + fmt(r.base)];
+  var L = ['Hola B.R.U ☕ Quiero reservar una clase:', '', '• ' + r.clase.nombre + ' · ' + dur(r.clase.duracion) + ' (' + st.personas + ' persona' + (st.personas > 1 ? 's' : '') + (r.clase.porGrupo ? ', ' + reparto(nPers(r.clase), r.grupos) : '') + ') — ' + fmt(r.base)];
   if (r.clase.incluye) L.push('• Regalo por asistente: ' + r.clase.incluye + ' (incluido)');
   r.lineas.forEach(function(l){ L.push('• ' + (l.qty > 1 ? l.qty + ' × ' : '') + l.nombre + (l.cafe ? ' (' + l.cafe + ')' : '') + ' — ' + fmt(l.precio)); });
   if (r.descuento) L.push('• Descuento combo — −' + fmt(r.descuento));
@@ -337,7 +342,7 @@ function enviar(ev){
 }
 function guardarRes(r, f, b, win){
   var id = 'res_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  var datos = { estado: 'nueva', clase: r.clase.nombre, claseId: r.clase.id, combo: comboActual(), personas: st.personas, grupos: r.grupos, items: r.lineas, base: r.base, extras: r.extras, descuento: r.descuento, total: r.total, nombre: f.nombre, telefono: f.telefono, email: f.email, direccion: f.direccion, empresa: f.empresa, fechaPref: f.fecha, horaPref: f.hora, slot: f.slot || '', nota: f.nota, origen: 'web' };
+  var datos = { estado: 'nueva', clase: r.clase.nombre, claseId: r.clase.id, combo: comboActual(), personas: st.personas, grupos: r.grupos, reparto: r.clase.porGrupo ? reparto(nPers(r.clase), r.grupos) : '', items: r.lineas, base: r.base, extras: r.extras, descuento: r.descuento, total: r.total, nombre: f.nombre, telefono: f.telefono, email: f.email, direccion: f.direccion, empresa: f.empresa, fechaPref: f.fecha, horaPref: f.hora, slot: f.slot || '', nota: f.nota, origen: 'web' };
   var wa = 'https://wa.me/' + (P.wa || '573044927790') + '?text=' + encodeURIComponent(mensaje(r, f));
   sb('bru_conta', { method: 'POST', prefer: 'return=minimal', body: [{ id: id, tipo: 'clase_res', fecha: hoy(), data: datos }] }).catch(function(){}).then(function(){
     if (win) win.location.href = wa; else location.href = wa;
@@ -368,10 +373,12 @@ function irArmar(){ var a = $('armar'); if (a) setTimeout(function(){ a.scrollIn
     if (e.target.closest('#bar-btn')) { $('datos').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   });
   document.addEventListener('change', function(e){ var s = e.target.getAttribute('data-cafe'); if (s) { var p = s.split('|'); (st.cafes[p[0]] = st.cafes[p[0]] || [])[Number(p[1])] = e.target.value; pintarArmador(); } });
-  $('personas').oninput = function(){ var c = claseAct(); st.personas = Math.max(c ? (c.minPersonas || 1) : 1, Math.min(c ? c.maxPersonas : 10, Number(this.value) || 1)); if (c && c.porGrupo) { st.grupos = Math.max(gruposMin(c), st.grupos || 1); $('grupos').value = st.grupos; notaGrupos(c); } if (c && c.extrasPorPersona) pintarArmador(); else pintarResumen(); };
+  $('personas').oninput = function(){ var c = claseAct(); st.personas = Math.max(c ? (c.minPersonas || 1) : 1, Math.min(c ? c.maxPersonas : 10, Number(this.value) || 1)); if (c && c.porGrupo) { fijarGrupos(c); $('grupos').value = st.grupos; notaGrupos(c); } if (c && c.extrasPorPersona) pintarArmador(); else pintarResumen(); };
   $('pm').onclick = function(){ $('personas').value = st.personas - 1; $('personas').oninput(); $('personas').value = st.personas; };
   $('pp').onclick = function(){ $('personas').value = st.personas + 1; $('personas').oninput(); $('personas').value = st.personas; };
-  $('grupos').oninput = function(){ var c = claseAct(); st.grupos = Math.max(gruposMin(c), Math.min(20, Number(this.value) || 1)); pintarResumen(); };
+  $('grupos').oninput = function(){ var c = claseAct(); st.grupos = Number(this.value) || 1; fijarGrupos(c); notaGrupos(c); pintarResumen(); };
+  $('grupos').onchange = function(){ this.value = st.grupos; };
+  $('grupos').onblur = function(){ this.value = st.grupos; };
   $('gm').onclick = function(){ $('grupos').value = st.grupos - 1; $('grupos').oninput(); $('grupos').value = st.grupos; };
   $('gp').onclick = function(){ $('grupos').value = st.grupos + 1; $('grupos').oninput(); $('grupos').value = st.grupos; };
   $('f-fecha').min = hoy();
