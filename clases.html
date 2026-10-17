@@ -319,7 +319,7 @@ function pintarArmador(){
   $('g-blk').classList.toggle('hide', !c.porGrupo); if (c.porGrupo) { fijarGrupos(c); $('grupos').value = st.grupos; notaGrupos(c); }
   $('personas').max = c.maxPersonas; $('personas').min = c.minPersonas || 1; if (st.personas < (c.minPersonas || 1)) st.personas = c.minPersonas || 1; $('personas').value = st.personas;
   $('p-nota').textContent = ((c.minPersonas || 1) > 1 ? 'Mínimo ' + c.minPersonas + ' personas. ' : '') + (c.precioExtra && c.precio === c.precioExtra ? 'Precio por persona: ' + fmt(c.precioExtra) + ', todo incluido. Máximo ' + c.maxPersonas + ' personas.' : c.precioExtra ? 'Cada persona adicional: ' + fmt(c.precioExtra) + (c.incluye ? ' (con su regalo incluido)' : '') + '. Máximo ' + c.maxPersonas + ' personas.' : '');
-  $('d-nota').textContent = (c.extrasPorPersona ? 'Todo lo que agregues es por persona: cada asistente recibe su kit o su café, y el precio se multiplica por el número de personas. ' : '') + (d.pct ? 'Suma ' + d.minExtras + ' o más elementos y obtienes ' + d.pct + ' % de descuento en ellos.' : '');
+  $('d-nota').textContent = (c.incluye ? 'El café del taller ya viene incluido; agrega más solo si quieren café adicional. ' : '') + (c.extrasPorPersona ? 'Todo lo que agregues es por persona: cada asistente recibe su kit o su café, y el precio se multiplica por el número de personas. ' : '') + (d.pct ? 'Suma ' + d.minExtras + ' o más elementos y obtienes ' + d.pct + ' % de descuento en ellos.' : '');
   pintarResumen();
 }
 function pintarResumen(){
