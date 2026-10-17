@@ -166,7 +166,7 @@ var SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
 var T = 'bru_conta';
 var S = { tab: 'costeo', cfg: null, cat: [], res: [], sub: {} };
 var DEF = {
-  costoG: 100, margen: 40, redondeo: 5000, wa: '573044927790', mig: 6,
+  costoG: 100, margen: 40, redondeo: 5000, wa: '573044927790', mig: 7,
   disponibilidad: 'Principalmente sábados y domingos. Entre semana, pregúntanos disponibilidad.',
   descuento: { pct: 10, minExtras: 2 },
   agenda: { horarios: ['9:00 a.m.', '2:00 p.m.'], dias: [6, 0], semanas: 8, anticipacion: 2, bloq: [], extra: [] },
@@ -177,8 +177,8 @@ var DEF = {
       horas: 2.5, valorHora: 40000, cafeG: 150, leche: 0, insumos: 12000, equipos: 30000, material: 8000, extraCafeG: 60, extraInsumos: 6000, precio: 0, precioExtra: 0, img: '', activa: true, extrasPorPersona: true },
     { id: 'barismo', nombre: 'Clase personalizada de Barismo', corto: 'Barismo', desc: 'Espresso de principio a fin: dosis, molienda, extracción y calibración. Texturiza leche y da tus primeros pasos en arte latte con máquina profesional.', duracion: 3, maxPersonas: 3,
       horas: 3, valorHora: 45000, cafeG: 300, leche: 13500, insumos: 10000, equipos: 60000, material: 8000, extraCafeG: 150, extraInsumos: 12000, precio: 0, precioExtra: 0, img: '', activa: true, estado: 'pronto', extrasPorPersona: true },
-    { id: 'empresas', nombre: 'Taller de café para empresas', corto: 'Empresas', desc: 'Una experiencia de café para tu equipo en tu oficina: preparación de filtrados, cata guiada y la historia detrás de cada taza. Ideal para integraciones, clientes y celebraciones.', duracion: 2, maxPersonas: 100, minPersonas: 5, porGrupo: 15,
-      horas: 2, valorHora: 60000, cafeG: 300, leche: 0, insumos: 30000, equipos: 40000, material: 8000, extraCafeG: 30, extraInsumos: 4000, kitPersona: 37500, kitPersonaTxt: 'Una bolsa de café de 250 g y 5 drip bags', extrasPorPersona: true, precio: 475000, precioExtra: 120000, img: '', activa: true, estado: 'disponible' }
+    { id: 'empresas', nombre: 'Taller de café para empresas', corto: 'Empresas', desc: 'Una experiencia de café para tu equipo en tu oficina: cada persona hace 2 cataciones guiadas de 4 cafés con el protocolo profesional (fragancia, aroma, sabor, acidez y cuerpo) y se lleva su café. Ideal para integraciones, clientes y celebraciones.', duracion: 2, maxPersonas: 100, minPersonas: 5, porGrupo: 15,
+      horas: 2, valorHora: 60000, cafeG: 300, leche: 0, insumos: 30000, equipos: 40000, material: 8000, extraCafeG: 130, extraInsumos: 8000, kitPersona: 37500, kitPersonaTxt: 'Una bolsa de café de 250 g, 5 drip bags y 2 cataciones de 4 cafés con la experiencia completa de catación', extrasPorPersona: true, precio: 320000, precioExtra: 320000, img: '', activa: true, estado: 'disponible' }
   ],
   extras: [
     { id: 'kit_v60', nombre: 'Kit de filtrado en casa', desc: 'Gotero V60 02, 40 filtros, cuchara medidora y guía de recetas', costo: 62000, precio: 105000, tipo: 'item', activo: true },
@@ -263,8 +263,9 @@ function cargar(){
     if (c && (c.mig || 0) < 3) { if (!S.cfg.clases.some(function(k){ return k.id === 'empresas'; })) S.cfg.clases.push(copia(DEF.clases.filter(function(k){ return k.id === 'empresas'; })[0])); if (!S.cfg.combos.empresas) S.cfg.combos.empresas = copia(DEF.combos.empresas); S.existe = false; }
     if (c && (c.mig || 0) < 4) { S.cfg.clases.forEach(function(k){ if (k.id === 'empresas' && !k.porGrupo) { k.porGrupo = 15; if ((k.maxPersonas || 0) < 100) k.maxPersonas = 100; } }); S.existe = false; }
     if (c && (c.mig || 0) < 5) { S.cfg.clases.forEach(function(k){ if (k.id === 'empresas') { k.extrasPorPersona = true; if ((k.precioExtra || 0) < 120000) k.precioExtra = 120000; if ((k.precio || 0) < 475000) k.precio = 475000; } }); (S.cfg.combos.empresas || []).forEach(function(cb){ cb.items.forEach(function(it){ if (it.id === 'cafe' && it.qty > 1) it.qty = 1; }); }); S.existe = false; }
-    if (c && (c.mig || 0) < 6) { S.cfg.clases.forEach(function(k){ k.extrasPorPersona = true; if (k.id !== 'empresas' && !k.precioExtra) { var cc = costoClase(k); k.precioExtra = Math.max(cc.precioExtra, redondear(cc.precio * 0.5)); } }); S.cfg.mig = 6; S.existe = false; }
-    if (c && (c.mig || 0) < 2) { S.cfg.clases.forEach(function(k){ if (!k.estado) k.estado = k.id === 'barismo' ? 'pronto' : 'disponible'; }); S.cfg.mig = 6; S.existe = false; }
+    if (c && (c.mig || 0) < 6) { S.cfg.clases.forEach(function(k){ k.extrasPorPersona = true; if (k.id !== 'empresas' && !k.precioExtra) { var cc = costoClase(k); k.precioExtra = Math.max(cc.precioExtra, redondear(cc.precio * 0.5)); } }); S.existe = false; }
+    if (c && (c.mig || 0) < 7) { S.cfg.clases.forEach(function(k){ if (k.id === 'empresas') { k.precio = 320000; k.precioExtra = 320000; k.kitPersonaTxt = 'Una bolsa de café de 250 g, 5 drip bags y 2 cataciones de 4 cafés con la experiencia completa de catación'; k.desc = 'Una experiencia de café para tu equipo en tu oficina: cada persona hace 2 cataciones guiadas de 4 cafés con el protocolo profesional (fragancia, aroma, sabor, acidez y cuerpo) y se lleva su café. Ideal para integraciones, clientes y celebraciones.'; k.extraCafeG = Math.max(k.extraCafeG || 0, 130); k.extraInsumos = Math.max(k.extraInsumos || 0, 8000); } }); S.cfg.mig = 7; S.existe = false; }
+    if (c && (c.mig || 0) < 2) { S.cfg.clases.forEach(function(k){ if (!k.estado) k.estado = k.id === 'barismo' ? 'pronto' : 'disponible'; }); S.cfg.mig = 7; S.existe = false; }
     S.cat = (r[1] && r[1][0] && r[1][0].catalogo) || [];
     S.res = r[2] || [];
   });
@@ -321,7 +322,7 @@ function tarjetaClase(k, i){
 function resumenClase(k){
   var r = costoClase(k), p = r.partes;
   return '<div class="kpis" style="margin-top:12px"><div class="kpi"><b>' + fmt(r.total) + '</b><span>costo de la clase</span></div><div class="kpi"><b>' + fmt(r.sugerido) + '</b><span>precio sugerido (' + S.cfg.margen + ' %)</span></div><div class="kpi ' + (r.margen < 30 ? 'bad' : 'ok') + '"><b>' + fmt(r.precio) + '</b><span>precio en la web · margen ' + pct(r.margen) + '</span></div><div class="kpi"><b>' + fmt(r.precioExtra) + '</b><span>por persona adicional · costo ' + fmt(r.extraCosto) + '</span></div></div>' +
-    (k.porGrupo ? '<div class="banner info" style="margin:6px 0">Precio para empresas = <b>' + fmt(r.precio - r.precioExtra) + ' por grupo</b> (sesión de hasta ' + k.porGrupo + ' personas) + <b>' + fmt(r.precioExtra) + ' por persona</b>. Ej.: 10 personas = ' + fmt((r.precio - r.precioExtra) + 10 * r.precioExtra) + ' · 30 personas (2 grupos) = ' + fmt(2 * (r.precio - r.precioExtra) + 30 * r.precioExtra) + '.</div>' : '') +
+    (k.porGrupo && r.precio === r.precioExtra ? '<div class="banner info" style="margin:6px 0">Precio para empresas = <b>' + fmt(r.precioExtra) + ' por persona</b>, todo incluido (sin cobro por grupo). Costo por persona ' + fmt(r.extraCosto) + ' · margen ' + pct(r.extraMargen) + '. Ej.: 10 personas = ' + fmt(10 * r.precioExtra) + ' · 30 personas = ' + fmt(30 * r.precioExtra) + '.</div>' : '') + (k.porGrupo && r.precio !== r.precioExtra ? '<div class="banner info" style="margin:6px 0">Precio para empresas = <b>' + fmt(r.precio - r.precioExtra) + ' por grupo</b> (sesión de hasta ' + k.porGrupo + ' personas) + <b>' + fmt(r.precioExtra) + ' por persona</b>. Ej.: 10 personas = ' + fmt((r.precio - r.precioExtra) + 10 * r.precioExtra) + ' · 30 personas (2 grupos) = ' + fmt(2 * (r.precio - r.precioExtra) + 30 * r.precioExtra) + '.</div>' : '') +
     '<div class="small muted">Instructor ' + fmt(p.instructor) + ' · café ' + fmt(p.cafe) + (p.leche ? ' · leche ' + fmt(p.leche) : '') + ' · insumos ' + fmt(p.insumos) + ' · equipos ' + fmt(p.equipos) + (p.transporte ? ' · transporte ' + fmt(p.transporte) : '') + ' · material ' + fmt(p.material) + (p.regalo ? ' · regalo por asistente ' + fmt(p.regalo) : '') + ' · ganancia por clase ' + fmt(r.precio - r.total) + '</div>';
 }
 function renderExtras(c){
