@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>B.R.U · Eventos</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,300;9..144,500&display=swap" rel="stylesheet">
+<script>if(/[?&]embed=1/.test(location.search))document.documentElement.className+=' embed';</script>
+<style>
+:root{
+  --bg:#0d0b09;--bg2:#141210;--bg3:#1c1916;--card:#181512;--card2:#1e1b17;
+  --gold:#c9a84c;--gold2:#e8c96a;--gold3:rgba(201,168,76,.12);
+  --txt:#e8e2d8;--mut:#a8a098;--dim:#6a6058;
+  --line:rgba(255,255,255,.08);--line2:rgba(201,168,76,.28);
+  --ok:#5fd394;--ok-bg:rgba(95,211,148,.1);--bad:#f38b8b;--bad-bg:rgba(243,139,139,.1);--warn:#f3a96b;--warn-bg:rgba(243,169,107,.1);--info:#7fb2f0;--info-bg:rgba(127,178,240,.1);
+  --r:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+select,option{background:var(--card2);color:var(--txt)}
+a{color:var(--gold)}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:300;margin:0}
+.wrap{max-width:1320px;margin:0 auto;padding:18px 16px 80px}
+html.embed .wrap{padding:12px 12px 60px}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.top h1{font-size:28px}
+html.embed .top h1{display:none}
+.top .sp{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--mut);white-space:nowrap}
+.pill.ok{color:var(--ok);border-color:rgba(95,211,148,.35)}.pill.warn{color:var(--warn);border-color:rgba(243,169,107,.35)}.pill.bad{color:var(--bad);border-color:rgba(243,139,139,.35)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;scrollbar-width:thin}
+.tabs button{border:1px solid var(--line);background:transparent;padding:7px 13px;border-radius:999px;cursor:pointer;color:var(--mut);white-space:nowrap;font-size:13px}
+.tabs button.on{background:var(--gold);color:#1a1406;border-color:var(--gold);font-weight:600}
+.tabs .cnt{font-size:11px;margin-left:4px;opacity:.85}
+.subtabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px}
+.subtabs button{border:none;background:var(--card2);padding:6px 12px;border-radius:8px;cursor:pointer;color:var(--mut);font-size:13px}
+.subtabs button.on{background:var(--gold3);color:var(--gold2);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.card h3{font-size:19px;margin-bottom:10px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:860px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.grid>*{min-width:0}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+label.f.chk{flex-direction:row;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--txt)}
+input[type=text],input[type=number],input[type=date],input[type=month],input[type=email],input[type=search],input[type=password],select,textarea{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;outline:none;text-transform:none;letter-spacing:0}
+input:focus,select:focus,textarea:focus{border-color:var(--line2)}
+textarea{min-height:90px;resize:vertical}
+.btn{border:1px solid var(--line2);background:var(--card2);padding:8px 14px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:13px}
+.btn:hover{border-color:var(--gold)}
+.btn.pri{background:var(--gold);color:#1a1406;border-color:var(--gold);font-weight:600}
+.btn.sm{padding:4px 9px;font-size:12px}
+.btn.ghost{background:transparent}
+.btn.dang{color:var(--bad);border-color:rgba(243,139,139,.35)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+.muted{color:var(--mut)}.dim{color:var(--dim)}.small{font-size:12px}.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:11px 13px;min-width:0}
+.kpi b{display:block;font-family:Fraunces,serif;font-weight:300;font-size:22px;line-height:1.15;overflow-wrap:anywhere}
+.kpi span{font-size:12px;color:var(--mut)}
+.kpi.ok b{color:var(--ok)}.kpi.bad b{color:var(--bad)}.kpi.warn b{color:var(--warn)}
+.tbl-w{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+table.t{width:100%;border-collapse:collapse;font-size:13px}
+table.t th,table.t td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.t th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);font-weight:600;background:var(--bg2);position:sticky;top:0}
+table.t tr.tot td{font-weight:600;border-top:1px solid var(--line2)}
+table.t tr.grp td{background:var(--bg2);font-weight:600;color:var(--gold2)}
+table.t tr.click{cursor:pointer}
+table.t tr.click:hover td{background:rgba(255,255,255,.02)}
+table.t tr.anul td{opacity:.45;text-decoration:line-through}
+table.t td.num,table.t th.num{text-align:right}
+.st{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--card2);color:var(--mut);white-space:nowrap}
+.st.ok{color:var(--ok);background:var(--ok-bg)}.st.warn{color:var(--warn);background:var(--warn-bg)}.st.bad{color:var(--bad);background:var(--bad-bg)}.st.info{color:var(--info);background:var(--info-bg)}
+.banner{border-radius:var(--r);padding:10px 13px;margin-bottom:10px;font-size:13px;border:1px solid}
+.banner.warn{background:var(--warn-bg);border-color:rgba(243,169,107,.35)}
+.banner.info{background:var(--info-bg);border-color:rgba(127,178,240,.35)}
+.banner.bad{background:var(--bad-bg);border-color:rgba(243,139,139,.35)}
+.banner.ok{background:var(--ok-bg);border-color:rgba(95,211,148,.35)}
+.banner code{background:rgba(0,0,0,.3);padding:1px 5px;border-radius:4px;font-size:12px}
+.sec{margin:16px 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--dim)}
+.empty{padding:34px 16px;text-align:center;color:var(--mut)}
+.hide{display:none!important}
+.agn-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.agn-dw{font-size:11px;color:var(--mut);text-align:center;text-transform:uppercase;letter-spacing:.08em}
+.agn-d{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:7px;min-height:92px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.agn-d.pas{opacity:.3}.agn-d.vac{background:transparent}.agn-d.cer{background:rgba(243,139,139,.06);border-color:rgba(243,139,139,.25)}
+.agn-n{font-size:12px;color:var(--mut)}.agn-n b{color:var(--txt);font-size:14px}
+.agn-s{display:flex;justify-content:space-between;gap:4px;align-items:baseline;border:1px solid var(--line2);background:var(--gold3);color:var(--gold2);border-radius:7px;padding:4px 6px;font-size:12px;cursor:pointer;text-align:left;width:100%;overflow:hidden}
+.agn-s i{font-style:normal;font-size:10px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agn-s.bl{background:transparent;border-color:var(--line);color:var(--mut);text-decoration:line-through}
+.agn-s.res{background:rgba(95,211,148,.12);border-color:rgba(95,211,148,.4);color:#8be0b0}.agn-s.res i{color:#8be0b0}
+.agn-a{display:flex;flex-wrap:wrap;gap:2px 8px;margin-top:auto}
+.lnk{background:none;border:none;padding:0;color:var(--gold2);font-size:11px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+@media(max-width:760px){.agn-g{grid-template-columns:repeat(2,minmax(0,1fr))}.agn-dw{display:none}.agn-d.pas{display:none}}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;display:none}
+.ov.on{display:block}
+.drawer{position:fixed;top:0;right:0;height:100dvh;width:min(760px,100vw);background:var(--bg2);border-left:1px solid var(--line);z-index:41;transform:translateX(105%);visibility:hidden;transition:transform .22s,visibility 0s .22s;display:flex;flex-direction:column}
+.drawer.on{transform:none;visibility:visible;transition:transform .22s}
+.drawer .hd{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center}
+.drawer .hd h2{font-size:22px;flex:1}
+.drawer .bd{padding:14px 16px;overflow:auto;flex:1}
+.drawer .ft{padding:10px 16px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lines td{padding:4px 4px}
+.lines input,.lines select{padding:6px 7px;font-size:13px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--gold);color:#1a1406;padding:9px 16px;border-radius:999px;font-weight:600;z-index:60;opacity:0;transition:opacity .25s;pointer-events:none;max-width:92vw;text-align:center}
+.toast.on{opacity:1}
+.toast.err{background:var(--bad)}
+.bar{height:8px;background:var(--card2);border-radius:4px;overflow:hidden;min-width:60px}
+.bar i{display:block;height:100%;background:var(--gold);border-radius:0 4px 4px 0}
+.drop{border:1.5px dashed var(--line2);border-radius:var(--r);padding:26px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--card);transition:background .15s,border-color .15s}
+.drop.on{background:var(--gold3);border-color:var(--gold)}
+.ag-fab{position:fixed;right:16px;bottom:16px;z-index:30;background:var(--gold);color:#1a1406;border:none;border-radius:999px;padding:11px 16px;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.45);display:flex;gap:6px;align-items:center}
+.ag{position:fixed;top:0;right:0;height:100dvh;width:min(460px,100vw);background:var(--bg2);border-left:1px solid var(--line2);z-index:44;transform:translateX(105%);visibility:hidden;transition:transform .22s,visibility 0s .22s;display:flex;flex-direction:column}
+.ag.on{transform:none;visibility:visible;transition:transform .22s}
+.ag.on~.ag-fab,body:has(.ag.on) .ag-fab{display:none}
+.ag .hd{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
+.ag .hd h2{font-size:20px;flex:1}
+.ag-msgs{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+.ag-in{padding:10px 12px;border-top:1px solid var(--line)}
+.ag-u{align-self:flex-end;background:var(--gold3);border:1px solid var(--line2);padding:8px 11px;border-radius:12px 12px 2px 12px;max-width:88%;overflow-wrap:anywhere}
+.ag-a{align-self:flex-start;background:var(--card);border:1px solid var(--line);padding:8px 11px;border-radius:12px 12px 12px 2px;max-width:92%;overflow-wrap:anywhere}
+.ag-a code,.ag-u code{background:rgba(0,0,0,.3);padding:0 4px;border-radius:4px}
+.ag-tool{font-size:12px;color:var(--mut);padding:6px 10px;border-left:2px solid var(--line2);overflow-wrap:anywhere}
+.ag-tool.ok{border-color:var(--ok)}.ag-tool.err{border-color:var(--bad);color:var(--bad)}.ag-tool.no{border-color:var(--dim)}
+.ag-ok{background:var(--warn-bg);border:1px solid rgba(243,169,107,.35);border-radius:10px;padding:10px 12px;font-size:13px}
+.ag-hola{color:var(--mut);line-height:1.6}
+.ag-sug{display:block;margin-top:6px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 10px;cursor:pointer;text-align:left;width:100%;color:var(--txt)}
+.ag-sug:hover{border-color:var(--gold)}
+@media(max-width:600px){.ag-fab span{display:none}}
+@media print{.ag,.ag-fab{display:none!important}}
+.cal-day{display:flex;gap:10px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line)}
+.cal-day .d{width:58px;font-variant-numeric:tabular-nums;color:var(--mut);font-size:12px}
+@media print{body{background:#fff;color:#000}.tabs,.top,.no-print{display:none!important}}
+.ag.inline{position:relative;top:auto;right:auto;height:calc(100dvh - 150px);min-height:480px;width:100%;transform:none;visibility:visible;border:1px solid var(--line2);border-radius:var(--r);z-index:1;transition:none}
+html.embed .ag.inline{height:calc(100dvh - 110px)}
+.ag.inline #agX{display:none}
+.tabs button[data-t=agente]:not(.on){border-color:var(--line2);color:var(--gold2)}
+.chipq{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:2px 4px 2px 9px;margin:2px;font-size:12px;color:var(--mut)}
+.chipq.on{border-color:var(--line2);color:var(--gold2);background:var(--gold3)}
+.chipq button{border:none;background:var(--card2);color:var(--txt);border-radius:50%;width:20px;height:20px;cursor:pointer;line-height:1}
+.chipq b{min-width:10px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><h1>Eventos · estación de café</h1><span class="sp"></span><span class="pill" id="estado">Los cambios se publican solos en la web</span><a class="btn sm" href="/eventos.html" target="_blank">Ver página ↗</a></div>
+  <div class="tabs" id="tabs"></div>
+  <div id="main"></div>
+</div>
+<div class="ov" id="ov"></div>
+<aside class="drawer" id="dr"></aside>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+'use strict';
+// =============== B.R.U · CLASES PERSONALIZADAS (dashboard) ===============
+// Costeo de eventos (estación de café), extras y combos. Guarda en bru_conta: 'eventoscfg' (con costos, privado) y 'eventospub' (solo precios, lo lee la web).
+// Las reservas de eventos que llegan de la web son documentos tipo 'evento_res'. Nunca modifica bru_store.
+var SB_URL = 'https://dzgtyazvqpdmwvwqpvco.supabase.co';
+var SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
+var T = 'bru_conta';
+var S = { tab: 'costeo', cfg: null, cat: [], res: [], sub: {} };
+var DEF = {
+  costoG: 100, margen: 40, redondeo: 5000, wa: '573203713844', mig: 10,
+  disponibilidad: 'Bodas, fiestas y eventos en Bogotá y alrededores. Reserva con anticipación: las fechas se separan con un anticipo.',
+  descuento: { pct: 10, minExtras: 3 },
+  agenda: { horarios: ['10:00 a.m.', '12:00 p.m.', '2:00 p.m.', '4:00 p.m.', '6:00 p.m.', '8:00 p.m.'], dias: [5, 6, 0], semanas: 26, anticipacion: 7, bloq: [], extra: [] },
+  pago: { link: '', nequi: '', llave: '', banco: '', cuenta: '', titular: '', doc: '', anticipo: 50, pasarela: { trasladar: true, pct: 2.99, fijo: 600, iva: 19 } },
+  clases: [
+    { id: 'bodas', nombre: 'Estación de café para bodas', corto: 'Bodas', desc: 'Una barra de café de especialidad atendida por nuestros baristas durante tu recepción: espresso, capuchinos, lattes con arte y métodos de filtrado con cafés colombianos. Montamos y desmontamos todo.', duracion: 4, maxPersonas: 300, minPersonas: 40, porGrupo: 80,
+      horas: 6, valorHora: 60000, cafeG: 0, leche: 30000, insumos: 40000, equipos: 150000, transporte: 80000, material: 20000, extraCafeG: 36, extraInsumos: 2500, kitPersona: 0, kitPersonaTxt: '', extrasPorPersona: false, precio: 0, precioExtra: 0, img: '', activa: true, estado: 'disponible' },
+    { id: 'fiestas', nombre: 'Estación de café para fiestas', corto: 'Fiestas y celebraciones', desc: 'Cumpleaños, grados, aniversarios o reuniones en casa: llevamos la máquina de espresso, el barista y el café para que tus invitados tomen café de verdad toda la noche.', duracion: 3, maxPersonas: 150, minPersonas: 15, porGrupo: 60,
+      horas: 5, valorHora: 60000, cafeG: 0, leche: 20000, insumos: 25000, equipos: 120000, transporte: 80000, material: 15000, extraCafeG: 30, extraInsumos: 2000, kitPersona: 0, kitPersonaTxt: '', extrasPorPersona: false, precio: 0, precioExtra: 0, img: '', activa: true, estado: 'disponible' },
+    { id: 'corporativos', nombre: 'Estación de café para eventos corporativos', corto: 'Eventos corporativos', desc: 'Lanzamientos, ferias, congresos y activaciones de marca: una estación de café con baristas profesionales y la imagen de tu empresa. Ideal para atraer y atender a tus invitados.', duracion: 4, maxPersonas: 500, minPersonas: 20, porGrupo: 80,
+      horas: 6, valorHora: 60000, cafeG: 0, leche: 30000, insumos: 40000, equipos: 150000, transporte: 80000, material: 30000, extraCafeG: 36, extraInsumos: 2500, kitPersona: 0, kitPersonaTxt: '', extrasPorPersona: false, precio: 0, precioExtra: 0, img: '', activa: true, estado: 'disponible' }
+  ],
+  extras: [
+    { id: 'hora_extra', nombre: 'Hora adicional de servicio', desc: 'Una hora más de barra con barista', costo: 90000, precio: 150000, tipo: 'item', activo: true },
+    { id: 'barra_filtrados', nombre: 'Barra de métodos de filtrado', desc: 'V60, Chemex y AeroPress con un barista adicional preparando a la vista', costo: 250000, precio: 420000, tipo: 'item', activo: true },
+    { id: 'frias', nombre: 'Bebidas frías', desc: 'Cold brew y espresso tonic', costo: 3000, precio: 6000, tipo: 'item', porPersona: true, activo: true },
+    { id: 'arte', nombre: 'Arte latte y show de baristas', desc: 'Diseños en cada taza y un momento de show para los invitados', costo: 80000, precio: 150000, tipo: 'item', activo: true },
+    { id: 'vegetal', nombre: 'Leches vegetales', desc: 'Avena y almendras para quienes no toman leche de vaca', costo: 40000, precio: 70000, tipo: 'item', activo: true },
+    { id: 'souvenir', nombre: 'Recuerdo: bolsita de café de 100 g', desc: 'Un detalle para cada invitado, con etiqueta personalizada', costo: 12000, precio: 20000, tipo: 'item', porPersona: true, activo: true },
+    { id: 'drip_souv', nombre: 'Recuerdo: 2 drip bags personalizados', desc: 'Sobres listos para preparar, con el nombre del evento', costo: 5000, precio: 9000, tipo: 'item', porPersona: true, activo: true },
+    { id: 'branding', nombre: 'Estación personalizada', desc: 'Logo o nombres en la barra, menú impreso y decoración a tono con tu evento', costo: 120000, precio: 220000, tipo: 'item', activo: true },
+    { id: 'cafe', nombre: 'Bolsas de café para regalar', desc: 'Bolsas del café B.R.U que prefieras', costo: 0, precio: 0, tipo: 'cafe', activo: true }
+  ],
+  cafes: {},
+  combos: {
+    bodas: [{ nombre: 'Esencial', items: [] }, { nombre: 'Boda clásica', items: [{ id: 'arte', qty: 1 }, { id: 'vegetal', qty: 1 }] }, { nombre: 'Boda premium', items: [{ id: 'barra_filtrados', qty: 1 }, { id: 'souvenir', qty: 1 }, { id: 'branding', qty: 1 }] }],
+    fiestas: [{ nombre: 'Esencial', items: [] }, { nombre: 'Fiesta completa', items: [{ id: 'frias', qty: 1 }, { id: 'arte', qty: 1 }] }, { nombre: 'Con recuerdos', items: [{ id: 'arte', qty: 1 }, { id: 'drip_souv', qty: 1 }] }],
+    corporativos: [{ nombre: 'Esencial', items: [] }, { nombre: 'Con tu marca', items: [{ id: 'branding', qty: 1 }, { id: 'drip_souv', qty: 1 }] }, { nombre: 'Experiencia completa', items: [{ id: 'barra_filtrados', qty: 1 }, { id: 'frias', qty: 1 }, { id: 'branding', qty: 1 }] }]
+  }
+};
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function fmt(n){ var v = Math.round(Number(n) || 0), neg = v < 0; return (neg ? '-$' : '$') + Math.abs(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+function pct(n){ return (Math.round((Number(n) || 0) * 10) / 10) + ' %'; }
+function num(v){ return Number(String(v == null ? '' : v).replace(/[^\d.-]/g, '')) || 0; }
+function uid(p){ return p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
+function toast(t, err){ var e = $('toast'); e.textContent = t; e.classList.toggle('err', !!err); e.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(function(){ e.classList.remove('on'); }, 2600); }
+function fFecha(f){ if (!f) return ''; var p = String(f).slice(0, 10).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+function copia(o){ return JSON.parse(JSON.stringify(o)); }
+function sb(path, opts){
+  opts = opts || {};
+  var h = { 'apikey': SB_KEY, 'Content-Type': 'application/json' }; if (opts.prefer) h.Prefer = opts.prefer;
+  return fetch(SB_URL + '/rest/v1/' + path, { method: opts.method || 'GET', headers: h, body: opts.body ? JSON.stringify(opts.body) : undefined })
+    .then(function(r){ if (!r.ok) return r.text().then(function(t){ throw new Error('Supabase ' + r.status + ': ' + t.slice(0, 140)); }); if (r.status === 204) return null; return r.text().then(function(t){ return t ? JSON.parse(t) : null; }); });
+}
+function upsert(fila){ return sb(T + '?on_conflict=id', { method: 'POST', prefer: 'resolution=merge-duplicates,return=minimal', body: [fila] }); }
+
+// =============== CÁLCULOS ===============
+function redondear(v){ var r = S.cfg.redondeo || 1000; return Math.ceil(v / r) * r; }
+function costoClase(c){
+  var g = S.cfg.costoG || 0;
+  var partes = { instructor: c.horas * c.valorHora, cafe: c.cafeG * g, leche: c.leche || 0, insumos: c.insumos || 0, equipos: c.equipos || 0, transporte: c.transporte || 0, material: c.material || 0, regalo: c.kitPersona || 0 };
+  var total = 0; for (var k in partes) total += partes[k];
+  var extra = (c.extraCafeG || 0) * g + (c.extraInsumos || 0) + (c.kitPersona || 0);
+  var m = Math.min(90, S.cfg.margen || 0) / 100;
+  var sug = redondear(total / (1 - m)), sugExtra = redondear(extra / (1 - m));
+  var precio = c.precio || sug, precioExtra = c.precioExtra || sugExtra;
+  return { partes: partes, total: total, sugerido: sug, precio: precio, margen: precio ? (precio - total) / precio * 100 : 0, extraCosto: extra, extraSugerido: sugExtra, precioExtra: precioExtra, extraMargen: precioExtra ? (precioExtra - extra) / precioExtra * 100 : 0 };
+}
+function cafesCatalogo(){
+  return S.cat.filter(function(c){ return c && c.nombre && c.activo !== false; }).map(function(c){
+    var precio = Math.round((Number(c.precio) || 0) * 1.19 / 100) * 100, cc = S.cfg.cafes[c.nombre];
+    return { nombre: c.nombre, presentacion: c.presLabel || ((c.cantidad || '') + 'g'), precio: precio, costo: cc != null ? cc : Math.round(precio * 0.45), stock: Number(c.stock) || 0, notas: c.notas || '', img: c.img || '' };
+  });
+}
+function extra(id){ return S.cfg.extras.filter(function(e){ return e.id === id; })[0]; }
+function precioExtra(e){ if (e.tipo === 'kit') { var pk = 0, ck = 0; (e.componentes || []).forEach(function(cp){ var o = (cp.opciones || [])[0]; if (o) { pk += o.precio || 0; ck += o.costo || 0; } }); return { precio: pk, costo: ck }; }
+  if (e.tipo === 'opcion') { var O = e.opciones || []; if (!O.length) return { precio: e.precio, costo: e.costo }; return { precio: Math.round(e.precio + O.reduce(function(s, o){ return s + (o.precio || 0); }, 0) / O.length), costo: Math.round(e.costo + O.reduce(function(s, o){ return s + (o.costo || 0); }, 0) / O.length), promedio: true }; }
+  if (e.tipo !== 'cafe') return { precio: e.precio, costo: e.costo }; var L = cafesCatalogo(); if (!L.length) return { precio: e.precio, costo: e.costo }; var p = L.reduce(function(s, c){ return s + c.precio; }, 0) / L.length, k = L.reduce(function(s, c){ return s + c.costo; }, 0) / L.length; return { precio: Math.round(p), costo: Math.round(k), promedio: true }; }
+function totalCombo(clase, items, personas){
+  var cc = costoClase(clase), n = Math.max(1, personas || 1);
+  var precio = cc.precio + (n - 1) * cc.precioExtra, costo = cc.total + (n - 1) * cc.extraCosto, pe = 0, ce = 0, cuenta = 0;
+  var mult = clase.extrasPorPersona ? n : 1;
+  (items || []).forEach(function(it){ var e = extra(it.id); if (!e) return; var v = precioExtra(e), mu = (clase.extrasPorPersona || e.porPersona) ? n : 1; pe += v.precio * it.qty * mu; ce += v.costo * it.qty * mu; cuenta += it.qty; });
+  var d = S.cfg.descuento, desc = cuenta >= (d.minExtras || 99) ? Math.round(pe * (d.pct || 0) / 100) : 0;
+  var total = precio + pe - desc, costoT = costo + ce;
+  return { clase: precio, extras: pe, descuento: desc, total: total, costo: costoT, ganancia: total - costoT, margen: total ? (total - costoT) / total * 100 : 0 };
+}
+
+// =============== DATOS ===============
+function cargar(){
+  return Promise.all([
+    sb(T + '?id=eq.eventoscfg&select=data'),
+    sb('bru_store?id=eq.main&select=catalogo'),
+    sb(T + '?tipo=eq.evento_res&select=id,fecha,data,created_at&order=created_at.desc&limit=200').catch(function(){ return []; })
+  ]).then(function(r){
+    var c = r[0] && r[0][0] ? r[0][0].data : null;
+    S.cfg = copia(DEF); S.existe = !!c; S.vieja = !!(c && (c.mig || 0) > DEF.mig);
+    if (c) Object.keys(c).forEach(function(k){ S.cfg[k] = c[k]; });
+    if (c && !c.mig) { S.cfg.mig = 0; var kc = copia(DEF.extras.filter(function(e){ return e.id === 'kit_completo'; })[0]); if (!S.cfg.extras.some(function(e){ return e.id === 'kit_completo'; })) S.cfg.extras.splice(3, 0, kc); if (S.cfg.combos.filtrados && !S.cfg.combos.filtrados.some(function(x){ return x.nombre === 'Barra en casa'; })) S.cfg.combos.filtrados.push(copia(DEF.combos.filtrados[3])); if (!S.cfg.disponibilidad) S.cfg.disponibilidad = DEF.disponibilidad; S.cfg.mig = 1; S.existe = false; }
+    if (c && (c.mig || 0) < 3) { if (!S.cfg.clases.some(function(k){ return k.id === 'empresas'; })) S.cfg.clases.push(copia(DEF.clases.filter(function(k){ return k.id === 'empresas'; })[0])); if (!S.cfg.combos.empresas) S.cfg.combos.empresas = copia(DEF.combos.empresas); S.existe = false; }
+    if (c && (c.mig || 0) < 4) { S.cfg.clases.forEach(function(k){ if (k.id === 'empresas' && !k.porGrupo) { k.porGrupo = 15; if ((k.maxPersonas || 0) < 100) k.maxPersonas = 100; } }); S.existe = false; }
+    if (c && (c.mig || 0) < 5) { S.cfg.clases.forEach(function(k){ if (k.id === 'empresas') { k.extrasPorPersona = true; if ((k.precioExtra || 0) < 120000) k.precioExtra = 120000; if ((k.precio || 0) < 475000) k.precio = 475000; } }); (S.cfg.combos.empresas || []).forEach(function(cb){ cb.items.forEach(function(it){ if (it.id === 'cafe' && it.qty > 1) it.qty = 1; }); }); S.existe = false; }
+    if (c && (c.mig || 0) < 6) { S.cfg.clases.forEach(function(k){ k.extrasPorPersona = true; if (k.id !== 'empresas' && !k.precioExtra) { var cc = costoClase(k); k.precioExtra = Math.max(cc.precioExtra, redondear(cc.precio * 0.5)); } }); S.existe = false; }
+    if (c && (c.mig || 0) < 7) { S.cfg.clases.forEach(function(k){ if (k.id === 'empresas') { k.precio = 320000; k.precioExtra = 320000; k.kitPersonaTxt = 'Una bolsa de café de 250 g, 5 drip bags y 2 cataciones de 4 cafés con la experiencia completa de catación'; k.desc = 'Una experiencia de café para tu equipo en tu oficina: cada persona hace 2 cataciones guiadas de 4 cafés con el protocolo profesional (fragancia, aroma, sabor, acidez y cuerpo) y se lleva su café. Ideal para integraciones, clientes y celebraciones.'; k.extraCafeG = Math.max(k.extraCafeG || 0, 130); k.extraInsumos = Math.max(k.extraInsumos || 0, 8000); } }); S.existe = false; }
+    if (c && (c.mig || 0) < 8) { var km = S.cfg.extras.filter(function(e){ return e.id === 'kit_completo'; })[0]; if (km && km.opciones && !km.opciones.some(function(o){ return o.nombre === 'Chemex'; })) km.opciones.push({ nombre: 'Chemex', costo: 195000, precio: 325000 }); if (!S.cfg.extras.some(function(e){ return e.id === 'metodo'; })) { var ki = S.cfg.extras.indexOf(km); S.cfg.extras.splice(ki >= 0 ? ki + 1 : S.cfg.extras.length, 0, copia(DEF.extras.filter(function(e){ return e.id === 'metodo'; })[0])); } S.existe = false; }
+    if (c && (c.mig || 0) < 9) { ['kit_v60', 'kit_prensa', 'kit_completo'].forEach(function(id){ var cur = S.cfg.extras.filter(function(e){ return e.id === id; })[0], df = copia(DEF.extras.filter(function(e){ return e.id === id; })[0]); if (!cur) return; var met = id === 'kit_completo' && cur.opciones ? cur.opciones : null; cur.tipo = 'kit'; cur.componentes = df.componentes; cur.desc = df.desc; cur.costo = 0; cur.precio = 0; delete cur.opciones; if (met) cur.componentes[2].opciones = met; }); S.cfg.extras.forEach(function(e){ if (e.id === 'kit_barista') e.activo = false; }); S.cfg.clases.forEach(function(k){ if (k.id === 'empresas') { k.precio = 300000; k.precioExtra = 300000; } }); (S.cfg.combos.empresas || []).forEach(function(cb){ cb.items = cb.items.filter(function(it){ return it.id !== 'cafe'; }); }); Object.keys(S.cfg.combos).forEach(function(k){ S.cfg.combos[k].forEach(function(cb){ cb.items = cb.items.filter(function(it){ return it.id !== 'kit_barista'; }); }); }); S.existe = false; }
+    if (c && (c.mig || 0) < 10) { var ag = S.cfg.agenda || {}; if (!ag.horarios || ag.horarios.join('|') === '9:00 a.m.|2:00 p.m.') { ag.horarios = copia(DEF.agenda.horarios); S.cfg.agenda = ag; } S.cfg.mig = 10; S.existe = false; }
+    if (c && (c.mig || 0) < 2) { S.cfg.clases.forEach(function(k){ if (!k.estado) k.estado = k.id === 'barismo' ? 'pronto' : 'disponible'; }); S.cfg.mig = 10; S.existe = false; }
+    S.cfg.pago = S.cfg.pago || copia(DEF.pago); if (!S.cfg.pago.pasarela) S.cfg.pago.pasarela = copia(DEF.pago.pasarela);
+    S.cat = (r[1] && r[1][0] && r[1][0].catalogo) || [];
+    S.res = r[2] || [];
+  });
+}
+function publico(){
+  var C = S.cfg;
+  return {
+    actualizado: new Date().toISOString(), wa: C.wa, descuento: C.descuento, disponibilidad: C.disponibilidad || '', agenda: agCfg(), pago: C.pago || DEF.pago,
+    clases: C.clases.filter(function(c){ return c.activa !== false; }).map(function(c){ var k = costoClase(c); return { id: c.id, extrasPorPersona: !!c.extrasPorPersona, porGrupo: c.porGrupo || 0, minPersonas: Math.max(1, c.minPersonas || 1), incluye: c.kitPersonaTxt || '', estado: c.estado || 'disponible', nombre: c.nombre, corto: c.corto, desc: c.desc, duracion: c.duracion, maxPersonas: c.maxPersonas, precio: k.precio, precioExtra: k.precioExtra, img: c.img || '' }; }),
+    extras: C.extras.filter(function(e){ return e.activo !== false; }).map(function(e){ return { id: e.id, porPersona: !!e.porPersona, nombre: e.nombre, desc: e.desc, precio: e.tipo === 'cafe' ? 0 : e.precio, tipo: e.tipo, opciones: e.tipo === 'opcion' ? (e.opciones || []).map(function(o){ return { nombre: o.nombre, precio: o.precio || 0 }; }) : undefined, componentes: e.tipo === 'kit' ? (e.componentes || []).map(function(cp){ return { nombre: cp.nombre, opciones: (cp.opciones || []).map(function(o){ return { nombre: o.nombre, precio: o.precio || 0 }; }) }; }) : undefined }; }),
+    cafes: cafesCatalogo().filter(function(c){ return c.stock > 0; }).sort(function(a, b){ return b.stock - a.stock; }).map(function(c){ return { nombre: c.nombre, presentacion: c.presentacion, precio: c.precio, notas: c.notas, img: c.img }; }),
+    combos: C.combos
+  };
+}
+function guardar(){
+  return Promise.all([
+    upsert({ id: 'eventoscfg', tipo: 'eventos_cfg', fecha: null, data: S.cfg }),
+    upsert({ id: 'eventospub', tipo: 'eventos_pub', fecha: null, data: publico() })
+  ]).then(function(){ toast('Guardado y publicado en la web'); }).catch(function(e){ toast(e.message, true); });
+}
+var guardarLuego = (function(){ var t; return function(){ clearTimeout(t); $('estado').textContent = 'Guardando…'; t = setTimeout(function(){ guardar().then(function(){ $('estado').textContent = 'Publicado ✓'; }); }, 900); }; })();
+
+// =============== UI ===============
+var TABS = [['costeo', 'Costeo de eventos'], ['extras', 'Extras y recuerdos'], ['combos', 'Combos'], ['agenda', 'Agenda'], ['reservas', 'Reservas'], ['ajustes', 'Ajustes']];
+function render(){
+  $('tabs').innerHTML = TABS.map(function(t){ var n = t[0] === 'reservas' ? S.res.filter(function(r){ return (r.data.estado || 'nueva') === 'nueva'; }).length : 0; return '<button data-t="' + t[0] + '" class="' + (S.tab === t[0] ? 'on' : '') + '">' + t[1] + (n ? ' <span class="cnt">' + n + '</span>' : '') + '</button>'; }).join('');
+  var fn = { costeo: renderCosteo, extras: renderExtras, combos: renderCombos, agenda: renderAgenda, reservas: renderReservas, ajustes: renderAjustes }[S.tab];
+  try { fn($('main')); } catch (e) { console.error(e); $('main').innerHTML = '<div class="banner bad">Error: ' + esc(e.message) + '</div>'; }
+}
+function campo(lbl, path, v, tipo, extraAttr){ return '<label class="f">' + esc(lbl) + '<input type="' + (tipo || 'number') + '" data-p="' + path + '" value="' + esc(v == null ? '' : v) + '"' + (extraAttr || '') + '></label>'; }
+function setPath(path, val){ var p = path.split('.'), o = S.cfg; for (var i = 0; i < p.length - 1; i++) o = o[isNaN(p[i]) ? p[i] : Number(p[i])]; var k = p[p.length - 1]; o[k] = val; }
+function enlazar(c, alCambiar){
+  c.oninput = function(e){ var el = e.target; if (!el.getAttribute('data-p')) return; var v = el.type === 'number' ? num(el.value) : (el.type === 'checkbox' ? el.checked : el.value); setPath(el.getAttribute('data-p'), v); guardarLuego(); if (alCambiar) alCambiar(el); };
+  c.onchange = c.oninput;
+}
+function renderCosteo(c){
+  c.innerHTML = '<div class="banner info">Cada evento se costea con un costo fijo por barista (horas con montaje y desmontaje, leche, insumos, desgaste de la máquina, transporte y decoración) más un costo por invitado (café a ' + fmt(S.cfg.costoG) + ' por gramo, vasos e insumos). Se suma un barista por cada «invitados por barista». El precio sugerido busca un margen del ' + S.cfg.margen + ' %; si escribes un precio propio, ese es el que sale en la web.</div>' +
+    S.cfg.clases.map(function(k, i){ return '<div class="card" style="margin-bottom:12px" id="cl' + i + '">' + tarjetaClase(k, i) + '</div>'; }).join('');
+  enlazar(c, function(el){ var i = Number(el.getAttribute('data-p').split('.')[1]); var box = $('res' + i); if (box) box.innerHTML = resumenClase(S.cfg.clases[i]); });
+}
+function tarjetaClase(k, i){
+  var b = 'clases.' + i + '.';
+  return '<div class="row"><h3 style="flex:1">' + esc(k.nombre) + '</h3><label class="f chk"><input type="checkbox" data-p="' + b + 'activa"' + (k.activa !== false ? ' checked' : '') + '> Visible en la web</label></div>' +
+    '<div class="row" style="margin:6px 0 10px"><span class="small muted">Estado en la web:</span><select data-p="' + b + 'estado" style="width:auto">' + [['disponible', '✅ Disponible (se puede reservar)'], ['pronto', '⏳ Disponible pronto (solo lista de espera)']].map(function(o){ return '<option value="' + o[0] + '"' + ((k.estado || 'disponible') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></div>' +
+    '<div class="grid g3">' + campo('Nombre en la web', b + 'nombre', k.nombre, 'text') + campo('Duración (horas)', b + 'duracion', k.duracion) + campo('Máximo de invitados', b + 'maxPersonas', k.maxPersonas) + campo('Mínimo de invitados', b + 'minPersonas', k.minPersonas || 1) + campo('Invitados por barista', b + 'porGrupo', k.porGrupo || 0) + campo('Recuerdo incluido por invitado (costo)', b + 'kitPersona', k.kitPersona || 0) + campo('Qué recibe cada invitado (sale en la web, opcional)', b + 'kitPersonaTxt', k.kitPersonaTxt || '', 'text', ' placeholder="Ej. Un drip bag de recuerdo"') + '</div>' +
+    '<label class="f chk" style="margin-top:8px"><input type="checkbox" data-p="' + b + 'extrasPorPersona"' + (k.extrasPorPersona ? ' checked' : '') + '> Todos los extras son por invitado (si no, cada extra se marca por separado en «Extras y recuerdos»)</label>' +
+    '<label class="f" style="margin-top:8px">Descripción<textarea data-p="' + b + 'desc" style="min-height:60px">' + esc(k.desc) + '</textarea></label>' +
+    campo('Foto (URL de imagen)', b + 'img', k.img, 'text', ' placeholder="https://res.cloudinary.com/…"') +
+    '<div class="sec">Costo fijo por barista</div><div class="grid g4">' + campo('Horas del barista (con montaje)', b + 'horas', k.horas) + campo('Valor hora barista', b + 'valorHora', k.valorHora) + campo('Café usado (g)', b + 'cafeG', k.cafeG) + campo('Leche y otros alimentos', b + 'leche', k.leche) +
+    campo('Insumos (filtros, vasos, agua…)', b + 'insumos', k.insumos) + campo('Desgaste de equipos', b + 'equipos', k.equipos) + campo('Transporte con equipos (ida y vuelta)', b + 'transporte', k.transporte || 0) + campo('Decoración y material', b + 'material', k.material) + '</div>' +
+    '<div class="sec">Por invitado</div><div class="grid g4">' + campo('Café por invitado (g)', b + 'extraCafeG', k.extraCafeG) + campo('Vasos, leche e insumos por invitado', b + 'extraInsumos', k.extraInsumos) + campo('Precio propio por invitado (0 = sugerido)', b + 'precioExtra', k.precioExtra || '') + campo('Precio propio estación + 1 invitado (0 = sugerido)', b + 'precio', k.precio || '') + '</div>' +
+    '<div id="res' + i + '">' + resumenClase(k) + '</div>';
+}
+function resumenClase(k){
+  var r = costoClase(k), p = r.partes;
+  return '<div class="kpis" style="margin-top:12px"><div class="kpi"><b>' + fmt(r.total) + '</b><span>costo fijo por barista</span></div><div class="kpi"><b>' + fmt(r.sugerido) + '</b><span>precio sugerido (' + S.cfg.margen + ' %)</span></div><div class="kpi ' + (r.margen < 30 ? 'bad' : 'ok') + '"><b>' + fmt(r.precio) + '</b><span>precio en la web · margen ' + pct(r.margen) + '</span></div><div class="kpi"><b>' + fmt(r.precioExtra) + '</b><span>por invitado · costo ' + fmt(r.extraCosto) + '</span></div></div>' +
+    (k.porGrupo && r.precio === r.precioExtra ? '<div class="banner info" style="margin:6px 0">Precio = <b>' + fmt(r.precioExtra) + ' por invitado</b>, todo incluido.</div>' : '') + (k.porGrupo && r.precio !== r.precioExtra ? '<div class="banner info" style="margin:6px 0">Precio = <b>' + fmt(r.precio - r.precioExtra) + ' por barista</b> (uno por cada ' + k.porGrupo + ' invitados) + <b>' + fmt(r.precioExtra) + ' por invitado</b>. Ej.: ' + (k.minPersonas || 1) + ' invitados = ' + fmt(Math.ceil((k.minPersonas || 1) / k.porGrupo) * (r.precio - r.precioExtra) + (k.minPersonas || 1) * r.precioExtra) + ' · 100 invitados = ' + fmt(Math.ceil(100 / k.porGrupo) * (r.precio - r.precioExtra) + 100 * r.precioExtra) + ' · 200 invitados = ' + fmt(Math.ceil(200 / k.porGrupo) * (r.precio - r.precioExtra) + 200 * r.precioExtra) + '.</div>' : '') +
+    '<div class="small muted">Barista ' + fmt(p.instructor) + ' · café ' + fmt(p.cafe) + (p.leche ? ' · leche ' + fmt(p.leche) : '') + ' · insumos ' + fmt(p.insumos) + ' · equipos ' + fmt(p.equipos) + (p.transporte ? ' · transporte ' + fmt(p.transporte) : '') + ' · material ' + fmt(p.material) + (p.regalo ? ' · recuerdo por invitado ' + fmt(p.regalo) : '') + ' · ganancia fija por barista ' + fmt(r.precio - r.total) + '</div>';
+}
+function renderExtras(c){
+  var E = S.cfg.extras, cafes = cafesCatalogo();
+  c.innerHTML = '<div class="banner info">Estos son los extras que el cliente puede sumar a su evento en la web. Los marcados «Precio por invitado» se multiplican por el número de invitados. Ajusta el costo real de cada uno y el precio de venta.</div>' +
+    '<div class="tbl-w"><table class="t"><thead><tr><th>Visible</th><th>Elemento</th><th>Descripción</th><th class="num">Costo</th><th class="num">Precio</th><th class="num">Margen</th><th></th></tr></thead><tbody>' +
+    E.map(function(e, i){ var b = 'extras.' + i + '.', v = precioExtra(e), m = v.precio ? (v.precio - v.costo) / v.precio * 100 : 0;
+      return '<tr><td><input type="checkbox" data-p="' + b + 'activo"' + (e.activo !== false ? ' checked' : '') + '></td><td style="min-width:160px"><input type="text" data-p="' + b + 'nombre" value="' + esc(e.nombre) + '"></td><td style="min-width:220px"><input type="text" data-p="' + b + 'desc" value="' + esc(e.desc) + '">' + (e.tipo === 'cafe' ? '' : '<label class="small" style="display:flex;gap:6px;align-items:center;margin-top:4px"><input type="checkbox" data-p="' + b + 'porPersona"' + (e.porPersona ? ' checked' : '') + '> Precio por invitado</label>') + '</td>' +
+        (e.tipo === 'cafe' ? '<td class="num" colspan="2"><span class="small muted">Según el café elegido (abajo) · promedio ' + fmt(v.precio) + '</span></td>' : e.tipo === 'kit' ? '<td class="num">' + fmt(v.costo) + '</td><td class="num"><b>' + fmt(v.precio) + '</b><div class="small muted">kit completo</div></td>' : '<td class="num"><input type="number" data-p="' + b + 'costo" value="' + e.costo + '" style="width:110px"></td><td class="num"><input type="number" data-p="' + b + 'precio" value="' + e.precio + '" style="width:110px"></td>') +
+        '<td class="num"><span class="st ' + (m < 30 ? 'bad' : 'ok') + '">' + pct(m) + '</span></td><td>' + (e.tipo === 'cafe' ? '' : '<button class="btn sm ghost" data-del="' + i + '">✕</button>') + '</td></tr>' +
+        (e.tipo === 'kit' ? '<tr><td></td><td colspan="6"><div class="small muted" style="margin-bottom:4px">Piezas del kit. En la web la persona puede quitar las que ya tenga y elegir otra opción de cada pieza. La primera opción de cada pieza es la que viene por defecto.</div><table class="t" style="background:var(--bg2)"><thead><tr><th>Pieza</th><th>Opción</th><th class="num">Costo</th><th class="num">Precio</th><th class="num">Margen</th><th></th></tr></thead><tbody>' +
+          (e.componentes || []).map(function(cp, j){ var cb = b + 'componentes.' + j + '.'; return (cp.opciones || []).map(function(o, k){ var ob = cb + 'opciones.' + k + '.', mo = o.precio ? (o.precio - (o.costo || 0)) / o.precio * 100 : 0;
+            return '<tr>' + (k === 0 ? '<td rowspan="' + (cp.opciones.length + 1) + '" style="min-width:150px"><input type="text" data-p="' + cb + 'nombre" value="' + esc(cp.nombre) + '"><button class="btn sm ghost" data-delk="' + i + '|' + j + '" style="margin-top:4px">✕ pieza</button></td>' : '') + '<td><input type="text" data-p="' + ob + 'nombre" value="' + esc(o.nombre) + '">' + (k === 0 ? '<div class="small muted">por defecto</div>' : '') + '</td><td class="num"><input type="number" data-p="' + ob + 'costo" value="' + (o.costo || 0) + '" style="width:100px"></td><td class="num"><input type="number" data-p="' + ob + 'precio" value="' + (o.precio || 0) + '" style="width:100px"></td><td class="num"><span class="st ' + (mo < 30 ? 'bad' : 'ok') + '">' + pct(mo) + '</span></td><td>' + (cp.opciones.length > 1 ? '<button class="btn sm ghost" data-delko="' + i + '|' + j + '|' + k + '">✕</button>' : '') + '</td></tr>'; }).join('') + '<tr><td colspan="5"><button class="btn sm ghost" data-addko="' + i + '|' + j + '">+ opción para ' + esc(cp.nombre) + '</button></td></tr>'; }).join('') +
+          '</tbody></table><button class="btn sm" data-addk="' + i + '" style="margin-top:6px">+ Pieza</button></td></tr>' : '') +
+        (e.tipo === 'opcion' ? '<tr><td></td><td colspan="6"><div class="small muted" style="margin-bottom:4px">' + (e.precio ? 'Costo y precio de arriba = kit sin el método. A eso se le suma el método que elija la persona:' : 'Escribe aquí el costo y el precio de venta de cada método. En la web la persona elige cuál quiere y ve este precio.') + '</div><table class="t" style="background:var(--bg2)"><thead><tr><th>Método a elección</th><th class="num">Costo</th><th class="num">Precio</th><th class="num">' + (e.precio ? 'Kit completo' : 'Precio en la web') + '</th><th class="num">Margen</th><th></th></tr></thead><tbody>' +
+          (e.opciones || []).map(function(o, j){ var ob = b + 'opciones.' + j + '.', pt = e.precio + (o.precio || 0), ct = e.costo + (o.costo || 0), mo = pt ? (pt - ct) / pt * 100 : 0;
+            return '<tr><td><input type="text" data-p="' + ob + 'nombre" value="' + esc(o.nombre) + '"></td><td class="num"><input type="number" data-p="' + ob + 'costo" value="' + (o.costo || 0) + '" style="width:100px"></td><td class="num"><input type="number" data-p="' + ob + 'precio" value="' + (o.precio || 0) + '" style="width:100px"></td><td class="num">' + fmt(pt) + '</td><td class="num"><span class="st ' + (mo < 30 ? 'bad' : 'ok') + '">' + pct(mo) + '</span></td><td><button class="btn sm ghost" data-delo="' + i + '|' + j + '">✕</button></td></tr>'; }).join('') +
+          '</tbody></table><button class="btn sm" data-addo="' + i + '" style="margin-top:6px">+ Método</button></td></tr>' : ''); }).join('') +
+    '</tbody></table></div><div class="row" style="margin:10px 0 18px"><button class="btn" id="exNew">+ Agregar elemento</button></div>' +
+    '<h3 style="margin-bottom:8px">Cafés para «café de tu elección»</h3><div class="small muted" style="margin-bottom:8px">Salen del catálogo de la tienda con su precio de venta. Pon el costo real de cada bolsa para que el margen del combo sea exacto. Solo se ofrecen los que tienen stock.</div>' +
+    '<div class="tbl-w"><table class="t"><thead><tr><th>Café</th><th>Presentación</th><th class="num">Stock</th><th class="num">Precio venta</th><th class="num">Costo bolsa</th><th class="num">Margen</th></tr></thead><tbody>' +
+    (cafes.map(function(k){ var m = k.precio ? (k.precio - k.costo) / k.precio * 100 : 0; return '<tr><td><b>' + esc(k.nombre) + '</b></td><td>' + esc(k.presentacion) + '</td><td class="num">' + k.stock + '</td><td class="num">' + fmt(k.precio) + '</td><td class="num"><input type="number" data-cafe="' + esc(k.nombre) + '" value="' + k.costo + '" style="width:110px"></td><td class="num"><span class="st ' + (m < 30 ? 'bad' : 'ok') + '">' + pct(m) + '</span></td></tr>'; }).join('') || '<tr><td colspan="6" class="empty">No hay cafés en el catálogo</td></tr>') + '</tbody></table></div>';
+  enlazar(c);
+  c.onchange = function(e){ var k = e.target.getAttribute('data-cafe'); if (k) { S.cfg.cafes[k] = num(e.target.value); guardarLuego(); render(); } else if (e.target.getAttribute('data-p')) { c.oninput(e); render(); } };
+  $('exNew').onclick = function(){ S.cfg.extras.push({ id: uid('ex'), nombre: 'Nuevo elemento', desc: '', costo: 0, precio: 0, tipo: 'item', activo: true }); guardarLuego(); render(); };
+  c.onclick = function(e){ var ao = e.target.closest('[data-addo]'), dlo = e.target.closest('[data-delo]'), q;
+    if ((q = e.target.closest('[data-addk]'))) { var xk = S.cfg.extras[Number(q.getAttribute('data-addk'))]; (xk.componentes = xk.componentes || []).push({ nombre: 'Nueva pieza', opciones: [{ nombre: 'Nueva pieza', costo: 0, precio: 0 }] }); guardarLuego(); render(); return; }
+    if ((q = e.target.closest('[data-delk]'))) { var pk = q.getAttribute('data-delk').split('|'); S.cfg.extras[Number(pk[0])].componentes.splice(Number(pk[1]), 1); guardarLuego(); render(); return; }
+    if ((q = e.target.closest('[data-addko]'))) { var pa = q.getAttribute('data-addko').split('|'); S.cfg.extras[Number(pa[0])].componentes[Number(pa[1])].opciones.push({ nombre: 'Otra opción', costo: 0, precio: 0 }); guardarLuego(); render(); return; }
+    if ((q = e.target.closest('[data-delko]'))) { var pd = q.getAttribute('data-delko').split('|'); S.cfg.extras[Number(pd[0])].componentes[Number(pd[1])].opciones.splice(Number(pd[2]), 1); guardarLuego(); render(); return; }
+    if (ao) { var ex = S.cfg.extras[Number(ao.getAttribute('data-addo'))]; (ex.opciones = ex.opciones || []).push({ nombre: 'Nuevo método', costo: 0, precio: 0 }); guardarLuego(); render(); return; }
+    if (dlo) { var pz = dlo.getAttribute('data-delo').split('|'); S.cfg.extras[Number(pz[0])].opciones.splice(Number(pz[1]), 1); guardarLuego(); render(); return; }
+    var d = e.target.closest('[data-del]'); if (!d) return; var i = Number(d.getAttribute('data-del')), id = S.cfg.extras[i].id; if (!confirm('¿Quitar «' + S.cfg.extras[i].nombre + '»?')) return; S.cfg.extras.splice(i, 1); Object.keys(S.cfg.combos).forEach(function(k){ S.cfg.combos[k].forEach(function(cb){ cb.items = cb.items.filter(function(it){ return it.id !== id; }); }); }); guardarLuego(); render(); };
+}
+function renderCombos(c){
+  var d = S.cfg.descuento;
+  c.innerHTML = '<div class="banner info">Los combos son puntos de partida: en la web cada persona puede quitar o agregar elementos y armar el suyo. Si suma ' + d.minExtras + ' o más elementos, recibe ' + d.pct + ' % de descuento sobre los elementos (cámbialo en Ajustes).</div>' +
+    S.cfg.clases.map(function(k){
+      var L = S.cfg.combos[k.id] || (S.cfg.combos[k.id] = []);
+      return '<div class="card" style="margin-bottom:12px"><div class="row"><h3 style="flex:1">' + esc(k.corto || k.nombre) + '</h3><button class="btn sm" data-addc="' + k.id + '">+ Combo</button></div>' +
+        '<div class="tbl-w" style="margin-top:8px"><table class="t"><thead><tr><th>Combo</th><th>Incluye</th><th class="num">Precio (' + Math.max(1, k.minPersonas || 1) + ' invitados' + ')</th><th class="num">Costo</th><th class="num">Ganancia</th><th class="num">Margen</th><th></th></tr></thead><tbody>' +
+        L.map(function(cb, j){ var t = totalCombo(k, cb.items, Math.max(1, k.minPersonas || 1));
+          return '<tr><td style="min-width:150px"><input type="text" data-cn="' + k.id + '|' + j + '" value="' + esc(cb.nombre) + '"></td><td style="min-width:260px">' + cb.items.map(function(it){ var e = extra(it.id); if (!e) return '';
+              return '<span class="chipq on">' + esc(e.nombre) + ' <button data-q="' + k.id + '|' + j + '|' + e.id + '|-1">−</button><b>' + it.qty + '</b><button data-q="' + k.id + '|' + j + '|' + e.id + '|1">+</button></span>'; }).join('') + (cb.items.length ? '' : '<span class="small muted">Solo la estación </span>') +
+              '<select data-add="' + k.id + '|' + j + '" style="width:auto;padding:3px 6px;font-size:12px;margin:2px"><option value="">+ agregar…</option>' + S.cfg.extras.filter(function(e){ return e.activo !== false && !cb.items.some(function(x){ return x.id === e.id; }); }).map(function(e){ return '<option value="' + e.id + '">' + esc(e.nombre) + '</option>'; }).join('') + '</select></td>' +
+            '<td class="num"><b>' + fmt(t.total) + '</b>' + (t.descuento ? '<div class="small muted">incluye −' + fmt(t.descuento) + '</div>' : '') + '</td><td class="num">' + fmt(t.costo) + '</td><td class="num">' + fmt(t.ganancia) + '</td><td class="num"><span class="st ' + (t.margen < 30 ? 'bad' : 'ok') + '">' + pct(t.margen) + '</span></td><td><button class="btn sm ghost" data-delc="' + k.id + '|' + j + '">✕</button></td></tr>'; }).join('') +
+        '</tbody></table></div></div>'; }).join('');
+  c.onclick = function(e){
+    var q = e.target.closest('[data-q]'), a = e.target.closest('[data-addc]'), dl = e.target.closest('[data-delc]');
+    if (q) { var p = q.getAttribute('data-q').split('|'), cb = S.cfg.combos[p[0]][Number(p[1])], it = cb.items.filter(function(x){ return x.id === p[2]; })[0]; if (!it) { it = { id: p[2], qty: 0 }; cb.items.push(it); } it.qty = Math.max(0, Math.min(9, it.qty + Number(p[3]))); cb.items = cb.items.filter(function(x){ return x.qty > 0; }); guardarLuego(); render(); }
+    if (a) { S.cfg.combos[a.getAttribute('data-addc')].push({ nombre: 'Nuevo combo', items: [] }); guardarLuego(); render(); }
+    if (dl) { var p2 = dl.getAttribute('data-delc').split('|'); S.cfg.combos[p2[0]].splice(Number(p2[1]), 1); guardarLuego(); render(); }
+  };
+  c.onchange = function(e){ var a = e.target.getAttribute('data-add'); if (!a || !e.target.value) return; var p = a.split('|'); S.cfg.combos[p[0]][Number(p[1])].items.push({ id: e.target.value, qty: 1 }); guardarLuego(); render(); };
+  c.oninput = function(e){ var n = e.target.getAttribute('data-cn'); if (!n) return; var p = n.split('|'); S.cfg.combos[p[0]][Number(p[1])].nombre = e.target.value; guardarLuego(); };
+}
+
+// =============== AGENDA ===============
+var MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'], DIAS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'], DIASL = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+function agCfg(){ var a = S.cfg.agenda || (S.cfg.agenda = copia(DEF.agenda)); Object.keys(DEF.agenda).forEach(function(k){ if (a[k] == null) a[k] = copia(DEF.agenda[k]); }); return a; }
+function ymd(d){ return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function horaMin(h){ var m = /(\d{1,2})(?::(\d{2}))?\s*([ap])?/i.exec(h || '') || [0, 0, 0, '']; var hh = Number(m[1]) % 12; if ((m[3] || '').toLowerCase() === 'p') hh += 12; else if (!m[3] && Number(m[1]) === 12) hh = 12; return hh * 60 + Number(m[2] || 0); }
+function slotsDia(f){ var A = agCfg(), d = new Date(f + 'T12:00:00'), L = A.dias.indexOf(d.getDay()) >= 0 ? A.horarios.slice() : [];
+  A.extra.forEach(function(x){ var p = x.split('|'); if (p[0] === f && L.indexOf(p[1]) < 0) L.push(p[1]); });
+  return L.sort(function(a, b){ return horaMin(a) - horaMin(b); }); }
+function slotLargo(k){ var p = String(k).split('|'), d = new Date(p[0] + 'T12:00:00'); return DIASL[d.getDay()] + ' ' + d.getDate() + ' ' + MESES[d.getMonth()] + (p[1] ? ' · ' + p[1] : ''); }
+function choca(f, x, O){ var a = horaMin(x); return Object.keys(O).some(function(k){ var q = k.split('|'); if (q[0] !== f || q[1] === x) return false; var ra = horaMin(q[1]), rb = ra + (Number(O[k].data.dur) || 3) * 60 + 60; return a < rb && ra < a + 120 + 60; }); }
+function ocupados(){ var o = {}; S.res.forEach(function(r){ var x = r.data || {}; if (x.slot && x.estado !== 'cancelada') o[x.slot] = r; }); return o; }
+function toggle(arr, v){ var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
+function renderAgenda(c){
+  var A = agCfg();
+  c.innerHTML = '<div class="card" style="margin-bottom:12px"><div class="small muted" style="margin-bottom:10px">La página de eventos muestra un calendario con estas fechas. Cuando alguien reserva, esa hora queda ocupada para los demás. Si cancelas la reserva, la hora se libera.</div>' +
+    '<div class="grid g3"><label class="f">Horas de inicio de los eventos (separadas por coma)<input type="text" id="agH" value="' + esc(A.horarios.join(', ')) + '" placeholder="9:00 a.m., 2:00 p.m."></label>' + campo('Semanas que se muestran', 'agenda.semanas', A.semanas) + campo('Días de anticipación mínima', 'agenda.anticipacion', A.anticipacion) + '</div><div class="small muted" style="margin-top:6px">Cuando alguien reserva, se bloquean también las horas que se cruzan con su clase (duración de la clase + 1 hora de traslado).</div>' +
+    '<div class="small muted" style="margin:12px 0 6px">Días que se abren cada semana:</div><div class="row">' + [1, 2, 3, 4, 5, 6, 0].map(function(d){ return '<label class="chipq' + (A.dias.indexOf(d) >= 0 ? ' on' : '') + '" style="padding:5px 12px;cursor:pointer"><input type="checkbox" data-dsem="' + d + '"' + (A.dias.indexOf(d) >= 0 ? ' checked' : '') + ' style="display:none">' + DIASL[d] + '</label>'; }).join('') + '</div></div>' +
+    '<div class="row" style="margin-bottom:8px"><span class="small muted">Toca una hora para bloquearla o liberarla. En un día cerrado, “+ Abrir” lo habilita con tus horas.</span><span class="sp"></span><a class="btn sm" href="/eventos.html" target="_blank">Ver en la web ↗</a></div><div id="agCal"></div>';
+  pintarCal();
+  c.oninput = function(e){ var el = e.target;
+    if (el.id === 'agH') { A.horarios = el.value.split(',').map(function(x){ return x.trim(); }).filter(Boolean); guardarLuego(); pintarCal(); return; }
+    if (el.getAttribute('data-dsem') != null) { toggle(A.dias, Number(el.getAttribute('data-dsem'))); guardarLuego(); renderAgenda(c); return; }
+    if (el.getAttribute('data-p')) { setPath(el.getAttribute('data-p'), num(el.value)); guardarLuego(); pintarCal(); } };
+  c.onchange = null;
+  c.onclick = function(e){ var b = e.target.closest('[data-ag]'); if (!b) return; var p = b.getAttribute('data-ag').split('~'), act = p[0], f = p[1], h = p[2];
+    if (act === 'slot') toggle(A.bloq, f + '|' + h);
+    if (act === 'cerrar') toggle(A.bloq, f);
+    if (act === 'abrir') { A.horarios.forEach(function(x){ if (A.extra.indexOf(f + '|' + x) < 0) A.extra.push(f + '|' + x); }); A.bloq = A.bloq.filter(function(x){ return x !== f && x.indexOf(f + '|') !== 0; }); }
+    if (act === 'quitar') A.extra = A.extra.filter(function(x){ return x.indexOf(f + '|') !== 0; });
+    if (act === 'hora') { var n = prompt('Hora extra para el ' + slotLargo(f) + ' (ej. 4:00 p.m.)'); if (!n || !n.trim()) return; if (A.extra.indexOf(f + '|' + n.trim()) < 0) A.extra.push(f + '|' + n.trim()); }
+    if (act === 'res') { S.tab = 'reservas'; render(); return; }
+    guardarLuego(); pintarCal(); };
+}
+function pintarCal(){
+  var A = agCfg(), box = $('agCal'); if (!box) return; var O = ocupados(), hoyD = new Date(); hoyD.setHours(12, 0, 0, 0);
+  var ini = new Date(hoyD); ini.setDate(ini.getDate() - ((ini.getDay() + 6) % 7)); var fin = new Date(hoyD); fin.setDate(fin.getDate() + (A.semanas || 8) * 7);
+  var lim = new Date(hoyD); lim.setDate(lim.getDate() + (A.anticipacion || 0));
+  var h = '<div class="agn-g">' + [1, 2, 3, 4, 5, 6, 0].map(function(d){ return '<div class="agn-dw">' + DIAS[d] + '</div>'; }).join('');
+  for (var d = new Date(ini); d <= fin; d.setDate(d.getDate() + 1)) {
+    var f = ymd(d), pas = d < hoyD, L = slotsDia(f), cer = A.bloq.indexOf(f) >= 0, esExtra = A.extra.some(function(x){ return x.indexOf(f + '|') === 0; }), base = A.dias.indexOf(d.getDay()) >= 0;
+    h += '<div class="agn-d' + (pas ? ' pas' : '') + (cer ? ' cer' : '') + (!L.length ? ' vac' : '') + '"><div class="agn-n"><b>' + d.getDate() + '</b> ' + MESES[d.getMonth()] + (d < lim && !pas ? ' <span class="dim" title="Dentro de la anticipación mínima: no se muestra en la web">·</span>' : '') + '</div>';
+    if (!pas) {
+      if (cer) h += '<div class="small muted">Cerrado</div><button class="btn sm" data-ag="cerrar~' + f + '">Reabrir</button>';
+      else {
+        h += L.map(function(x){ var k = f + '|' + x, r = O[k], bl = A.bloq.indexOf(k) >= 0;
+          if (r) return '<button class="agn-s res" data-ag="res~' + f + '" title="' + esc((r.data.nombre || '') + ' · ' + (r.data.clase || '')) + '">' + esc(x) + '<i>' + esc(String(r.data.nombre || 'Reservado').split(' ')[0]) + '</i></button>';
+          if (!bl && choca(f, x, O)) return '<button class="agn-s bl" disabled title="Choca con otra reserva (duración + 1 h de traslado)">' + esc(x) + '<i>ocupada</i></button>';
+          return '<button class="agn-s' + (bl ? ' bl' : '') + '" data-ag="slot~' + f + '~' + esc(x) + '">' + esc(x) + '<i>' + (bl ? 'bloqueada' : 'libre') + '</i></button>'; }).join('');
+        h += '<div class="agn-a">' + (L.length ? '<button class="lnk" data-ag="hora~' + f + '">+ hora</button>' + (base ? '<button class="lnk" data-ag="cerrar~' + f + '">cerrar día</button>' : '') + (esExtra ? '<button class="lnk" data-ag="quitar~' + f + '">quitar</button>' : '') : '<button class="lnk" data-ag="abrir~' + f + '">+ Abrir</button>') + '</div>';
+      }
+    }
+    h += '</div>';
+  }
+  box.innerHTML = h + '</div>';
+}
+var EST = [['nueva', 'Nueva'], ['confirmada', 'Confirmada'], ['pagada', 'Pagada'], ['realizada', 'Realizada'], ['cancelada', 'Cancelada']];
+function renderReservas(c){
+  var R = S.res.filter(function(r){ return !(r.data && r.data.oculta); });
+  c.innerHTML = '<div class="row" style="margin-bottom:10px"><span class="small muted">Solicitudes que llegan desde la página de eventos. Escríbele a la persona para confirmar fecha y pago.</span><span class="sp"></span><button class="btn sm" id="rRef">Actualizar</button><a class="btn sm" href="/eventos.html" target="_blank">Ver página ↗</a></div>' +
+    (R.length ? R.map(function(r){ var x = r.data, tel = String(x.telefono || '').replace(/\D/g, ''); if (tel.length === 10) tel = '57' + tel;
+      return '<div class="card" style="margin-bottom:8px"><div class="row"><b>' + esc(x.nombre || 'Sin nombre') + '</b><span class="pill">' + esc(x.clase || '') + '</span><span class="small muted">' + fFecha(String(r.created_at || '').slice(0, 10)) + '</span><span class="sp"></span><select data-est="' + r.id + '" style="width:auto">' + EST.map(function(s){ return '<option value="' + s[0] + '"' + ((x.estado || 'nueva') === s[0] ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select></div>' +
+        '<div class="small" style="margin-top:6px">' + esc(x.personas || 1) + ' invitados · ' + (x.reparto ? esc(x.reparto) + ' · ' : '') + (x.slot ? '📅 <b>' + esc(slotLargo(x.slot)) + '</b> · ' : (x.fechaPref ? 'propone ' + fFecha(x.fechaPref) + (x.horaPref ? ' ' + esc(x.horaPref) : '') + ' · ' : '')) + (x.combo ? 'combo ' + esc(x.combo) + ' · ' : '') + '<b>' + fmt(x.total) + '</b></div>' + (x.direccion ? '<div class="small" style="margin-top:4px">📍 ' + esc(x.direccion) + '</div>' : '') + (x.empresa ? '<div class="small" style="margin-top:4px">🏢 ' + esc(x.empresa) + '</div>' : '') + (x.pago && x.pago.verificado ? '<div class="small" style="margin-top:4px;color:var(--ok)">✅ Pagó ' + fmt(x.pago.monto) + ' en línea (' + esc(x.pago.metodo) + ') · verificado por Wompi</div>' : x.pago && x.pago.reportado ? '<div class="small" style="margin-top:4px;color:var(--ok)">💳 Dice que pagó ' + fmt(x.pago.monto) + ' por ' + esc(x.pago.metodo) + ' · revisa el comprobante en WhatsApp</div>' : '') + (x.pagoWompi && x.pagoWompi.estado !== 'APPROVED' ? '<div class="small muted" style="margin-top:4px">Intento de pago en Wompi: ' + esc(x.pagoWompi.estado) + '</div>' : '') +
+        (x.items && x.items.length ? '<div class="small muted" style="margin-top:4px">' + x.items.map(function(i){ return esc(i.qty + ' × ' + i.nombre + (i.cafe ? ' (' + i.cafe + ')' : '')); }).join(' · ') + '</div>' : '') + (x.nota ? '<div class="small" style="margin-top:4px">“' + esc(x.nota) + '”</div>' : '') +
+        '<div class="row" style="margin-top:8px">' + (tel ? '<a class="btn sm pri" target="_blank" rel="noopener" href="https://wa.me/' + tel + '?text=' + encodeURIComponent('Hola ' + String(x.nombre || '').split(' ')[0] + ', soy Camilo de B.R.U ☕ Recibí tu solicitud para la ' + (x.clase || 'clase') + (x.slot ? ' para el ' + slotLargo(x.slot) + '. Te confirmo la reserva y te paso los datos de pago.' : '. ¿Te queda bien ' + (x.fechaPref ? fFecha(x.fechaPref) : 'esta semana') + '?')) + '">WhatsApp ' + esc(x.telefono) + '</a>' : '') + (x.email ? '<span class="small muted">' + esc(x.email) + '</span>' : '') + (x.pago && x.pago.verificado ? '' : '<button class="btn sm" data-linkpago="' + r.id + '">🔗 Link de pago</button>') + (x.estado === 'cancelada' ? '<span class="sp"></span><button class="btn sm dang" data-delres="' + r.id + '">🗑 Eliminar</button>' : '') + '</div></div>'; }).join('') : '<div class="empty">Aún no hay reservas. Comparte la página <b>brucoffeeshop.online/eventos.html</b>.</div>');
+  $('rRef').onclick = function(){ sb(T + '?tipo=eq.evento_res&select=id,fecha,data,created_at&order=created_at.desc&limit=200').then(function(r){ S.res = r || []; render(); }); };
+  c.onclick = function(e){ var lp = e.target.closest('[data-linkpago]'); if (lp) { var u = location.origin + '/eventos.html?pagar=' + lp.getAttribute('data-linkpago'); try { navigator.clipboard.writeText(u); toast('Link de pago copiado: pégalo en WhatsApp'); } catch (er) { prompt('Copia este link de pago:', u); } return; }
+    var b = e.target.closest('[data-delres]'); if (!b) return; var id = b.getAttribute('data-delres'), r = S.res.filter(function(x){ return x.id === id; })[0]; if (!r || r.data.estado !== 'cancelada') return; if (!confirm('¿Eliminar la reserva cancelada de ' + (r.data.nombre || 'esta persona') + '? No se puede deshacer.')) return;
+    sb(T + '?id=eq.' + encodeURIComponent(id) + '&tipo=eq.evento_res', { method: 'DELETE', prefer: 'return=representation' }).then(function(rows){ if (rows && rows.length) return true; r.data.oculta = true; return upsert({ id: r.id, tipo: 'evento_res', fecha: r.fecha, data: r.data }); }).catch(function(){ r.data.oculta = true; return upsert({ id: r.id, tipo: 'evento_res', fecha: r.fecha, data: r.data }); }).then(function(){ S.res = S.res.filter(function(x){ return x.id !== id; }); toast('Reserva eliminada'); render(); }); };
+  c.onchange = function(e){ var id = e.target.getAttribute('data-est'); if (!id) return; var r = S.res.filter(function(x){ return x.id === id; })[0]; r.data.estado = e.target.value; upsert({ id: r.id, tipo: 'evento_res', fecha: r.fecha, data: r.data }).then(function(){ toast('Estado actualizado'); render(); }); };
+}
+function renderAjustes(c){
+  var C = S.cfg;
+  c.innerHTML = '<div class="card"><div class="grid g3">' + campo('Costo del café tostado por gramo', 'costoG', C.costoG) + campo('Margen objetivo (%)', 'margen', C.margen) + campo('Redondear precios a', 'redondeo', C.redondeo) +
+    campo('Descuento por combo (%)', 'descuento.pct', C.descuento.pct) + campo('Desde cuántos elementos aplica', 'descuento.minExtras', C.descuento.minExtras) + campo('WhatsApp para reservas', 'wa', C.wa, 'text') + '</div>' + '<label class="f" style="margin-top:10px">Disponibilidad (sale en la web)<input type="text" data-p="disponibilidad" value="' + esc(C.disponibilidad || '') + '"></label>' +
+    '<div class="sec">Datos de pago (salen en la web justo después de reservar)</div><div class="small muted" style="margin-bottom:6px">Solo se muestran los medios que llenes. Si dejas todo vacío, la web dice que los datos llegan por WhatsApp.</div><label class="f">Link de pago con tarjeta (SumUp, Bold, Wompi…)<input type="text" data-p="pago.link" value="' + esc((C.pago || {}).link || '') + '" placeholder="https://…"></label><div class="grid g3" style="margin-top:8px">' + campo('Nequi / Daviplata (número)', 'pago.nequi', (C.pago || {}).nequi, 'text') + campo('Llave Bre-B', 'pago.llave', (C.pago || {}).llave, 'text') + campo('Banco y tipo de cuenta', 'pago.banco', (C.pago || {}).banco, 'text', ' placeholder="Ej. Bancolombia ahorros"') + campo('Número de cuenta', 'pago.cuenta', (C.pago || {}).cuenta, 'text') + campo('Titular', 'pago.titular', (C.pago || {}).titular, 'text') + campo('Cédula o NIT', 'pago.doc', (C.pago || {}).doc, 'text') + campo('Anticipo para reservar (%) · 100 = pago total', 'pago.anticipo', (C.pago || {}).anticipo == null ? 100 : C.pago.anticipo) + '</div>' +
+    '<div class="small muted" style="margin-top:10px">La comisión de Wompi que se suma al cliente se configura en Clases → Ajustes y aplica también a eventos.</div>' +
+    '<div class="small muted" style="margin-top:10px">El costo por gramo incluye café verde, merma de tostión y gas. Con un verde de unos $' + '35.000/kg y 16 % de merma, más tostión, queda alrededor de $90–110 por gramo.</div>' +
+    '<div class="row" style="margin-top:12px"><button class="btn" id="aRes">Volver a los valores iniciales</button><a class="btn" href="/eventos.html" target="_blank">Ver la página de eventos ↗</a></div></div>';
+  enlazar(c);
+  $('aRes').onclick = function(){ if (!confirm('Se reemplazan todos los costos, precios y combos por los valores iniciales. ¿Seguir?')) return; S.cfg = copia(DEF); guardar().then(render); };
+}
+
+// =============== ARRANQUE ===============
+(function(){
+  $('tabs').onclick = function(e){ var b = e.target.closest('button[data-t]'); if (b) { S.tab = b.getAttribute('data-t'); render(); window.scrollTo(0, 0); } };
+  $('main').innerHTML = '<div class="empty">Cargando…</div>';
+  cargar().then(function(){ if (S.vieja) { $('main').innerHTML = '<div class="banner bad">Esta pestaña tiene una versión vieja de la página. Recárgala (Ctrl + Shift + R o desliza hacia abajo en el celular) antes de hacer cambios.</div>'; guardar = function(){ return Promise.resolve(); }; return; } render(); if (!S.existe) guardar(); else upsert({ id: 'eventospub', tipo: 'eventos_pub', fecha: null, data: publico() }).catch(function(){}); }).catch(function(e){ $('main').innerHTML = '<div class="banner bad">No se pudo cargar: ' + esc(e.message) + '</div>'; });
+})();
+
+})();
+</script>
+</body>
+</html>
