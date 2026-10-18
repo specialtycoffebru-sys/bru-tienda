@@ -439,6 +439,8 @@ function irArmar(){ var a = $('armar'); if (a) setTimeout(function(){ a.scrollIn
     var q = /[?&]clase=([a-z]+)/.exec(location.search);
     pintarClases();
     cargarOcup().then(function(){ AG.mes = primerMes(); pintarAgenda(); });
+    var pq = /[?&]pagar=(res_[a-z0-9]+)/.exec(location.search);
+    if (pq) sb('bru_conta?id=eq.' + pq[1] + '&tipo=eq.clase_res&select=id,data').then(function(rr){ var row = (rr || []).filter(function(x){ return x.id === pq[1]; })[0]; if (!row) return; $('armar').classList.remove('hide'); Array.prototype.forEach.call(document.querySelectorAll('#armar .blk'), function(n){ if (n.id !== 'pago') n.classList.add('hide'); }); var rz = document.querySelector('.resumen'); if (rz) rz.classList.add('hide'); RES = { id: row.id, datos: row.data, wa: 'https://wa.me/' + (P.wa || '573203713844'), metodo: '' }; if (row.data.pago && row.data.pago.verificado) RES.pagado = true; pintarPago(); setTimeout(function(){ $('pago').scrollIntoView({ block: 'start' }); }, 100); });
     var vp = /[?&]pago=(res_[a-z0-9]+)/.exec(location.search), vt = /[?&]id=([^&]+)/.exec(location.search);
     if (vp && vt) { RES = { id: vp[1], datos: { total: 0, nombre: '' }, wa: 'https://wa.me/' + (P.wa || '573203713844'), metodo: 'wompi' }; pintarPago(); $('pago').scrollIntoView(); verificarTx(decodeURIComponent(vt[1])); }
     if (q && P.clases.some(function(c){ return c.id === q[1] && c.estado !== 'pronto'; })) { st.clase = q[1]; st.personas = (claseAct() || {}).minPersonas || 1; var L = P.combos[st.clase] || []; aplicarCombo(L[1] ? L[1].nombre : (L[0] ? L[0].nombre : '')); pintarClases(); pintarArmador(); irArmar(); }
