@@ -392,6 +392,10 @@ textarea.inp{resize:vertical;min-height:60px}
       <svg viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/><path d="M22 9v6"/></svg>
       <span>Clases</span>
     </div>
+    <div class="sb-a" onclick="go('estacion',this)">
+      <svg viewBox="0 0 24 24"><path d="M4 9h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 3c0 1.5 1 1.5 1 3M12 3c0 1.5 1 1.5 1 3"/><path d="M3 22h16"/></svg>
+      <span>Eventos</span>
+    </div>
     <div class="sb-grp">Tienda</div>
     <div class="sb-a" onclick="go('catalogo',this)">
       <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
@@ -3760,6 +3764,20 @@ function clasesAbrir(){
 }
 </script>
 
+<!-- EVENTOS · ESTACIÓN DE CAFÉ (módulo en /eventos-admin.html: costeo, combos, agenda y reservas de bodas, fiestas y eventos; guarda en bru_conta eventoscfg/eventospub/evento_res, nunca modifica bru_store) -->
+<div class="pg" id="page-estacion">
+  <div style="margin:-.25rem 0 0;border:.5px solid var(--bd);border-radius:10px;overflow:hidden;background:var(--bg)">
+    <iframe id="estacion-frame" title="Eventos · estación de café" style="display:block;width:100%;height:calc(100dvh - 92px);min-height:560px;border:0;background:var(--bg)"></iframe>
+  </div>
+  <div style="font-size:10.5px;color:var(--muted);margin-top:.5rem"><a href="/eventos-admin.html" target="_blank" style="color:var(--gold)">Abrir en pestaña aparte ↗</a> · <a href="/eventos.html" target="_blank" style="color:var(--gold)">Ver la página pública ↗</a></div>
+</div>
+<script>
+function estacionAbrir(){
+  var f = document.getElementById('estacion-frame');
+  if(f && !f.getAttribute('src')) f.setAttribute('src', '/eventos-admin.html?embed=1');
+}
+</script>
+
 <!-- MARKETING (módulo en /marketing.html: lee ventas de bru_store, guarda planes en bru_conta tipos mkt_*, nunca modifica bru_store) -->
 <div class="pg" id="page-marketing">
   <div style="margin:-.25rem 0 0;border:.5px solid var(--bd);border-radius:10px;overflow:hidden;background:var(--bg)">
@@ -5357,8 +5375,34 @@ try{
   }
 }catch(e){}
 
+// Pagos en línea (Wompi) de la tienda, clases y eventos: el servidor deja cada pago
+// aprobado en bru_conta como 'venta_web'. Aquí se pasa una sola vez a Ventas (D.ven)
+// con su referencia, y desde Ventas entra a Contabilidad → Importar como las demás.
+var _vwSync = false;
+function ventasWebSync(){
+  if(_vwSync || !NUBE_OK) return; _vwSync = true;
+  sbGet('/rest/v1/bru_conta?tipo=eq.venta_web&select=id,fecha,data&order=fecha.asc&limit=1000').then(function(rows){
+    D.ven = D.ven || [];
+    var ya = {}; D.ven.forEach(function(v){ if(v && v.ref) ya[String(v.ref).split('#')[0]] = 1; });
+    var n = 0, tot = 0;
+    (rows || []).forEach(function(r){
+      var x = r.data || {}; if(!r.id || ya[r.id]) return;
+      (x.lineas || []).forEach(function(l, i){
+        var q = Number(l.qty) || 1, p = Number(l.precio) || 0;
+        D.ven.push({prod:l.prod||'Venta web', qty:q, precio:p, total:q*p, cliente:x.cliente||'', canal:'Página web · Wompi', est:'Pagado', date:r.fecha||today(), ref:r.id+'#'+i, nota:(x.origen||'')+' · '+(x.medio||'')+' · cobrado '+(x.cobrado||0)+' (comisión pasarela '+(x.comision||0)+')'});
+        tot += q*p;
+      });
+      n++;
+    });
+    if(!n) return;
+    saveDCloud();
+    try{ if(typeof renderVentas==='function') renderVentas(); if(typeof updateVentasStats==='function') updateVentasStats(); if(typeof renderResumen==='function') renderResumen(); }catch(e){}
+    try{ toast(n + (n>1?' pagos en línea registrados':' pago en línea registrado') + ' en Ventas · ' + fmt(tot), 'ok'); }catch(e){}
+  }).catch(function(){ _vwSync = false; });
+}
 function marcarNubeOK(){
   NUBE_OK = true;
+  setTimeout(function(){ try{ ventasWebSync(); }catch(e){} }, 4000);
   try{ var si=ge('save-indicator'); if(si){ si.textContent='☁ Auto-guardado activo'; si.style.color=''; } }catch(e){}
   // Si mientras se cargaba hubo cambios que no se pudieron subir, subirlos ahora.
   // Se espera a que los datos de la nube ya esten dentro de D, y el candado
@@ -5523,7 +5567,7 @@ function mTab(tab,btn,modalId) {
 }
 
 // ═══ NAV ════════════════════════════════════════════════════════════════
-var TITLES = {eventos:'Propuestas de eventos',resumen:'Resumen',pedidos:'Pedidos',prepedidos:'Pre-pedidos',clientes:'Clientes',catalogo:'Catálogo',tienda:'Editor Tienda',
+var TITLES = {estacion:'Eventos · estación de café',eventos:'Propuestas de eventos',resumen:'Resumen',pedidos:'Pedidos',prepedidos:'Pre-pedidos',clientes:'Clientes',catalogo:'Catálogo',tienda:'Editor Tienda',
   finanzas:'Ingresos / Gastos',inventario:'Inventario',ventas:'Ventas',facturas:'Facturas',
   cotizaciones:'Cotizaciones',inversiones:'Inversiones',reportes:'Reportes',
   produccion:'Producción',blends:'Blends & Recetas',inversionistas:'Inversionistas',
@@ -5700,6 +5744,7 @@ function go(page,el) {
   if(page==='contabilidad'){ try{ contaAbrir(); }catch(e){} }
   if(page==='marketing'){ try{ mktAbrir(); }catch(e){} }
   if(page==='clases'){ try{ clasesAbrir(); }catch(e){} }
+  if(page==='estacion'){ try{ estacionAbrir(); }catch(e){} }
   if(page==='eventos'){ try{ renderEventos(); }catch(e){} }
   if(page==='propuestas') propRender();
   if(page==='pedidos'){syncPeds();renderPeds();}
@@ -14782,7 +14827,7 @@ var UPAGES = [
   {k:'reportes',n:'Reportes'},{k:'costos',n:'Costos y Gastos'},{k:'ganancias',n:'Ganancias'},
   {k:'produccion',n:'Producción'},{k:'blends',n:'Blends & Recetas'},{k:'inversionistas',n:'Inversionistas'},
   {k:'suscripciones',n:'Suscripciones'},{k:'nomina',n:'Nómina'},{k:'insumos',n:'Insumos'},{k:'usuarios',n:'Usuarios y accesos'},
-  {k:'respaldo',n:'Datos y Respaldo'},{k:'empresas',n:'Página Empresas'},{k:'planes',n:'Página Planes'},{k:'leads',n:'Leads / Ferias'},{k:'prospectos',n:'Prospectos'},{k:'contabilidad',n:'Contabilidad'},{k:'marketing',n:'Marketing'},{k:'clases',n:'Clases'},{k:'propuestas',n:'Propuestas'},
+  {k:'respaldo',n:'Datos y Respaldo'},{k:'empresas',n:'Página Empresas'},{k:'planes',n:'Página Planes'},{k:'leads',n:'Leads / Ferias'},{k:'prospectos',n:'Prospectos'},{k:'contabilidad',n:'Contabilidad'},{k:'marketing',n:'Marketing'},{k:'clases',n:'Clases'},{k:'estacion',n:'Eventos (estación de café)'},{k:'propuestas',n:'Propuestas'},
   {k:'config',n:'Configuración / Datos'}
 ];
 
