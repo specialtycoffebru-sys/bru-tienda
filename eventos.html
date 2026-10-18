@@ -213,7 +213,7 @@ footer{border-top:1px solid var(--bd);padding:26px 0;color:var(--muted);font-siz
 var SB_URL = 'https://dzgtyazvqpdmwvwqpvco.supabase.co';
 var SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
 var P = null, st = { clase: null, combo: '', items: {}, cafes: {}, kit: {}, personas: 1, grupos: 1 };
-function gruposMin(c){ return c && c.porGrupo ? Math.max(1, Math.ceil(Math.max(c.minPersonas || 1, st.personas) / c.porGrupo)) : 1; }
+function gruposMin(c){ if (!c || !c.porGrupo) return 1; var g = Math.max(1, Math.ceil(Math.max(c.minPersonas || 1, st.personas) / c.porGrupo)); return c.maxGrupos ? Math.min(c.maxGrupos, g) : g; }
 var MINXG = 3;
 function nPers(c){ return Math.max((c && c.minPersonas) || 1, st.personas); }
 function gruposMax(c){ return gruposMin(c); }
@@ -336,7 +336,7 @@ function pintarArmador(){
   }).join('');
   $('g-blk').classList.add('hide'); if (c.porGrupo) { fijarGrupos(c); $('grupos').value = st.grupos; notaGrupos(c); }
   $('personas').max = c.maxPersonas; $('personas').min = c.minPersonas || 1; if (st.personas < (c.minPersonas || 1)) st.personas = c.minPersonas || 1; $('personas').value = st.personas;
-  $('p-nota').textContent = ((c.minPersonas || 1) > 1 ? 'Mínimo ' + c.minPersonas + ' invitados. ' : '') + (c.precioExtra && c.precio === c.precioExtra ? 'Precio por invitado: ' + fmt(c.precioExtra) + ', todo incluido. Máximo ' + c.maxPersonas + ' invitados.' : c.precioExtra ? (c.porGrupo ? 'Incluye ' + gruposMin(c) + (gruposMin(c) > 1 ? ' baristas' : ' barista') + ' (uno por cada ' + c.porGrupo + ' invitados). ' : '') + 'Cada invitado: ' + fmt(c.precioExtra) + (c.incluye ? ' (con su regalo incluido)' : '') + '. Máximo ' + c.maxPersonas + ' invitados.' : '');
+  $('p-nota').textContent = ((c.minPersonas || 1) > 1 ? 'Mínimo ' + c.minPersonas + ' invitados. ' : '') + (c.precioExtra && c.precio === c.precioExtra ? 'Precio por invitado: ' + fmt(c.precioExtra) + ', todo incluido. Máximo ' + c.maxPersonas + ' invitados.' : c.precioExtra ? (c.porGrupo ? 'Incluye ' + gruposMin(c) + (gruposMin(c) > 1 ? ' baristas' : ' barista') + ' (uno por cada ' + c.porGrupo + ' invitados' + (c.maxGrupos ? ', m\u00e1ximo ' + c.maxGrupos : '') + '). ' : '') + 'Cada invitado: ' + fmt(c.precioExtra) + (c.incluye ? ' (con su regalo incluido)' : '') + '. Máximo ' + c.maxPersonas + ' invitados.' : '');
   if (AG.sel && AG.sel !== 'otra' && oc(AG.sel)) AG.sel = ''; pintarAgenda();
   $('d-nota').textContent = (P.extras.some(function(x){ return x.porPersona; }) ? 'Los recuerdos y bebidas marcados «por invitado» se multiplican por el número de invitados. ' : '') + (c.extrasPorPersona ? 'Todo lo que agregues es por persona: cada asistente recibe su kit o su café, y el precio se multiplica por el número de personas. ' : '') + (d.pct ? 'Suma ' + d.minExtras + ' o más elementos y obtienes ' + d.pct + ' % de descuento en ellos.' : '');
   pintarResumen();
