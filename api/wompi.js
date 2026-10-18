@@ -23,32 +23,43 @@ function sb(path, opts){
 function listo(){ return !!(process.env.WOMPI_PUBLIC_KEY && process.env.WOMPI_INTEGRITY_SECRET); }
 function api(){ return /^pub_test_/.test(process.env.WOMPI_PUBLIC_KEY || '') ? 'https://sandbox.wompi.co/v1' : 'https://production.wompi.co/v1'; }
 
+// Costo de la pasarela: se suma al cliente para que a la cuenta llegue el valor completo
+var FEE_DEF = { trasladar: true, pct: 2.99, fijo: 600, iva: 19 };
+function feeCfg(pago){ var f = (pago && pago.pasarela) || {}; return { trasladar: f.trasladar !== false, pct: f.pct == null ? FEE_DEF.pct : Number(f.pct), fijo: f.fijo == null ? FEE_DEF.fijo : Number(f.fijo), iva: f.iva == null ? FEE_DEF.iva : Number(f.iva) }; }
+function bruto(neto, f){ if (!f.trasladar) return neto; var t = 1 + f.iva / 100; return Math.ceil((neto + f.fijo * t) / (1 - f.pct / 100 * t) / 100) * 100; }
+function pagoPub(){ return sb('bru_conta?id=eq.clasespub&select=data').then(function(r){ return (r && r[0] && r[0].data && r[0].data.pago) || {}; }).catch(function(){ return {}; }); }
+
 // Calcula el valor en el servidor (no se confía en el navegador) y firma la transacción
 function firma(id){
   if (!listo()) return Promise.reject(new Error('Wompi no está configurado'));
-  return Promise.all([
-    sb('bru_conta?id=eq.' + encodeURIComponent(id) + '&tipo=eq.clase_res&select=id,data'),
-    sb('bru_conta?id=eq.clasespub&select=data')
-  ]).then(function(r){
-    var res = (r[0] || []).filter(function(x){ return x.id === id; })[0]; if (!res) throw new Error('No encontramos la reserva');
-    var pago = (r[1] && r[1][0] && r[1][0].data && r[1][0].data.pago) || {};
-    var pct = Math.min(100, Math.max(1, Number(pago.anticipo) || 100));
-    var valor = Math.round((Number(res.data.total) || 0) * pct / 100 / 100) * 100;
-    if (valor < 1500) throw new Error('Valor inválido');
-    var cents = valor * 100, ref = id + '-' + Date.now().toString(36);
-    return { publicKey: process.env.WOMPI_PUBLIC_KEY, reference: ref, amountInCents: cents, currency: 'COP', signature: sha(ref + cents + 'COP' + process.env.WOMPI_INTEGRITY_SECRET), valor: valor, pct: pct };
+  var esPed = /^ped_/.test(id);
+  if (!/^(res|ped)_[a-z0-9]+$/.test(id)) return Promise.reject(new Error('Referencia inválida'));
+  return Promise.all([sb('bru_conta?id=eq.' + encodeURIComponent(id) + '&select=id,tipo,data'), pagoPub()]).then(function(r){
+    var row = (r[0] || []).filter(function(x){ return x.id === id; })[0]; if (!row) throw new Error(esPed ? 'No encontramos el pedido' : 'No encontramos la reserva');
+    var pago = r[1], pct = esPed ? 100 : Math.min(100, Math.max(1, Number(pago.anticipo) || 100));
+    var neto = Math.round((Number(row.data.total) || 0) * pct / 100 / 100) * 100;
+    if (neto < 1500) throw new Error('Valor inválido');
+    var f = feeCfg(pago), valor = bruto(neto, f), cents = valor * 100, ref = id + '-' + Date.now().toString(36);
+    return { publicKey: process.env.WOMPI_PUBLIC_KEY, reference: ref, amountInCents: cents, currency: 'COP', signature: sha(ref + cents + 'COP' + process.env.WOMPI_INTEGRITY_SECRET), valor: valor, neto: neto, costo: valor - neto, pct: pct };
   });
 }
-// Marca la reserva según el estado de la transacción
+// Marca la reserva o el pedido según el estado de la transacción
 function aplicar(tx){
   var id = String(tx.reference || '').split('-')[0];
-  if (!/^res_/.test(id)) return Promise.resolve({ ignorado: true });
+  if (!/^(res|ped)_/.test(id)) return Promise.resolve({ ignorado: true });
   return sb('bru_conta?id=eq.' + encodeURIComponent(id) + '&select=id,tipo,fecha,data').then(function(r){
-    var row = (r || []).filter(function(x){ return x.id === id; })[0]; if (!row) return { sinReserva: true };
-    var d = row.data || {};
+    var row = (r || []).filter(function(x){ return x.id === id; })[0]; if (!row) return { sinRegistro: true };
+    var d = row.data || {}, ya = d.pago && d.pago.verificado;
     d.pagoWompi = { id: tx.id, estado: tx.status, monto: Math.round((tx.amount_in_cents || 0) / 100), medio: tx.payment_method_type || '', fecha: new Date().toISOString() };
-    if (tx.status === 'APPROVED') { d.pago = { reportado: true, verificado: true, metodo: 'Wompi · ' + (tx.payment_method_type || 'en línea'), monto: d.pagoWompi.monto, fecha: d.pagoWompi.fecha }; if (d.estado === 'nueva' || d.estado === 'confirmada' || !d.estado) d.estado = 'pagada'; }
-    return sb('bru_conta?on_conflict=id', { method: 'POST', prefer: 'resolution=merge-duplicates,return=minimal', body: [{ id: row.id, tipo: row.tipo, fecha: row.fecha, data: d }] }).then(function(){ return { ok: true, estado: tx.status }; });
+    if (tx.status === 'APPROVED') { d.pago = { reportado: true, verificado: true, metodo: 'Wompi · ' + (tx.payment_method_type || 'en línea'), monto: d.pagoWompi.monto, fecha: d.pagoWompi.fecha }; if (/^res_/.test(id) && (d.estado === 'nueva' || d.estado === 'confirmada' || !d.estado)) d.estado = 'pagada'; if (/^ped_/.test(id)) d.estado = 'pagado'; }
+    return sb('bru_conta?on_conflict=id', { method: 'POST', prefer: 'resolution=merge-duplicates,return=minimal', body: [{ id: row.id, tipo: row.tipo, fecha: row.fecha, data: d }] }).then(function(){
+      if (!/^ped_/.test(id) || tx.status !== 'APPROVED' || ya) return { ok: true, estado: tx.status };
+      // Marca también el pedido en la tabla de pedidos de la tienda
+      var refTxt = id.replace('ped_', 'PED-').toUpperCase();
+      return sb('bru_pedidos?notas=like.*' + encodeURIComponent(refTxt) + '*&select=id,notas').then(function(pp){
+        return Promise.all((pp || []).map(function(p){ return sb('bru_pedidos?id=eq.' + p.id, { method: 'PATCH', prefer: 'return=minimal', body: { estado: 'Confirmado', notas: String(p.notas || '').replace(/ · ⏳ Pago en línea pendiente/, '') + ' · ✅ PAGADO en línea (Wompi ' + (tx.payment_method_type || '') + ') ' + d.pagoWompi.monto } }).catch(function(){}); }));
+      }).catch(function(){}).then(function(){ return { ok: true, estado: tx.status }; });
+    });
   });
 }
 // Verifica el evento que envía Wompi (checksum con el secreto de eventos)
@@ -59,7 +70,7 @@ function eventoValido(ev){
 }
 
 module.exports = function(req, res){
-  if (req.method === 'GET') return json(res, 200, { ok: true, activo: listo(), prueba: /^pub_test_/.test(process.env.WOMPI_PUBLIC_KEY || '') });
+  if (req.method === 'GET') return pagoPub().then(function(p){ json(res, 200, { ok: true, activo: listo(), prueba: /^pub_test_/.test(process.env.WOMPI_PUBLIC_KEY || ''), fee: feeCfg(p) }); });
   if (req.method !== 'POST') return json(res, 405, { error: 'Método no permitido' });
   leerBody(req).then(function(b){
     if (b && b.event) { // evento de Wompi
