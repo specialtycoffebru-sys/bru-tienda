@@ -276,6 +276,7 @@ function dur(h){ h = Number(h) || 0; var hh = Math.floor(h), mm = Math.round((h 
 var RELOJ = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
 function claseAct(){ return P.clases.filter(function(c){ return c.id === st.clase; })[0]; }
 function extraPor(id){ return P.extras.filter(function(e){ return e.id === id; })[0]; }
+function maxDe(e){ return !e ? 50 : (e.porPersona ? 1 : (Number(e.max) || 50)); }
 function precioCafe(nombre){ var c = P.cafes.filter(function(x){ return x.nombre === nombre; })[0]; return c ? c.precio : 0; }
 function kitCfg(id){ return st.kit[id] || (st.kit[id] = { fuera: {}, op: {} }); }
 function kitPrecio(e){ var k = kitCfg(e.id), p = 0, det = [], sin = []; (e.componentes || []).forEach(function(cp, j){ var O = cp.opciones || []; if (k.fuera[j]) { sin.push(cp.nombre); return; } var o = O.filter(function(x){ return x.nombre === k.op[j]; })[0] || O[0]; if (!o) return; p += o.precio || 0; if (O.length > 1) det.push(o.nombre); }); return { precio: p, det: det.concat(sin.length ? ['sin ' + sin.join(', ').toLowerCase()] : []).join(' · ') }; }
@@ -285,7 +286,7 @@ function calcular(){
   var n = Math.max(c.minPersonas || 1, st.personas), g = c.porGrupo ? fijarGrupos(c) : 1, base = g * (c.precio - c.precioExtra) + n * c.precioExtra, lineas = [], ext = 0, cuenta = 0;
   var mult = c.extrasPorPersona ? n : 1, xp = mult > 1 ? ' × ' + mult + ' invitados' : '';
   Object.keys(st.items).forEach(function(id){
-    var q = st.items[id], e = extraPor(id); if (!q || !e) return; var mult = (c.extrasPorPersona || e.porPersona) ? n : 1, xp = mult > 1 ? ' × ' + mult + ' invitados' : '';
+    var q = st.items[id], e = extraPor(id); if (!q || !e) return; q = Math.min(q, maxDe(e)); var mult = (c.extrasPorPersona || e.porPersona) ? n : 1, xp = mult > 1 ? ' × ' + mult + ' invitados' : '';
     if (e.tipo === 'kit') { var kp = kitPrecio(e); lineas.push({ nombre: e.nombre + xp, cafe: kp.det, qty: q, precio: kp.precio * q * mult }); ext += kp.precio * q * mult; }
     else if (e.tipo === 'opcion') { for (var j = 0; j < q; j++) { var O = e.opciones || [], on = (st.cafes[id] || [])[j] || (O[0] && O[0].nombre) || '', op = O.filter(function(o){ return o.nombre === on; })[0] || O[0] || { precio: 0 }; var pz = (e.precio + (op.precio || 0)) * mult; lineas.push({ nombre: e.nombre + xp, cafe: on, qty: 1, precio: pz }); ext += pz; } }
     else if (e.tipo === 'cafe') { for (var i = 0; i < q; i++) { var nom = (st.cafes[id] || [])[i] || (P.cafes[0] && P.cafes[0].nombre) || ''; var pr = precioCafe(nom) * mult; lineas.push({ nombre: e.nombre + xp, cafe: nom, qty: 1, precio: pr }); ext += pr; } }
@@ -331,7 +332,7 @@ function pintarArmador(){
     if (e.tipo === 'cafe' && q) { var arr = st.cafes[e.id] || (st.cafes[e.id] = []); sel = '<div class="cafes">' + Array.apply(null, Array(q)).map(function(_, i){ if (!arr[i]) arr[i] = P.cafes[0] ? P.cafes[0].nombre : ''; return '<select data-cafe="' + e.id + '|' + i + '">' + P.cafes.map(function(k){ return '<option value="' + esc(k.nombre) + '"' + (arr[i] === k.nombre ? ' selected' : '') + '>' + esc(k.nombre + ' · ' + k.presentacion + ' · ' + fmt(k.precio)) + '</option>'; }).join('') + '</select>'; }).join('') + '</div>'; }
     var pr = e.tipo === 'kit' ? 'desde ' + fmt(Math.min(kitBase(e), kitPrecio(e).precio || kitBase(e))) : e.tipo === 'opcion' ? ((e.opciones || []).length ? 'desde ' + fmt(e.precio + Math.min.apply(null, e.opciones.map(function(o){ return o.precio || 0; }))) : fmt(e.precio)) : e.tipo === 'cafe' ? (P.cafes.length ? 'desde ' + fmt(Math.min.apply(null, P.cafes.map(function(k){ return k.precio; }))) : 'Sin stock') : fmt(e.precio) + (e.porPersona ? ' por invitado' : '');
     var dis = e.tipo === 'cafe' && !P.cafes.length;
-    return '<div class="ex' + (q ? ' on' : '') + '"><div class="ex-tx"><b>' + esc(e.nombre) + '</b><span>' + esc(e.desc) + '</span></div><div class="ex-pr">' + pr + '</div><div class="qty"><button data-q="' + e.id + '|-1"' + (q ? '' : ' disabled') + ' aria-label="Quitar">−</button><b>' + q + '</b><button data-q="' + e.id + '|1"' + (dis ? ' disabled' : '') + ' aria-label="Agregar">+</button></div>' + sel + '</div>';
+    return '<div class="ex' + (q ? ' on' : '') + '"><div class="ex-tx"><b>' + esc(e.nombre) + '</b><span>' + esc(e.desc) + '</span></div><div class="ex-pr">' + pr + '</div><div class="qty"><button data-q="' + e.id + '|-1"' + (q ? '' : ' disabled') + ' aria-label="Quitar">−</button><b>' + q + '</b><button data-q="' + e.id + '|1"' + (dis || q >= maxDe(e) ? ' disabled' : '') + ' aria-label="Agregar">+</button></div>' + sel + '</div>';
   }).join('');
   $('g-blk').classList.add('hide'); if (c.porGrupo) { fijarGrupos(c); $('grupos').value = st.grupos; notaGrupos(c); }
   $('personas').max = c.maxPersonas; $('personas').min = c.minPersonas || 1; if (st.personas < (c.minPersonas || 1)) st.personas = c.minPersonas || 1; $('personas').value = st.personas;
@@ -452,7 +453,7 @@ function irArmar(){ var a = $('armar'); if (a) setTimeout(function(){ a.scrollIn
   document.addEventListener('click', function(e){
     var c = e.target.closest('[data-clase]'); if (c) { st.clase = c.getAttribute('data-clase'); st.personas = (claseAct() || {}).minPersonas || 1; st.grupos = 1; var L = P.combos[st.clase] || []; aplicarCombo(L[1] ? L[1].nombre : (L[0] ? L[0].nombre : '')); pintarClases(); pintarArmador(); irArmar(); return; }
     var cb = e.target.closest('[data-combo]'); if (cb) { aplicarCombo(cb.getAttribute('data-combo')); pintarArmador(); return; }
-    var q = e.target.closest('[data-q]'); if (q) { var p = q.getAttribute('data-q').split('|'); st.items[p[0]] = Math.max(0, Math.min(50, (st.items[p[0]] || 0) + Number(p[1]))); if (st.cafes[p[0]]) st.cafes[p[0]].length = st.items[p[0]]; pintarArmador(); return; }
+    var q = e.target.closest('[data-q]'); if (q) { var p = q.getAttribute('data-q').split('|'); st.items[p[0]] = Math.max(0, Math.min(maxDe(extraPor(p[0])), (st.items[p[0]] || 0) + Number(p[1]))); if (st.cafes[p[0]]) st.cafes[p[0]].length = st.items[p[0]]; pintarArmador(); return; }
     var mb = e.target.closest('[data-mes]'); if (mb) { AG.mes += Number(mb.getAttribute('data-mes')); AG.dia = ''; pintarAgenda(); return; }
     var db = e.target.closest('[data-dia]'); if (db) { AG.dia = db.getAttribute('data-dia'); if (AG.sel.indexOf(AG.dia) !== 0) AG.sel = ''; var L = slotsDe(AG.dia).filter(function(x){ return !oc(AG.dia + '|' + x); }); if (L.length === 1) AG.sel = AG.dia + '|' + L[0]; pintarAgenda(); pintarResumen(); return; }
     var sl = e.target.closest('[data-slot]'); if (sl) { AG.sel = sl.getAttribute('data-slot'); if (AG.sel === 'otra') AG.dia = ''; pintarAgenda(); pintarResumen(); if (AG.sel !== 'otra') setTimeout(function(){ $('form').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 250); return; }
