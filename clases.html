@@ -174,7 +174,7 @@ footer{border-top:1px solid var(--bd);padding:26px 0;color:var(--muted);font-siz
 </style>
 </head>
 <body>
-<header><div class="wrap"><a class="logo" href="/">B·R·U</a><nav><a href="/">Inicio</a><a href="/#cafes">Cafés</a><a href="/clases.html" class="on">Clases</a><a href="/empresas">Empresas</a></nav><a class="wa" href="https://wa.me/573203713844" target="_blank" rel="noopener">WhatsApp</a></div></header>
+<header><div class="wrap"><a class="logo" href="/">B·R·U</a><nav><a href="/">Inicio</a><a href="/#cafes">Cafés</a><a href="/clases.html" class="on">Clases</a><a href="/eventos.html">Eventos</a><a href="/empresas">Empresas</a></nav><a class="wa" href="https://wa.me/573203713844" target="_blank" rel="noopener">WhatsApp</a></div></header>
 <main>
   <section class="hero wrap">
     <div class="eyebrow">Clases personalizadas</div>
@@ -240,7 +240,7 @@ function slotTxt(k){ var p = k.split('|'); return fechaLarga(p[0]) + ' · ' + p[
 var BUF = 60;
 function durAct(){ var c = P && st.clase ? claseAct() : null; return c ? Number(c.duracion) || 2 : 2; }
 function oc(k){ var p = k.split('|'), a = horaMin(p[1]), b = a + durAct() * 60 + BUF; return AG.res.some(function(r){ var q = r.k.split('|'); if (q[0] !== p[0]) return false; var ra = horaMin(q[1]), rb = ra + (r.d || 3) * 60 + BUF; return a < rb && ra < b; }); }
-function cargarOcup(){ return sb('bru_conta?tipo=eq.clase_res&select=s:data->>slot,e:data->>estado,d:data->>dur&data->>slot=gte.' + hoy()).then(function(r){ AG.res = []; (r || []).forEach(function(x){ if (x.s && x.e !== 'cancelada') AG.res.push({ k: x.s, d: Number(x.d) || 3 }); }); }).catch(function(){}); }
+function cargarOcup(){ return sb('bru_conta?tipo=in.(clase_res,evento_res)&select=s:data->>slot,e:data->>estado,d:data->>dur&data->>slot=gte.' + hoy()).then(function(r){ AG.res = []; (r || []).forEach(function(x){ if (x.s && x.e !== 'cancelada') AG.res.push({ k: x.s, d: Number(x.d) || 3 }); }); }).catch(function(){}); }
 function pintarAgenda(){
   var box = $('agenda'); if (!box || !P) return;
   var R = rango(), ini = R[0], fin = R[1], m0 = new Date(ini.getFullYear(), ini.getMonth() + AG.mes, 1, 12), maxMes = (fin.getFullYear() - ini.getFullYear()) * 12 + fin.getMonth() - ini.getMonth();
