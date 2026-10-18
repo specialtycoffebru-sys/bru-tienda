@@ -5381,12 +5381,12 @@ try{
 var _vwSync = false;
 function ventasWebSync(){
   if(_vwSync || !NUBE_OK) return; _vwSync = true;
-  sbGet('/rest/v1/bru_conta?tipo=eq.venta_web&select=id,fecha,data&order=fecha.asc&limit=1000').then(function(rows){
+  sbGet('/rest/v1/bru_conta?tipo=eq.venta_web&data->>sincronizado=is.null&select=id,tipo,fecha,data&order=fecha.asc&limit=1000').then(function(rows){
     D.ven = D.ven || [];
     var ya = {}; D.ven.forEach(function(v){ if(v && v.ref) ya[String(v.ref).split('#')[0]] = 1; });
-    var n = 0, tot = 0;
+    var n = 0, tot = 0, hechas = [];
     (rows || []).forEach(function(r){
-      var x = r.data || {}; if(!r.id || ya[r.id]) return;
+      var x = r.data || {}; if(!r.id) return; hechas.push(r); if(ya[r.id]) return;
       (x.lineas || []).forEach(function(l, i){
         var q = Number(l.qty) || 1, p = Number(l.precio) || 0;
         D.ven.push({prod:l.prod||'Venta web', qty:q, precio:p, total:q*p, cliente:x.cliente||'', canal:'Página web · Wompi', est:'Pagado', date:r.fecha||today(), ref:r.id+'#'+i, nota:(x.origen||'')+' · '+(x.medio||'')+' · cobrado '+(x.cobrado||0)+' (comisión pasarela '+(x.comision||0)+')'});
@@ -5394,8 +5394,9 @@ function ventasWebSync(){
       });
       n++;
     });
-    if(!n) return;
-    saveDCloud();
+    function marcar(){ hechas.forEach(function(r){ r.data.sincronizado = new Date().toISOString(); fetch(SB+'/rest/v1/bru_conta?on_conflict=id',{method:'POST',headers:sbHead({'Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify([{id:r.id,tipo:r.tipo,fecha:r.fecha,data:r.data}])}).catch(function(){}); }); }
+    if(!n){ marcar(); return; }
+    finGuardarNube(function(ok){ if(ok) marcar(); else _vwSync = false; }); saveD();
     try{ if(typeof renderVentas==='function') renderVentas(); if(typeof updateVentasStats==='function') updateVentasStats(); if(typeof renderResumen==='function') renderResumen(); }catch(e){}
     try{ toast(n + (n>1?' pagos en línea registrados':' pago en línea registrado') + ' en Ventas · ' + fmt(tot), 'ok'); }catch(e){}
   }).catch(function(){ _vwSync = false; });
