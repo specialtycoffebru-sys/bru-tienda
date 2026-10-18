@@ -12468,5 +12468,85 @@ function cardQuickAdd(idx){
 }
 
 </script>
+<script>
+/* ===== B.R.U · Pago en línea con Wompi en la tienda ===== */
+(function(){
+  var W = { activo: false, fee: { trasladar: true, pct: 2.99, fijo: 600, iva: 19 } };
+  function brutoW(neto){ var f = W.fee || {}; if (f.trasladar === false) return neto; var t = 1 + (Number(f.iva) || 0) / 100; return Math.ceil((neto + (Number(f.fijo) || 0) * t) / (1 - (Number(f.pct) || 0) / 100 * t) / 100) * 100; }
+  function totalPedido(){
+    var tot = (typeof cart !== 'undefined' ? cart : []).reduce(function(s, c){ return s + c.precio * c.qty; }, 0);
+    var e = window._envioActual, ev = (e && e.ok && !e.gratis) ? e.valor : 0;
+    return { productos: tot, envio: ev, total: tot + ev, envioPorConfirmar: !!(e && !e.ok) };
+  }
+  function money(n){ return typeof fmt === 'function' ? fmt(n) : ('$' + Math.round(n).toLocaleString('es-CO')); }
+  function nota(){
+    var sel = document.getElementById('o-pago'), box = document.getElementById('o-pago-wompi-nota'); if (!sel || !box) return;
+    if (sel.value !== 'wompi') { box.style.display = 'none'; var b0 = document.getElementById('btn-confirm'); if (b0 && !b0.disabled) b0.textContent = 'Confirmar pedido'; return; }
+    var t = totalPedido(), g = brutoW(t.total);
+    box.style.display = 'block';
+    box.innerHTML = 'Pagas aquí mismo con tarjeta, PSE, Nequi o Bancolombia en la ventana segura de Wompi.' + (g > t.total ? '<br>Pedido ' + money(t.total) + ' + costo del pago en línea ' + money(g - t.total) + ' = <b>' + money(g) + '</b>. Si prefieres no pagar ese costo, elige Nequi, Llave o transferencia.' : '') + (t.envioPorConfirmar ? '<br>El envío a tu zona se confirma y se cobra aparte por WhatsApp.' : '');
+    var b = document.getElementById('btn-confirm'); if (b && !b.disabled) b.textContent = 'Pagar ' + money(g) + ' en línea';
+  }
+  function cargar(src){ return new Promise(function(ok, no){ if (window.WidgetCheckout) return ok(); var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = function(){ no(new Error('No se pudo abrir el pago')); }; document.head.appendChild(s); }); }
+  function api(body){ return fetch('/api/wompi', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function(r){ return r.json(); }); }
+  function sbPost(tabla, filas, pref){ return fetch(SB_URL + '/rest/v1/' + tabla, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, Prefer: pref || 'return=minimal' }, body: JSON.stringify(filas) }); }
+  function exito(monto, ref){
+    document.getElementById('om-form').style.display = 'none';
+    var ok = document.getElementById('om-success'); ok.style.display = 'block';
+    var h = ok.querySelector('.success-h'), p = ok.querySelector('.success-p');
+    if (h) h.textContent = '¡Pago recibido!';
+    if (p) p.textContent = 'Pagaste ' + money(monto) + ' en línea. Referencia ' + ref + '. Te escribimos por WhatsApp para coordinar el envío.';
+    cart = []; try { renderCart(); } catch (e) {}
+  }
+  function pagarEnLinea(){
+    var nombre = document.getElementById('o-nombre').value.trim(), tel = document.getElementById('o-tel').value.trim();
+    if (!nombre || !tel) { toast('Nombre y WhatsApp son obligatorios'); return; }
+    if (!cart.length) { toast('Tu carrito está vacío'); return; }
+    var btn = document.getElementById('btn-confirm'), msg = document.getElementById('o-pago-wompi-msg');
+    btn.disabled = true; btn.textContent = 'Abriendo pago seguro…'; msg.textContent = '';
+    var t = totalPedido(), id = 'ped_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), ref = id.replace('ped_', 'PED-').toUpperCase();
+    var items = cart.map(function(c){ return { nombre: c.nombre, tamano: c.tamano, sku: c.sku || '', qty: c.qty, precio: c.precio }; });
+    var dir = document.getElementById('o-dir').value.trim(), ciudad = document.getElementById('o-ciudad').value.trim(), barrio = document.getElementById('o-barrio').value.trim(), notas = document.getElementById('o-notas').value.trim();
+    var u = (typeof bruUser === 'function') ? bruUser() : null;
+    var pedido = { cliente: nombre, tel: tel, envio: t.envio, envioZona: (window._envioActual && window._envioActual.zona) || '', ciudad: ciudad, barrio: barrio, dir: dir, pago: 'wompi', notas: (notas + (u ? ' · Cliente registrado: ' + u.email : '') + ' · Pago en línea Wompi · Ref ' + ref + ' · ⏳ Pago en línea pendiente').trim(), items: items, subtotal: t.productos, iva: 0, total: t.total, estado: 'Pendiente', visto: false };
+    var hoy = new Date(); hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
+    sbPost('bru_conta', [{ id: id, tipo: 'pedido_web', fecha: hoy.toISOString().slice(0, 10), data: { estado: 'pendiente', ref: ref, total: t.total, productos: t.productos, envio: t.envio, items: items, cliente: nombre, tel: tel, dir: dir, ciudad: ciudad, barrio: barrio } }])
+      .then(function(r){ if (!r.ok) throw new Error('No se pudo guardar el pedido'); try { bruGuardarPedido(pedido); } catch (e) {} return api({ accion: 'firma', id: id }); })
+      .then(function(f){ if (f.error) throw new Error(f.error);
+        return cargar('https://checkout.wompi.co/widget.js').then(function(){
+          var cfg = { currency: f.currency, amountInCents: f.amountInCents, reference: f.reference, publicKey: f.publicKey, signature: { integrity: f.signature }, customerData: { fullName: nombre, phoneNumber: tel.replace(/\D/g, '').slice(-10), phoneNumberPrefix: '+57' } };
+          if (u && u.email) cfg.customerData.email = u.email;
+          if (dir) cfg.shippingAddress = { addressLine1: dir, city: ciudad || 'Bogotá', region: ciudad || 'Bogotá', country: 'CO', phoneNumber: tel.replace(/\D/g, '').slice(-10), name: nombre };
+          new window.WidgetCheckout(cfg).open(function(res){
+            var tx = res && res.transaction; btn.disabled = false; nota();
+            if (!tx) return;
+            msg.textContent = 'Confirmando tu pago…';
+            api({ accion: 'estado', tx: tx.id }).then(function(j){ var st = j.estado || tx.status;
+              if (st === 'APPROVED') exito(f.valor, ref);
+              else if (st === 'PENDING') msg.textContent = 'Tu pago está en proceso. Te avisamos por WhatsApp apenas se apruebe (Ref ' + ref + ').';
+              else msg.textContent = 'El pago no se aprobó (' + st + '). Intenta de nuevo o elige otro medio de pago.'; })
+            .catch(function(){ msg.textContent = 'No pudimos confirmar el pago. Si se descontó, escríbenos por WhatsApp con la referencia ' + ref + '.'; });
+          });
+        });
+      })
+      .catch(function(e){ btn.disabled = false; nota(); msg.textContent = e.message || 'No se pudo abrir el pago'; });
+  }
+  function iniciar(){
+    var sel = document.getElementById('o-pago'); if (!sel || document.getElementById('o-pago-wompi-nota')) return;
+    var op = document.createElement('option'); op.value = 'wompi'; op.textContent = 'Pago en línea: tarjeta, PSE, Nequi'; sel.insertBefore(op, sel.firstChild); sel.value = 'wompi';
+    var box = document.createElement('div'); box.id = 'o-pago-wompi-nota'; box.style.cssText = 'font-size:12px;line-height:1.5;opacity:.85;margin-top:6px';
+    var m = document.createElement('div'); m.id = 'o-pago-wompi-msg'; m.style.cssText = 'font-size:13px;margin-top:8px;color:#c8a84b';
+    sel.parentNode.appendChild(box);
+    var b = document.getElementById('btn-confirm'); if (b) b.parentNode.insertBefore(m, b.nextSibling);
+    sel.addEventListener('change', nota);
+    var orig = window.submitOrder;
+    window.submitOrder = function(){ var s = document.getElementById('o-pago'); if (s && s.value === 'wompi') return pagarEnLinea(); return orig.apply(this, arguments); };
+    var oo = window.openOrder; if (typeof oo === 'function') window.openOrder = function(){ var r = oo.apply(this, arguments); setTimeout(nota, 50); return r; };
+    document.addEventListener('click', function(){ setTimeout(nota, 60); }, true);
+    nota();
+  }
+  fetch('/api/wompi').then(function(r){ return r.json(); }).then(function(j){ if (!j || !j.activo) return; W = j; if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar(); }).catch(function(){});
+})();
+</script>
 </body>
 </html>
