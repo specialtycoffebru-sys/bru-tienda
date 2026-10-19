@@ -10297,7 +10297,10 @@ function envPintarTotal(){
   } else if(r && r.ok && !r.gratis){
     envio = r.valor;
   }
-  el.innerHTML = '<span>Total a pagar</span><span>' + fmt(tot + envio) + '</span>' + nota;
+  var desc = descPrimeraMonto(tot), dl = document.getElementById('om-desc-primera');
+  if(dl){ dl.style.display = desc ? 'flex' : 'none'; dl.innerHTML = desc ? '<span>🎁 Descuento primera compra (' + DESC_PRIMERA_PCT + ' %)</span><span>−' + fmt(desc) + '</span>' : ''; }
+  el.innerHTML = '<span>Total a pagar</span><span>' + fmt(tot + envio - desc) + '</span>' + nota;
+  try{ document.dispatchEvent(new Event('bru-total')); }catch(e){}
 }
 
 // Sugerencias de ciudad tomadas de las zonas configuradas
@@ -10332,7 +10335,9 @@ function openOrder(){
   document.getElementById('om-sum').innerHTML=
     '<div class="om-sum-title">Resumen</div>'+
     cart.map(function(c){ var label=c.nombre+(c.tamano?' — '+c.tamano:'')+(c.sku?' ('+c.sku+')':''); return '<div class="om-sum-line"><span>'+label+' × '+c.qty+'</span><span>'+fmt(c.precio*c.qty)+'</span></div>'; }).join('')+
+    '<div class="om-sum-line" id="om-desc-primera" style="display:none;color:var(--gold)"></div>'+
     '<div class="om-sum-total" id="om-total-envio"><span>Total a pagar</span><span>'+fmt(tot)+'</span></div>';
+  descPrimeraRevisar(function(){ try{ envPintarTotal(); }catch(e){} });
   document.getElementById('om-form').style.display='block';
   document.getElementById('om-success').style.display='none';
   var _u=bruUser();
@@ -10356,18 +10361,22 @@ function submitOrder(){
   if(!nombre||!tel){ toast('Nombre y WhatsApp son obligatorios'); return; }
   var btn=document.getElementById('btn-confirm');
   btn.disabled=true; btn.textContent='Enviando...';
+  var _desc=0;
   try{
     var tot2=cart.reduce(function(s,c){ return s+c.precio*c.qty; },0);
     var sub=tot2;                    // sin IVA por ahora
     var _env = window._envioActual;
     var _envVal = (_env && _env.ok && !_env.gratis) ? _env.valor : 0;
     var _envTxt = !_env ? '' : (_env.ok ? (_env.gratis ? 'Envío gratis · ' + _env.zona : 'Envío ' + _env.zona + ': ' + fmt(_env.valor)) : 'Envío por confirmar');
-    var pedido={cliente:nombre,tel:tel,envio:_envVal,envioZona:(_env&&_env.zona)||'',ciudad:document.getElementById('o-ciudad').value.trim(),barrio:document.getElementById('o-barrio').value.trim(),dir:document.getElementById('o-dir').value.trim(),pago:document.getElementById('o-pago').value,notas:(document.getElementById('o-notas').value.trim()+(bruUser()?' · Cliente registrado: '+bruUser().email:'')).trim(),items:cart.map(function(c){ return {nombre:c.nombre,tamano:c.tamano,sku:c.sku||'',qty:c.qty,precio:c.precio}; }),subtotal:sub,iva:0,total:tot2+_envVal,estado:'Pendiente',visto:false};
+    _desc = descPrimeraMonto(tot2);
+    var pedido={cliente:nombre,tel:tel,envio:_envVal,envioZona:(_env&&_env.zona)||'',ciudad:document.getElementById('o-ciudad').value.trim(),barrio:document.getElementById('o-barrio').value.trim(),dir:document.getElementById('o-dir').value.trim(),pago:document.getElementById('o-pago').value,notas:(document.getElementById('o-notas').value.trim()+(bruUser()?' · Cliente registrado: '+bruUser().email:'')+(_desc?' · 🎁 Descuento primera compra '+DESC_PRIMERA_PCT+'%: -'+_desc:'')).trim(),items:cart.map(function(c){ return {nombre:c.nombre,tamano:c.tamano,sku:c.sku||'',qty:c.qty,precio:c.precio}; }),subtotal:sub,iva:0,total:tot2+_envVal-_desc,estado:'Pendiente',visto:false};
     bruGuardarPedido(pedido);
+    descPrimeraMarcar('web' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), pedido.total, pedido.pago);
     var d=JSON.parse(localStorage.getItem('bru_data')||'{}'); d.pedidos=d.pedidos||[]; d.pedidos.push({...pedido,fecha:new Date().toISOString()}); localStorage.setItem('bru_data',JSON.stringify(d));
   }catch(e){}
   var items=cart.map(function(c){ var info=c.tamano?(c.sku?' '+c.tamano+' ['+c.sku+']':' '+c.tamano):''; return '• '+c.nombre+info+' ×'+c.qty+' — '+fmt(c.precio*c.qty); }).join('\n');
-  var sub2=cart.reduce(function(s,c){ return s+c.precio*c.qty; },0);
+  var sub2=cart.reduce(function(s,c){ return s+c.precio*c.qty; },0), _d2=_desc||0;
+  if(_d2){ items += '\n• 🎁 Descuento primera compra ('+DESC_PRIMERA_PCT+' %) — -'+fmt(_d2); sub2 -= _d2; }
   var msg=encodeURIComponent('Hola B.R.U! 👋\nSoy *'+nombre+'*\n\nMi pedido:\n'+items+'\n\n*Total: '+fmt(sub2)+'*\n\nPago: '+document.getElementById('o-pago').options[document.getElementById('o-pago').selectedIndex].text+'\nDirección: '+(document.getElementById('o-dir').value||'Por confirmar'));
   var cfg=getConfig(); var waNum=cfg.wa||WA;
   document.getElementById('btn-wa-final').onclick=function(){ window.open('https://wa.me/'+waNum+'?text='+msg,'_blank'); };
@@ -10383,6 +10392,41 @@ window.BRU_SNAKE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAEsCAYAAA
 var _pendingCheckout = false;
 function resumeAfterAuth(){ if(_pendingCheckout){ _pendingCheckout=false; setTimeout(function(){ closeAuth(); openOrder(); }, 700); } }
 function bruUser(){ try{ return JSON.parse(localStorage.getItem('bru_user')||'null'); }catch(e){ return null; } }
+/* ── 10 % de descuento en la PRIMERA compra de un cliente registrado ──
+   Aplica a los productos (no al envío), con cualquier medio de pago, también tarjeta (Wompi).
+   Es primera compra si no hay pedidos anteriores con su correo, sin contar los cancelados
+   ni los pagos en línea que quedaron sin pagar. */
+var DESC_PRIMERA_PCT = 10;
+window._descPrimera = { email: '', ok: false, listo: false };
+function descPrimeraRevisar(cb){
+  var u = bruUser(), em = u && u.email ? String(u.email).toLowerCase() : '';
+  if(!em){ window._descPrimera = { email: '', ok: false, listo: true }; if(cb) cb(); return; }
+  if(window._descPrimera.email === em && window._descPrimera.listo){ if(cb) cb(); return; }
+  window._descPrimera = { email: em, ok: false, listo: false };
+  var h = { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }, cache: 'no-store' };
+  Promise.all([
+    fetch(SB_URL + '/rest/v1/bru_conta?tipo=eq.cliente_compra&data->>email=eq.' + encodeURIComponent(em) + '&select=id&limit=1', h).then(function(r){ if(!r.ok) throw new Error('x'); return r.json(); }),
+    fetch(SB_URL + '/rest/v1/bru_pedidos?notas=ilike.*' + encodeURIComponent('Cliente registrado: ' + em) + '*&estado=neq.Cancelado&select=id,notas&limit=50', h).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; })
+  ]).then(function(res){
+      var previas = (res[1] || []).filter(function(p){ return String(p.notas || '').indexOf('Pago en línea pendiente') < 0; });
+      window._descPrimera = { email: em, ok: !(res[0] || []).length && !previas.length, listo: true };
+    })
+    .catch(function(){ window._descPrimera = { email: em, ok: false, listo: true }; })
+    .then(function(){ if(cb) cb(); });
+}
+// Deja constancia de que este cliente ya compró (así el descuento no se repite)
+function descPrimeraMarcar(ref, total, pago){
+  var u = bruUser(); if(!u || !u.email) return;
+  var em = String(u.email).toLowerCase(), hoy = new Date(); hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
+  fetch(SB_URL + '/rest/v1/bru_conta?on_conflict=id', { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, Prefer: 'resolution=ignore-duplicates,return=minimal' },
+    body: JSON.stringify([{ id: 'cc_' + String(ref).toLowerCase().replace(/[^a-z0-9]/g, ''), tipo: 'cliente_compra', fecha: hoy.toISOString().slice(0, 10), data: { email: em, ref: ref, total: total, pago: pago } }]) }).catch(function(){});
+  if(window._descPrimera) window._descPrimera.ok = false;
+}
+function descPrimeraMonto(productos){
+  var u = bruUser(), d = window._descPrimera;
+  if(!u || !d.ok || d.email !== String(u.email || '').toLowerCase()) return 0;
+  return Math.round((Number(productos) || 0) * DESC_PRIMERA_PCT / 100);
+}
 function applyAuthConfig(){
   var cfg=getConfig();
   var bg=document.getElementById('au-side-bg');
@@ -12503,7 +12547,8 @@ function cardQuickAdd(idx){
   function totalPedido(){
     var tot = (typeof cart !== 'undefined' ? cart : []).reduce(function(s, c){ return s + c.precio * c.qty; }, 0);
     var e = window._envioActual, ev = (e && e.ok && !e.gratis) ? e.valor : 0;
-    return { productos: tot, envio: ev, total: tot + ev, envioPorConfirmar: !!(e && !e.ok) };
+    var ds = typeof descPrimeraMonto === 'function' ? descPrimeraMonto(tot) : 0;
+    return { productos: tot, descuento: ds, envio: ev, total: tot + ev - ds, envioPorConfirmar: !!(e && !e.ok) };
   }
   function money(n){ return typeof fmt === 'function' ? fmt(n) : ('$' + Math.round(n).toLocaleString('es-CO')); }
   function nota(){
@@ -12524,6 +12569,7 @@ function cardQuickAdd(idx){
     if (h) h.textContent = '¡Pago recibido!';
     if (p) p.textContent = 'Pagaste ' + money(monto) + ' en línea. Referencia ' + ref + '. Te escribimos por WhatsApp para coordinar el envío.';
     cart = []; try { renderCart(); } catch (e) {}
+    try { descPrimeraMarcar(ref, monto, 'wompi'); } catch (e) {}
   }
   function pagarEnLinea(){
     var nombre = document.getElementById('o-nombre').value.trim(), tel = document.getElementById('o-tel').value.trim();
@@ -12535,9 +12581,9 @@ function cardQuickAdd(idx){
     var items = cart.map(function(c){ return { nombre: c.nombre, tamano: c.tamano, sku: c.sku || '', qty: c.qty, precio: c.precio }; });
     var dir = document.getElementById('o-dir').value.trim(), ciudad = document.getElementById('o-ciudad').value.trim(), barrio = document.getElementById('o-barrio').value.trim(), notas = document.getElementById('o-notas').value.trim();
     var u = (typeof bruUser === 'function') ? bruUser() : null;
-    var pedido = { cliente: nombre, tel: tel, envio: t.envio, envioZona: (window._envioActual && window._envioActual.zona) || '', ciudad: ciudad, barrio: barrio, dir: dir, pago: 'wompi', notas: (notas + (u ? ' · Cliente registrado: ' + u.email : '') + ' · Pago en línea Wompi · Ref ' + ref + ' · ⏳ Pago en línea pendiente').trim(), items: items, subtotal: t.productos, iva: 0, total: t.total, estado: 'Pendiente', visto: false };
+    var pedido = { cliente: nombre, tel: tel, envio: t.envio, envioZona: (window._envioActual && window._envioActual.zona) || '', ciudad: ciudad, barrio: barrio, dir: dir, pago: 'wompi', notas: (notas + (u ? ' · Cliente registrado: ' + u.email : '') + (t.descuento ? ' · 🎁 Descuento primera compra 10%: -' + t.descuento : '') + ' · Pago en línea Wompi · Ref ' + ref + ' · ⏳ Pago en línea pendiente').trim(), items: items, subtotal: t.productos, iva: 0, total: t.total, estado: 'Pendiente', visto: false };
     var hoy = new Date(); hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
-    sbPost('bru_conta', [{ id: id, tipo: 'pedido_web', fecha: hoy.toISOString().slice(0, 10), data: { estado: 'pendiente', ref: ref, total: t.total, productos: t.productos, envio: t.envio, items: items, cliente: nombre, tel: tel, dir: dir, ciudad: ciudad, barrio: barrio } }])
+    sbPost('bru_conta', [{ id: id, tipo: 'pedido_web', fecha: hoy.toISOString().slice(0, 10), data: { estado: 'pendiente', ref: ref, email: u && u.email ? String(u.email).toLowerCase() : '', total: t.total, productos: t.productos, descuento: t.descuento, envio: t.envio, items: items, cliente: nombre, tel: tel, dir: dir, ciudad: ciudad, barrio: barrio } }])
       .then(function(r){ if (!r.ok) throw new Error('No se pudo guardar el pedido'); try { bruGuardarPedido(pedido); } catch (e) {} return api({ accion: 'firma', id: id }); })
       .then(function(f){ if (f.error) throw new Error(f.error);
         return cargar('https://checkout.wompi.co/widget.js').then(function(){
@@ -12566,6 +12612,7 @@ function cardQuickAdd(idx){
     sel.parentNode.appendChild(box);
     var b = document.getElementById('btn-confirm'); if (b) b.parentNode.insertBefore(m, b.nextSibling);
     sel.addEventListener('change', nota);
+    document.addEventListener('bru-total', function(){ setTimeout(nota, 0); });
     var orig = window.submitOrder;
     window.submitOrder = function(){ var s = document.getElementById('o-pago'); if (s && s.value === 'wompi') return pagarEnLinea(); return orig.apply(this, arguments); };
     var oo = window.openOrder; if (typeof oo === 'function') window.openOrder = function(){ var r = oo.apply(this, arguments); setTimeout(nota, 50); return r; };
