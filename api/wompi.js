@@ -51,12 +51,15 @@ function registrarVenta(row, d, tx){
   return Promise.all([pagoPub(), evt ? pagoPub('eventospub') : null]).then(function(r){
     var pctSrc = r[1] || r[0], pct = ped ? 100 : Math.min(100, Math.max(1, Number(pctSrc.anticipo) || 100));
     var neto = Math.round((Number(d.total) || 0) * pct / 100 / 100) * 100, cob = d.pagoWompi.monto, lineas = [];
-    if (ped) { (d.items || []).forEach(function(it){ lineas.push({ prod: (it.nombre || 'Producto') + (it.tamano ? ' ' + it.tamano : ''), qty: Number(it.qty) || 1, precio: Number(it.precio) || 0 }); }); if (Number(d.envio)) lineas.push({ prod: 'Envío', qty: 1, precio: Number(d.envio) }); }
+    if (ped) { var fd = Number(d.descuento) && Number(d.productos) ? 1 - Number(d.descuento) / Number(d.productos) : 1;
+      (d.items || []).forEach(function(it){ lineas.push({ prod: (it.nombre || 'Producto') + (it.tamano ? ' ' + it.tamano : '') + (fd < 1 ? ' (desc. primera compra)' : ''), qty: Number(it.qty) || 1, precio: Math.round((Number(it.precio) || 0) * fd) }); }); if (Number(d.envio)) lineas.push({ prod: 'Envío', qty: 1, precio: Number(d.envio) }); }
     else lineas.push({ prod: (evt ? 'Evento · ' : 'Clase · ') + (d.clase || '') + (pct < 100 ? ' (anticipo ' + pct + ' %)' : ''), qty: 1, precio: neto });
     var suma = lineas.reduce(function(s, l){ return s + l.qty * l.precio; }, 0);
     if (!lineas.length || Math.abs(suma - neto) > 1) lineas = [{ prod: (ped ? 'Pedido tienda ' : '') + (d.ref || id), qty: 1, precio: neto }];
     var doc = { id: 'vw_' + id, tipo: 'venta_web', fecha: hoyBog(), data: { ref: id, origen: ped ? 'Tienda' : (evt ? 'Evento' : 'Clase'), cliente: d.cliente || d.nombre || '', tel: d.tel || d.telefono || '', lineas: lineas, neto: neto, cobrado: cob, comision: Math.max(0, cob - neto), medio: 'Wompi · ' + (tx.payment_method_type || 'en línea'), tx: tx.id, creado: new Date().toISOString() } };
-    return sb('bru_conta?on_conflict=id', { method: 'POST', prefer: 'resolution=ignore-duplicates,return=minimal', body: [doc] });
+    var docs = [doc];
+    if (ped && d.email) docs.push({ id: 'cc_' + String(d.ref || id).toLowerCase().replace(/[^a-z0-9]/g, ''), tipo: 'cliente_compra', fecha: hoyBog(), data: { email: String(d.email).toLowerCase(), ref: d.ref || id, total: neto, pago: 'wompi' } });
+    return sb('bru_conta?on_conflict=id', { method: 'POST', prefer: 'resolution=ignore-duplicates,return=minimal', body: docs });
   }).catch(function(){});
 }
 // Marca la reserva o el pedido según el estado de la transacción
