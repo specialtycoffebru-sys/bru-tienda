@@ -168,6 +168,10 @@ label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--crea
 @media(max-width:960px){#bar{display:flex}#bar.hide{display:none!important}.resumen{position:static}}
 .faq{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;padding:40px 0 70px;border-top:1px solid var(--bd)}
 @media(max-width:900px){.faq{grid-template-columns:1fr}}
+.custom{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-top:28px;padding:26px 28px;border:1px solid var(--bd2);border-radius:18px;background:linear-gradient(135deg,var(--gold3),transparent)}
+.custom-tx{flex:1 1 380px;min-width:0}.custom h3{font-family:var(--serif);font-weight:400;font-size:26px;margin:6px 0 8px;color:var(--cream)}.custom p{color:var(--cream2);font-size:15px;line-height:1.6;margin:0}
+.custom-btn{width:auto;flex:0 0 auto;text-decoration:none}
+@media(max-width:640px){.custom{padding:20px}.custom-btn{width:100%}}
 .faq h4{font-family:var(--serif);font-weight:400;font-size:20px;margin-bottom:6px;color:var(--gold2)}
 .faq p{color:var(--cream2);font-size:15px}
 footer{border-top:1px solid var(--bd);padding:26px 0;color:var(--muted);font-size:13px;text-align:center}
@@ -184,6 +188,7 @@ footer{border-top:1px solid var(--bd);padding:26px 0;color:var(--muted);font-siz
     <div class="disp js-disp-box hide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></svg><span class="js-disp"></span></div>
   </section>
   <section class="wrap"><div class="clases" id="clases"><div class="vacio">Cargando eventos…</div></div></section>
+  <section class="wrap"><div class="custom"><div class="custom-tx"><div class="eyebrow">A tu medida</div><h3>Conversa con nosotros si quieres algo diferente</h3><p>¿Tienes una idea que no está aquí? Un menú de bebidas especial, una barra temática, varias estaciones, otra ciudad o un horario distinto: cuéntanos y construimos tu evento juntos.</p></div><a class="btn custom-btn" target="_blank" rel="noopener" href="https://wa.me/573203713844?text=Hola%20B.R.U%20%E2%98%95%20Quiero%20armar%20un%20evento%20diferente%20y%20conversar%20con%20ustedes.%20Mi%20evento%20es%3A">Conversar por WhatsApp</a></div></section>
   <section class="wrap hide" id="armar">
     <div class="armar">
       <div>
