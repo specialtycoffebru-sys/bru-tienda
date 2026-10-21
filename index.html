@@ -5428,15 +5428,17 @@ function bruPintarGeoBanner(){
       + (m.nombre || _bruGeo.codigo) + ' (' + (m.moneda || '') + ').';
   } else if (_bruGeo.modo === 'CONSULTAR'){
     txt.innerHTML = banderaSpan + bruT(
-      'No tenemos precios cargados para tu pais todavia.',
+      'No tenemos precios cargados para tu país todavía.',
       "We don't have prices loaded for your country yet."
     );
   } else {
     txt.innerHTML = banderaSpan + bruT('Mostrando precios de Colombia (COP).', 'Showing prices for Colombia (COP).');
   }
-  btn.textContent = bruT('¿No es tu pais? Usar mi ubicacion', 'Not your country? Use my location');
+  btn.textContent = bruT('¿No es tu país? Usar mi ubicación', 'Not your country? Use my location');
   btn.disabled = false;
   caja.style.display = 'flex';
+  // En celular el aviso flota abajo: se retira solo a los 8 segundos
+  try{ if (window.matchMedia('(max-width:600px)').matches){ clearTimeout(window._bruGeoTmr); window._bruGeoTmr = setTimeout(function(){ if (caja.style.display !== 'none' && !btn.disabled) bruCerrarGeoBanner(); }, 8000); } }catch(e){}
 }
 
 function bruCerrarGeoBanner(){
@@ -5930,6 +5932,55 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
   font-weight:700;margin-bottom:.35rem}
 .bru-track-link{display:inline-block;margin-top:.4rem;font-size:12px;color:var(--gold,#edbe6d);
   text-decoration:underline}
+
+/* ══════════ CELULAR · ajustes de usabilidad (oct 2026) ══════════
+   Solo pantallas <=600px. Botones de al menos 40px, textos legibles,
+   un solo botón flotante y nada encima de formularios, carrito o menú. */
+@media(max-width:600px){
+  /* Barra superior: "Menú" completo y botones tocables */
+  .nav-links{flex-shrink:0 !important}
+  #menu-btn{flex-shrink:0 !important;width:auto !important;min-width:68px !important;min-height:40px !important;
+    overflow:visible !important;white-space:nowrap !important;justify-content:center;gap:4px;font-size:13px !important}
+  #nav-wa{display:none !important}
+  #nav-account,.lang-btn,.cart-btn{min-height:40px !important;min-width:40px !important}
+  /* Mensaje de país: abajo como aviso, no escondido detrás de la barra */
+  .bru-geo-banner{position:fixed !important;left:12px;right:12px;bottom:12px;z-index:9997;border-radius:14px;
+    padding:.7rem 2.9rem .7rem 1rem !important;font-size:12.5px !important;justify-content:flex-start !important;text-align:left !important;
+    box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  .bru-geo-fix{font-size:12.5px !important;padding:6px 0 !important}
+  .bru-geo-close{width:40px;height:40px;right:4px !important;font-size:20px !important;opacity:.85 !important}
+  /* Un solo botón flotante (WhatsApp). Rastreo e Instagram siguen en el menú y el pie */
+  #ig-fab,#track-fab{display:none !important}
+  #wa-fab{left:auto !important;right:14px !important;bottom:16px !important}
+  body:has(#bru-geo-banner[style*="flex"]) #wa-fab{bottom:118px !important}
+  body.ficha-abierta .bru-geo-banner,body:has(.om-wrap.on) .bru-geo-banner,body:has(.cart-el.on) .bru-geo-banner,body:has(#mega.on) .bru-geo-banner{display:none !important}
+  body:has(.om-wrap.on) #wa-fab,body:has(.cart-el.on) #wa-fab,body:has(#mega.on) #wa-fab{opacity:0 !important;pointer-events:none !important}
+  /* Menú: que se vea completo y se pueda recorrer */
+  #mega{max-height:calc(100dvh - 112px) !important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  /* Textos que estaban en 8–9px */
+  .hero-stat-l{font-size:10.5px !important;letter-spacing:1.6px !important}
+  .mg-lbl,.mg-card-t,.hcs-sub,footer h4{font-size:11px !important}
+  .mg-card-b{font-size:12.5px !important;min-height:40px}
+  .cart-n{font-size:10.5px !important}
+  .pp-badge{font-size:10px !important}
+  .cart-crumb,.pp-back{font-size:11.5px !important}
+  /* Pie de página: enlaces con área táctil cómoda */
+  footer a{display:inline-block;padding:9px 0 !important;min-height:40px}
+  #foot-ig,#foot-wa2{font-size:11.5px !important;padding:12px 8px !important}
+  /* Ficha de producto: aprovechar todo el ancho */
+  .pp-hero{padding-left:6px !important;padding-right:6px !important}
+  .pp-add,.pp-wa{width:100% !important;min-height:48px}
+  /* Cerrar ventanas: área táctil de 40px */
+  .cart-x,.aum-x{min-width:40px !important;min-height:40px !important}
+}
+@media(max-width:400px){
+  /* Pantallas angostas: la bandera es decorativa y "Cuenta" sigue en el Menú */
+  .bru-nav-flag{display:none !important}
+  .lang-btn{padding-left:10px !important;padding-right:10px !important}
+}
+@media(max-width:370px){
+  #nav-account{display:none !important}
+}
 </style>
 
 </head>
@@ -6099,6 +6150,13 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
             <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
         </span>
         <span class="mg-tx"><b id="mg-cuenta-t">Mi cuenta</b><i id="mg-cuenta-s">Inicia sesión</i></span>
+      </button>
+      <button class="mg-it" id="mg-rastreo" onclick="toggleMega();bruAbrirRastreo()">
+        <span class="mg-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
+        </span>
+        <span class="mg-tx"><b>Rastrear mi pedido</b><i>Mira dónde va tu envío</i></span>
       </button>
     </div>
 
@@ -11657,6 +11715,7 @@ var BRU_EN = {
  "Total con IVA": "Total incl. VAT",
  "Envío a coordinar por WhatsApp": "Shipping arranged over WhatsApp",
  "Hacer pedido →": "Place Order →",
+ "Mira dónde va tu envío": "See where your order is",
  "Confirmar pedido": "Confirm Order",
  "Nombre *": "Name *",
  "WhatsApp *": "WhatsApp *",
