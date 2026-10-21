@@ -2117,8 +2117,19 @@ textarea.inp{resize:vertical;min-height:60px}
   </div>
 </div>
 
-<!-- COTIZACIONES -->
+<!-- COTIZACIONES (pestaña Kits = módulo /kits.html: 3 opciones de kits con cafés, métodos y equipos; guarda en bru_conta tipo kit_cot, nunca modifica bru_store. Pestaña Simple = cotizaciones de siempre en D.cot) -->
 <div class="pg" id="page-cotizaciones">
+  <div style="display:flex;gap:.35rem;margin-bottom:.65rem">
+    <button class="btn btn-p btn-sm" id="cot-tab-kits" onclick="cotTab('kits')">Kits de café (3 opciones)</button>
+    <button class="btn btn-g btn-sm" id="cot-tab-simple" onclick="cotTab('simple')">Cotización simple</button>
+  </div>
+  <div id="cot-kits">
+    <div style="border:.5px solid var(--bd);border-radius:10px;overflow:hidden;background:var(--bg)">
+      <iframe id="kits-frame" title="Cotizador de kits" style="display:block;width:100%;height:calc(100dvh - 130px);min-height:560px;border:0;background:var(--bg)"></iframe>
+    </div>
+    <div style="font-size:10.5px;color:var(--muted);margin-top:.5rem">¿No carga? Revisa que <b>kits.html</b> esté subido al repositorio. <a href="/kits.html" target="_blank" style="color:var(--gold)">Abrir en pestaña aparte ↗</a></div>
+  </div>
+  <div id="cot-simple" style="display:none">
   <div class="card mb"><div class="ch"><div class="ch-t">Nueva cotización</div></div><div class="cb">
     <div class="row"><div class="f"><label class="fl">Cliente *</label><input class="inp" id="cot-cliente"></div><div class="f"><label class="fl">NIT</label><input class="inp" id="cot-nit"></div><div class="f"><label class="fl">Email</label><input class="inp" id="cot-email"></div><div class="f"><label class="fl">Fecha</label><input class="inp" type="date" id="cot-fecha"></div><div class="f"><label class="fl">Vigencia</label><input class="inp" type="date" id="cot-vigencia"></div><div class="f" style="flex:2"><label class="fl">Notas</label><input class="inp" id="cot-notas" placeholder="Válido por 15 días..."></div></div>
     <div style="background:var(--bg3);border-radius:var(--r);padding:.75rem;margin-bottom:.55rem">
@@ -2130,7 +2141,19 @@ textarea.inp{resize:vertical;min-height:60px}
   <div class="card"><div class="ch"><div class="ch-t">Cotizaciones</div><div class="ch-s" id="cot-count"></div></div>
     <div class="csm"><table class="tbl"><thead><tr><th>N°</th><th>Cliente</th><th>Fecha</th><th>Vigencia</th><th>Total</th><th>Estado</th><th></th></tr></thead><tbody id="cot-body"></tbody></table></div>
   </div>
+  </div>
 </div>
+<script>
+function cotTab(t){
+  var k=document.getElementById('cot-kits'), sm=document.getElementById('cot-simple');
+  if(k) k.style.display = t==='kits' ? '' : 'none';
+  if(sm) sm.style.display = t==='simple' ? '' : 'none';
+  var bk=document.getElementById('cot-tab-kits'), bs=document.getElementById('cot-tab-simple');
+  if(bk) bk.className='btn btn-sm '+(t==='kits'?'btn-p':'btn-g');
+  if(bs) bs.className='btn btn-sm '+(t==='simple'?'btn-p':'btn-g');
+  if(t==='kits'){ var f=document.getElementById('kits-frame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/kits.html?embed=1'); }
+}
+</script>
 
 <!-- INVERSIONES -->
 <div class="pg" id="page-inversiones">
@@ -5757,7 +5780,7 @@ function go(page,el) {
   if(page==='inventario'){ renderInvt(); renderCompras(); updateInvStats(); renderInvExt(); fillInvExtDl(); }
   if(page==='ventas'){renderVentas();updateVentasStats();fillDls();renderVentasExt();fillVextProductos();}
   if(page==='facturas'){renderFacs();loadMio();}
-  if(page==='cotizaciones') renderCots();
+  if(page==='cotizaciones'){ renderCots(); try{ cotTab(document.getElementById('cot-simple') && document.getElementById('cot-simple').style.display!=='none' ? 'simple' : 'kits'); }catch(e){} }
   if(page==='inversiones'){renderList('inv2-list',D.inv);renderInvs();}
   if(page==='reportes') renderRep();
   if(page==='costos') renderCostos();

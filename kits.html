@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>B.R.U · Cotizador de kits</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,300;9..144,500&display=swap" rel="stylesheet">
+<script>if(/[?&]embed=1/.test(location.search))document.documentElement.className+=' embed';</script>
+<style>
+:root{
+  --bg:#0d0b09;--bg2:#141210;--bg3:#1c1916;--card:#181512;--card2:#1e1b17;
+  --gold:#c9a84c;--gold2:#e8c96a;--gold3:rgba(201,168,76,.12);
+  --txt:#e8e2d8;--mut:#a8a098;--dim:#6a6058;
+  --line:rgba(255,255,255,.08);--line2:rgba(201,168,76,.28);
+  --ok:#5fd394;--ok-bg:rgba(95,211,148,.1);--bad:#f38b8b;--bad-bg:rgba(243,139,139,.1);--warn:#f3a96b;--warn-bg:rgba(243,169,107,.1);--info:#7fb2f0;--info-bg:rgba(127,178,240,.1);
+  --r:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+select,option,optgroup{background:var(--card2);color:var(--txt)}
+a{color:var(--gold)}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:300;margin:0}
+.wrap{max-width:1320px;margin:0 auto;padding:18px 16px 80px}
+html.embed .wrap{padding:12px 12px 60px}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.top h1{font-size:26px}
+.sp{flex:1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.grid{display:grid;gap:12px}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:860px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.g4{grid-template-columns:1fr}}
+.grid>*{min-width:0}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+label.chk{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--txt);cursor:pointer}
+input[type=text],input[type=number],input[type=date],input[type=email],input[type=search],select,textarea{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;outline:none;text-transform:none;letter-spacing:0}
+input:focus,select:focus,textarea:focus{border-color:var(--line2)}
+textarea{min-height:64px;resize:vertical}
+.btn{border:1px solid var(--line2);background:var(--card2);padding:8px 14px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:13px}
+.btn:hover{border-color:var(--gold)}
+.btn.pri{background:var(--gold);color:#1a1406;border-color:var(--gold);font-weight:600}
+.btn.sm{padding:4px 9px;font-size:12px}
+.btn.ghost{background:transparent}
+.btn.dang{color:var(--bad);border-color:rgba(243,139,139,.35)}
+.btn.wa{color:var(--ok);border-color:rgba(95,211,148,.35)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.muted{color:var(--mut)}.dim{color:var(--dim)}.small{font-size:12px}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl-w{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+table.t{width:100%;border-collapse:collapse;font-size:13px}
+table.t th,table.t td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+table.t th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);font-weight:600;background:var(--bg2)}
+table.t tr.click{cursor:pointer}
+table.t tr.click:hover td{background:rgba(255,255,255,.02)}
+.st{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--card2);color:var(--mut);white-space:nowrap}
+.st.ok{color:var(--ok);background:var(--ok-bg)}.st.warn{color:var(--warn);background:var(--warn-bg)}.st.bad{color:var(--bad);background:var(--bad-bg)}.st.info{color:var(--info);background:var(--info-bg)}
+.banner{border-radius:var(--r);padding:10px 13px;margin-bottom:10px;font-size:13px;border:1px solid}
+.banner.warn{background:var(--warn-bg);border-color:rgba(243,169,107,.35)}
+.sec{margin:18px 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--dim)}
+.empty{padding:34px 16px;text-align:center;color:var(--mut)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--gold);color:#1a1406;padding:9px 16px;border-radius:999px;font-weight:600;z-index:60;opacity:0;transition:opacity .25s;pointer-events:none;max-width:92vw;text-align:center}
+.toast.on{opacity:1}.toast.err{background:var(--bad)}
+/* opciones */
+.opts{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}
+.opt{background:var(--card);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;min-width:0}
+.opt.sel{border-color:var(--gold)}
+.opt-hd{padding:12px 12px 8px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.opt-hd .tier{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.opt-hd input.nm{font-family:Fraunces,serif;font-size:19px;font-weight:300;background:transparent;border:1px solid transparent;padding:2px 4px;margin-left:-4px}
+.opt-hd input.nm:hover,.opt-hd input.nm:focus{border-color:var(--line)}
+.opt-bd{padding:10px 12px;flex:1}
+.it{display:grid;grid-template-columns:44px 1fr 28px;gap:6px;align-items:start;padding:7px 0;border-bottom:1px dashed var(--line)}
+.it:last-child{border-bottom:none}
+.it input{padding:5px 7px;font-size:13px}
+.it .m{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:5px}
+.it .m label{font-size:10px;color:var(--dim);display:flex;flex-direction:column;gap:2px;text-transform:uppercase;letter-spacing:.05em}
+.it .tag{font-size:10px;color:var(--dim);margin-top:3px}
+.x{background:none;border:none;color:var(--dim);cursor:pointer;font-size:16px;padding:4px}
+.x:hover{color:var(--bad)}
+.opt-add{margin-top:8px}
+.opt-ft{padding:10px 12px;border-top:1px solid var(--line);background:var(--bg2);border-radius:0 0 var(--r) var(--r)}
+.kv{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:2px 0}
+.kv b{font-variant-numeric:tabular-nums;font-weight:500}
+.kv.big{font-size:15px;padding-top:6px;margin-top:4px;border-top:1px solid var(--line)}
+.kv.big b{color:var(--gold2);font-family:Fraunces,serif;font-size:21px;font-weight:300}
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.mini label{font-size:10px;color:var(--dim);display:flex;flex-direction:column;gap:3px;text-transform:uppercase;letter-spacing:.05em}
+.mini input{padding:6px 8px}
+.mg-ok{color:var(--ok)}.mg-warn{color:var(--warn)}.mg-bad{color:var(--bad)}
+.sticky{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0;margin:-8px 0 8px}
+.save-st{font-size:12px;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="main"><div class="empty">Cargando catálogo e insumos…</div></div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+'use strict';
+// =============== B.R.U · COTIZADOR DE KITS ===============
+// Lee catálogo (con presentaciones y costos) e insumos de bru_store SOLO LECTURA.
+// Guarda cotizaciones en bru_conta con tipo 'kit_cot' + copia local de respaldo. Nunca borra: archiva.
+var SB_URL = 'https://dzgtyazvqpdmwvwqpvco.supabase.co';
+var SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
+var T = 'bru_conta', TIPO = 'kit_cot', LS_BK = 'bru_kitcot_bk';
+var IVA = 0.19, WA_BRU = '573044927790';
+var TIERS = ['Económico', 'Intermedio', 'Premium', 'Opción 4'];
+var ESTADOS = ['Borrador', 'Enviada', 'Aprobada', 'Rechazada'];
+var EQ_CATS = ['Método', 'Molino', 'Accesorio', 'Filtros', 'Taza / vaso', 'Otro'];
+var EQ_DEF = [['Dripper V60 02 (plástico)','Método'],['Dripper V60 02 (cerámica)','Método'],['Chemex 6 tazas','Método'],['Prensa francesa 350 ml','Método'],['AeroPress','Método'],['Cafetera moka 3 tazas','Método'],['Cold brew (jarra)','Método'],
+  ['Molino manual','Molino'],['Filtros V60 x40','Filtros'],['Filtros Chemex x100','Filtros'],['Tetera cuello de cisne','Accesorio'],['Balanza con temporizador','Accesorio'],['Server / jarra 600 ml','Accesorio'],['Cuchara medidora','Accesorio'],['Taza de cerámica B.R.U','Taza / vaso'],['Vaso térmico','Taza / vaso']];
+var S = { docs: [], byId: {}, cafes: [], ins: [], eq: [], eqDoc: null, cur: null, vista: 'lista', offline: false, verArch: false, dirty: false, tSave: null };
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function n(v){ var x = Number(v); return isFinite(x) ? x : 0; }
+function r100(v){ return Math.round(n(v) / 100) * 100; }
+function fmt(v){ var x = Math.round(n(v)), neg = x < 0; return (neg ? '-$' : '$') + Math.abs(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+function hoy(){ var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+function sumaDias(f, k){ var d = new Date(f + 'T12:00:00'); d.setDate(d.getDate() + n(k)); return d.toISOString().slice(0, 10); }
+function fFecha(f){ if (!f) return ''; var p = String(f).slice(0, 10).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+function uid(p){ return p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function lsGet(k, d){ try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+function toast(t, err){ var e = $('toast'); e.textContent = t; e.classList.toggle('err', !!err); e.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(function(){ e.classList.remove('on'); }, 2800); }
+function copiar(t){ return (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ toast('Copiado'); }).catch(function(){ var a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); document.execCommand('copy'); a.remove(); toast('Copiado'); }); }
+
+// =============== DATOS ===============
+function sb(path, opts){
+  opts = opts || {};
+  var h = { 'apikey': SB_KEY, 'Content-Type': 'application/json' }; if (opts.prefer) h.Prefer = opts.prefer;
+  return fetch(SB_URL + '/rest/v1/' + path, { method: opts.method || 'GET', headers: h, body: opts.body ? JSON.stringify(opts.body) : undefined })
+    .then(function(r){ if (!r.ok) return r.text().then(function(t){ throw new Error('Supabase ' + r.status + ': ' + t.slice(0, 140)); }); if (r.status === 204) return null; return r.text().then(function(t){ return t ? JSON.parse(t) : null; }); });
+}
+function armarCatalogo(store){
+  var cat = (store && store.catalogo) || [], fin = (store && store.finanzas) || {};
+  var out = [];
+  cat.forEach(function(c){
+    if (!c || !c.nombre || c.activo === false) return;
+    var pres = c.presentaciones || [];
+    if (pres.length) {
+      pres.forEach(function(p){
+        var precio = n(p.precio) || (n(p.precioIva) ? n(p.precioIva) / (1 + IVA) : 0);
+        out.push({ key: c.nombre + '|' + (p.label || ''), nombre: c.nombre, pres: p.label || '', precio: Math.round(precio), costo: Math.round(n(p.costo)), stock: n(c.stock) });
+      });
+    } else {
+      out.push({ key: c.nombre + '|', nombre: c.nombre, pres: c.cantidad ? c.cantidad + 'g' : '', precio: Math.round(n(c.precio)), costo: Math.round(n(c.costo)), stock: n(c.stock) });
+    }
+  });
+  out.sort(function(a, b){ return a.nombre === b.nombre ? a.precio - b.precio : (a.nombre < b.nombre ? -1 : 1); });
+  S.cafes = out;
+  S.ins = (fin.insumos || []).filter(function(i){ return i && i.nombre; }).map(function(i){ return { key: i.id || i.nombre, nombre: i.nombre, tipo: i.tipo || '', costo: Math.round(n(i.costoUnit)), qty: n(i.qty) }; });
+}
+function cargar(){
+  var bk = lsGet(LS_BK, {});
+  return Promise.all([
+    sb('bru_store?id=eq.main&select=catalogo,finanzas').catch(function(){ return null; }),
+    sb(T + '?tipo=eq.' + TIPO + '&select=id,tipo,fecha,data,created_at&order=created_at.asc').catch(function(){ return null; }),
+    sb(T + '?id=eq.kitequipos&select=id,tipo,data').catch(function(){ return null; })
+  ]).then(function(r){
+    var eqN = r[2] && r[2][0], eqL = lsGet('bru_kitcot_eq', null);
+    if (eqN && eqL && String(eqL.data.actualizada || '') > String(eqN.data.actualizada || '')) eqN = eqL;
+    S.eqDoc = eqN || eqL || { id: 'kitequipos', tipo: 'kit_cfg', data: { lista: EQ_DEF.map(function(e, i){ return { id: 'eq' + i, nombre: e[0], cat: e[1], costo: 0, precio: 0 }; }) } };
+    S.eq = S.eqDoc.data.lista || [];
+    if (r[0] && r[0][0]) { armarCatalogo(r[0][0]); lsSet('bru_kitcot_cat', { cafes: S.cafes, ins: S.ins }); }
+    else { var cc = lsGet('bru_kitcot_cat', null); if (cc) { S.cafes = cc.cafes || []; S.ins = cc.ins || []; } }
+    var nube = r[1];
+    S.offline = !nube;
+    var mapa = {};
+    (nube || []).forEach(function(d){ d.data = d.data || {}; mapa[d.id] = d; });
+    // la copia local gana solo si es más reciente (cambios que no alcanzaron a subir)
+    Object.keys(bk).forEach(function(id){
+      var l = bk[id]; if (!l || !l.data) return;
+      if (!mapa[id] || String(l.data.actualizada || '') > String(mapa[id].data.actualizada || '')) { mapa[id] = l; if (nube) subir(l); }
+    });
+    S.docs = Object.keys(mapa).map(function(k){ return mapa[k]; });
+    S.byId = mapa;
+  });
+}
+function respaldoLocal(){ lsSet(LS_BK, S.byId); }
+function subir(doc){
+  return sb(T + '?on_conflict=id', { method: 'POST', prefer: 'resolution=merge-duplicates,return=minimal', body: [{ id: doc.id, tipo: doc.tipo, fecha: doc.fecha || null, data: doc.data }] });
+}
+function guardar(doc, silencioso){
+  doc.data.actualizada = new Date().toISOString();
+  if (!S.byId[doc.id]) { S.docs.push(doc); S.byId[doc.id] = doc; }
+  respaldoLocal();
+  S.dirty = false; pintarEstadoGuardado('Guardando…');
+  return subir(doc).then(function(){ S.offline = false; pintarEstadoGuardado('Guardado ✓'); if (!silencioso) toast('Cotización guardada'); })
+    .catch(function(){ S.offline = true; pintarEstadoGuardado('Guardado en este equipo (sin nube)'); if (!silencioso) toast('Sin conexión: quedó guardada en este equipo', true); });
+}
+function programarGuardado(){
+  S.dirty = true; pintarEstadoGuardado('Cambios sin guardar…');
+  clearTimeout(S.tSave); S.tSave = setTimeout(function(){ if (S.cur) guardar(S.cur, true); }, 1500);
+}
+function pintarEstadoGuardado(t){ var e = $('saveSt'); if (e) e.textContent = t; }
+function guardarEquipos(){
+  S.eqDoc.data.lista = S.eq; S.eqDoc.data.actualizada = new Date().toISOString();
+  lsSet('bru_kitcot_eq', S.eqDoc);
+  return subir(S.eqDoc).then(function(){ toast('Equipos guardados'); }).catch(function(){ toast('Sin conexión: guardados en este equipo', true); });
+}
+function sigNum(){ var m = 0; S.docs.forEach(function(d){ m = Math.max(m, n(d.data.num)); }); return m + 1; }
+
+// =============== CÁLCULOS ===============
+function calcOpcion(o, cant, conIva){
+  var costoU = 0, listaU = 0;
+  (o.items || []).forEach(function(it){ costoU += n(it.qty) * n(it.costo); listaU += n(it.qty) * n(it.precio); });
+  var precioU = n(o.manual) > 0 ? n(o.manual) : r100(listaU * (1 - n(o.dcto) / 100));
+  var c = Math.max(1, Math.round(n(cant)) || 1);
+  var sub = precioU * c, iva = conIva ? Math.round(sub * IVA) : 0;
+  var util = precioU - costoU, mg = precioU > 0 ? util / precioU * 100 : 0;
+  return { costoU: costoU, listaU: listaU, precioU: precioU, precioUIva: conIva ? Math.round(precioU * (1 + IVA)) : precioU, cant: c, sub: sub, iva: iva, total: sub + iva, util: util, utilTot: util * c, mg: mg, sinCosto: (o.items || []).some(function(it){ return n(it.qty) > 0 && !n(it.costo); }) };
+}
+function mgClase(m){ return m >= 35 ? 'mg-ok' : m >= 20 ? 'mg-warn' : 'mg-bad'; }
+
+// =============== MODELO ===============
+function itemCafe(c, qty){ return { tipo: 'cafe', ref: c.key, desc: c.nombre + (c.pres ? ' · ' + c.pres : ''), qty: qty || 1, costo: c.costo, precio: c.precio }; }
+function itemIns(i, qty){ return { tipo: 'insumo', ref: i.key, desc: i.nombre, qty: qty || 1, costo: i.costo, precio: r100(i.costo * 1.3) }; }
+function itemEq(e, qty){ return { tipo: 'equipo', ref: e.id, desc: e.nombre, qty: qty || 1, costo: n(e.costo), precio: n(e.precio) }; }
+function nuevaCot(){
+  var f = hoy();
+  return { id: uid('kc'), tipo: TIPO, fecha: f, data: {
+    num: sigNum(), cliente: '', empresa: '', nit: '', tel: '', email: '', ciudad: '',
+    cantidad: 1, vigencia: 15, iva: true, estado: 'Borrador', elegida: null, archivada: false,
+    notas: '', condiciones: 'Precios por kit. Tiempo de entrega: 5 a 8 días hábiles después de confirmar el pedido y el anticipo del 50%. Café tostado sobre pedido. Envío no incluido salvo que se indique.',
+    opciones: [0, 1, 2].map(function(k){ return { nombre: 'Kit ' + TIERS[k], desc: '', items: [], dcto: 0, manual: 0 }; }),
+    creada: new Date().toISOString()
+  } };
+}
+function autollenar(cot){
+  var cafes = S.cafes.filter(function(c){ return c.precio > 0 && !/drip/i.test(c.nombre + ' ' + c.pres); }).slice().sort(function(a, b){ return a.precio - b.precio; });
+  if (!cafes.length) cafes = S.cafes.filter(function(c){ return c.precio > 0; }).sort(function(a, b){ return a.precio - b.precio; });
+  if (!cafes.length) { toast('No hay cafés con precio en el catálogo', true); return; }
+  var empaque = S.ins.filter(function(i){ return /caja|kit|empaque|estuche|bolsa/i.test(i.nombre); })[0];
+  var drip = S.cafes.filter(function(c){ return /drip/i.test(c.nombre + ' ' + c.pres); })[0];
+  var distintos = function(lista, k){ var vistos = {}, out = []; lista.forEach(function(c){ if (out.length < k && !vistos[c.nombre]) { vistos[c.nombre] = 1; out.push(c); } }); return out; };
+  var mid = cafes.slice(Math.floor(cafes.length / 3));
+  var top = cafes.slice().reverse();
+  var o = cot.data.opciones;
+  o[0].items = [itemCafe(cafes[0])];
+  o[0].desc = 'Un café de especialidad, ideal como detalle.';
+  o[1].items = distintos(mid, 2).map(function(c){ return itemCafe(c); });
+  o[1].desc = 'Dos cafés para comparar orígenes o perfiles.';
+  o[2].items = distintos(top, 3).map(function(c){ return itemCafe(c); });
+  o[2].desc = 'Selección premium de nuestros mejores cafés.';
+  if (drip) { o[1].items.push(itemCafe(drip)); o[2].items.push(itemCafe(drip)); }
+  var eqP = S.eq.filter(function(e){ return n(e.precio) > 0; });
+  var porCat = function(cat, rx){ var l = eqP.filter(function(e){ return e.cat === cat && (!rx || rx.test(e.nombre)); }).sort(function(a, b){ return n(a.precio) - n(b.precio); }); return l; };
+  var met = porCat('Método'), mol = porCat('Molino'), fil = porCat('Filtros'), taza = porCat('Taza / vaso');
+  if (met.length) { o[1].items.push(itemEq(met[0])); o[2].items.push(itemEq(met[met.length - 1])); }
+  if (fil.length && met.length) { o[1].items.push(itemEq(fil[0])); o[2].items.push(itemEq(fil[0])); }
+  if (mol.length) o[2].items.push(itemEq(mol[0]));
+  if (taza.length) o[0].items.push(itemEq(taza[0]));
+  if (met.length) { o[1].desc = 'Dos cafés y un método para prepararlos en casa.'; o[2].desc = 'Selección premium de cafés con el equipo completo para preparar.'; }
+  if (empaque) o.forEach(function(op){ op.items.push(itemIns(empaque)); });
+}
+
+// =============== VISTA: LISTA ===============
+function pintarLista(){
+  var docs = S.docs.filter(function(d){ return S.verArch ? d.data.archivada : !d.data.archivada; })
+    .sort(function(a, b){ return n(b.data.num) - n(a.data.num); });
+  var h = '<div class="top"><h1>Cotizador de kits</h1><span class="sp"></span>'
+    + '<label class="chk small muted"><input type="checkbox" id="verArch"' + (S.verArch ? ' checked' : '') + '> Ver archivadas</label>'
+    + '<button class="btn" id="bEq">☕ Métodos y equipos</button>'
+    + '<button class="btn pri" id="bNueva">+ Nueva cotización de kits</button></div>';
+  if (S.offline) h += '<div class="banner warn">No hay conexión con la nube: estás viendo la copia de este equipo. Lo que guardes se sube cuando vuelva la conexión.</div>';
+  if (!S.cafes.length) h += '<div class="banner warn">No se pudo leer el catálogo. Puedes agregar ítems libres, o abrir el catálogo del dashboard y pulsar ☁ Sincronizar.</div>';
+  if (!docs.length) {
+    h += '<div class="card empty">' + (S.verArch ? 'No hay cotizaciones archivadas.' : 'Aún no hay cotizaciones de kits.<br><span class="small">Arma 3 opciones (económica, intermedia y premium) con los cafés del catálogo y envíaselas al cliente en PDF o por WhatsApp.</span>') + '</div>';
+  } else {
+    h += '<div class="tbl-w"><table class="t"><thead><tr><th>N°</th><th>Cliente</th><th>Fecha</th><th class="num">Kits</th><th>Opciones (precio por kit)</th><th>Estado</th><th></th></tr></thead><tbody>';
+    docs.forEach(function(d){
+      var x = d.data, precios = (x.opciones || []).map(function(o, i){ var c = calcOpcion(o, x.cantidad, x.iva); return (x.elegida === i ? '★ ' : '') + fmt(c.precioUIva); }).join(' · ');
+      var est = x.estado || 'Borrador', cls = est === 'Aprobada' ? 'ok' : est === 'Enviada' ? 'info' : est === 'Rechazada' ? 'bad' : '';
+      h += '<tr class="click" data-open="' + esc(d.id) + '"><td>#' + esc(x.num) + '</td><td><b>' + esc(x.cliente || '—') + '</b>' + (x.empresa ? '<div class="small muted">' + esc(x.empresa) + '</div>' : '') + '</td><td>' + fFecha(d.fecha) + '</td><td class="num">' + esc(x.cantidad) + '</td><td class="small">' + precios + '</td><td><span class="st ' + cls + '">' + esc(est) + '</span></td>'
+        + '<td class="num"><button class="btn sm ghost" data-dup="' + esc(d.id) + '">Duplicar</button> <button class="btn sm ghost" data-arch="' + esc(d.id) + '">' + (x.archivada ? 'Restaurar' : 'Archivar') + '</button></td></tr>';
+    });
+    h += '</tbody></table></div>';
+  }
+  $('main').innerHTML = h;
+  $('bNueva').onclick = function(){ var c = nuevaCot(); if (S.cafes.length) autollenar(c); abrir(c); guardar(c, true); };
+  $('bEq').onclick = pintarEquipos;
+  $('verArch').onchange = function(){ S.verArch = this.checked; pintarLista(); };
+  Array.prototype.forEach.call(document.querySelectorAll('[data-open]'), function(tr){ tr.onclick = function(e){ if (e.target.closest('button')) return; abrir(S.byId[tr.getAttribute('data-open')]); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-dup]'), function(b){ b.onclick = function(){ duplicar(S.byId[b.getAttribute('data-dup')]); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-arch]'), function(b){ b.onclick = function(){ var d = S.byId[b.getAttribute('data-arch')]; d.data.archivada = !d.data.archivada; guardar(d, true).then(pintarLista); toast(d.data.archivada ? 'Archivada (puedes restaurarla)' : 'Restaurada'); }; });
+}
+function duplicar(d){
+  var c = clone(d); c.id = uid('kc'); c.fecha = hoy();
+  c.data.num = sigNum(); c.data.estado = 'Borrador'; c.data.elegida = null; c.data.archivada = false; c.data.creada = new Date().toISOString();
+  guardar(c, true); abrir(c); toast('Duplicada como #' + c.data.num);
+}
+
+// =============== VISTA: EDITOR ===============
+function abrir(doc){ S.cur = doc; S.vista = 'editor'; pintarEditor(); }
+function volver(){ if (S.dirty && S.cur) { clearTimeout(S.tSave); guardar(S.cur, true); } S.cur = null; S.vista = 'lista'; pintarLista(); }
+function opcionesItems(){
+  var h = '<option value="">+ Agregar ítem…</option>';
+  if (S.cafes.length) {
+    h += '<optgroup label="Productos del catálogo (cafés)">';
+    S.cafes.forEach(function(c, i){ h += '<option value="c' + i + '">' + esc(c.nombre + (c.pres ? ' · ' + c.pres : '')) + ' — ' + fmt(c.precio) + '</option>'; });
+    h += '</optgroup>';
+  }
+  if (S.eq.length) {
+    EQ_CATS.forEach(function(cat){
+      var l = []; S.eq.forEach(function(e, i){ if ((e.cat || 'Otro') === cat) l.push('<option value="e' + i + '">' + esc(e.nombre) + ' — ' + (n(e.precio) ? fmt(e.precio) : 'sin precio') + '</option>'); });
+      if (l.length) h += '<optgroup label="Métodos y equipos · ' + esc(cat) + '">' + l.join('') + '</optgroup>';
+    });
+  }
+  if (S.ins.length) {
+    h += '<optgroup label="Insumos (empaques, cajas, stickers…)">';
+    S.ins.forEach(function(it, i){ h += '<option value="i' + i + '">' + esc(it.nombre) + ' — costo ' + fmt(it.costo) + '</option>'; });
+    h += '</optgroup>';
+  }
+  h += '<optgroup label="Otro"><option value="libre">Ítem libre (taza, tarjeta, accesorio, servicio…)</option></optgroup>';
+  return h;
+}
+function pintarEditor(){
+  var d = S.cur, x = d.data, optsHtml = opcionesItems();
+  var h = '<div class="sticky"><div class="row">'
+    + '<button class="btn sm ghost" id="bVolver">← Cotizaciones</button>'
+    + '<h1 style="font-size:22px">Cotización de kits #' + esc(x.num) + '</h1><span class="sp"></span>'
+    + '<span class="save-st" id="saveSt">' + (S.dirty ? 'Cambios sin guardar…' : 'Guardado ✓') + '</span>'
+    + '<button class="btn" id="bAuto" title="Reemplaza los ítems con una propuesta armada desde el catálogo">↻ Autollenar</button>'
+    + '<button class="btn wa" id="bWa">WhatsApp</button>'
+    + '<button class="btn" id="bCopy">Copiar texto</button>'
+    + '<button class="btn pri" id="bPdf">Ver / PDF para el cliente</button>'
+    + '</div></div>';
+
+  h += '<div class="card"><div class="grid g4">'
+    + fld('Cliente / contacto *', '<input type="text" data-f="cliente" value="' + esc(x.cliente) + '">')
+    + fld('Empresa', '<input type="text" data-f="empresa" value="' + esc(x.empresa) + '">')
+    + fld('NIT / CC', '<input type="text" data-f="nit" value="' + esc(x.nit) + '">')
+    + fld('WhatsApp del cliente', '<input type="text" data-f="tel" value="' + esc(x.tel) + '" placeholder="57300…">')
+    + fld('Email', '<input type="email" data-f="email" value="' + esc(x.email) + '">')
+    + fld('Ciudad', '<input type="text" data-f="ciudad" value="' + esc(x.ciudad) + '">')
+    + fld('Cantidad de kits', '<input type="number" min="1" data-f="cantidad" data-num="1" value="' + esc(x.cantidad) + '">')
+    + fld('Vigencia (días)', '<input type="number" min="1" data-f="vigencia" data-num="1" value="' + esc(x.vigencia) + '">')
+    + fld('Fecha', '<input type="date" id="fFecha" value="' + esc(d.fecha) + '">')
+    + fld('Estado', '<select data-f="estado">' + ESTADOS.map(function(e){ return '<option' + (e === x.estado ? ' selected' : '') + '>' + e + '</option>'; }).join('') + '</select>')
+    + '<label class="chk" style="align-self:end;padding-bottom:9px"><input type="checkbox" data-f="iva"' + (x.iva ? ' checked' : '') + '> Sumar IVA 19% al cliente</label>'
+    + '</div></div>';
+
+  h += '<div class="sec row"><span>Opciones de kit · precios sin IVA por unidad</span><span class="sp"></span>'
+    + (x.opciones.length < 4 ? '<button class="btn sm ghost" id="bAddOpt">+ Opción</button>' : '') + '</div>';
+  h += '<div class="opts">';
+  x.opciones.forEach(function(o, oi){
+    var c = calcOpcion(o, x.cantidad, x.iva);
+    h += '<div class="opt' + (x.elegida === oi ? ' sel' : '') + '">'
+      + '<div class="opt-hd"><div class="row"><span class="tier">Opción ' + (oi + 1) + (x.elegida === oi ? ' · ★ elegida por el cliente' : '') + '</span><span class="sp"></span>'
+      + '<button class="btn sm ghost" data-pick="' + oi + '" title="Marcar como la opción que eligió el cliente">' + (x.elegida === oi ? '★' : '☆') + '</button>'
+      + (x.opciones.length > 1 ? '<button class="x" data-delopt="' + oi + '" title="Quitar opción">✕</button>' : '') + '</div>'
+      + '<input type="text" class="nm" data-o="' + oi + '" data-of="nombre" value="' + esc(o.nombre) + '">'
+      + '<input type="text" data-o="' + oi + '" data-of="desc" value="' + esc(o.desc) + '" placeholder="Descripción corta para el cliente"></div>'
+      + '<div class="opt-bd">';
+    if (!o.items.length) h += '<div class="small dim" style="padding:8px 0">Sin ítems todavía.</div>';
+    o.items.forEach(function(it, ii){
+      var k = 'data-o="' + oi + '" data-i="' + ii + '"';
+      h += '<div class="it"><input type="number" min="0" step="1" ' + k + ' data-if="qty" value="' + esc(it.qty) + '" title="Cantidad por kit">'
+        + '<div><input type="text" ' + k + ' data-if="desc" value="' + esc(it.desc) + '">'
+        + '<div class="m"><label>Costo unit.<input type="number" min="0" ' + k + ' data-if="costo" value="' + esc(it.costo) + '"></label>'
+        + '<label>Precio unit.<input type="number" min="0" ' + k + ' data-if="precio" value="' + esc(it.precio) + '"></label></div>'
+        + '<div class="tag">' + (it.tipo === 'cafe' ? 'Producto del catálogo' : it.tipo === 'equipo' ? 'Método / equipo' : it.tipo === 'insumo' ? 'Insumo' : 'Ítem libre') + (!n(it.precio) ? ' · <span class="mg-bad">sin precio</span>' : '') + (it.tipo !== 'libre' && !n(it.costo) ? ' · <span class="mg-warn">sin costo registrado</span>' : '') + '</div></div>'
+        + '<button class="x" data-delit="' + oi + ':' + ii + '" title="Quitar">✕</button></div>';
+    });
+    h += '<select class="opt-add" data-add="' + oi + '">' + optsHtml + '</select></div>'
+      + '<div class="opt-ft">'
+      + '<div class="kv"><span class="muted">Costo por kit</span><b>' + fmt(c.costoU) + '</b></div>'
+      + '<div class="kv"><span class="muted">Suma a precio de lista</span><b>' + fmt(c.listaU) + '</b></div>'
+      + '<div class="mini"><label>Descuento %<input type="number" min="0" max="90" data-o="' + oi + '" data-of="dcto" value="' + esc(o.dcto || 0) + '"></label>'
+      + '<label>Precio manual / kit<input type="number" min="0" data-o="' + oi + '" data-of="manual" value="' + esc(o.manual || '') + '" placeholder="auto"></label></div>'
+      + '<div class="kv"><span class="muted">Utilidad por kit</span><b class="' + mgClase(c.mg) + '">' + fmt(c.util) + ' · ' + Math.round(c.mg) + '%</b></div>'
+      + '<div class="kv"><span class="muted">Utilidad total (' + c.cant + ' kits)</span><b class="' + mgClase(c.mg) + '">' + fmt(c.utilTot) + '</b></div>'
+      + (c.sinCosto ? '<div class="small mg-warn" style="margin-top:4px">Hay ítems sin costo: la utilidad real es menor.</div>' : '')
+      + '<div class="kv big"><span>Precio por kit' + (x.iva ? ' + IVA' : '') + '</span><b>' + fmt(c.precioUIva) + '</b></div>'
+      + '<div class="kv"><span class="muted">Total ' + c.cant + ' kits' + (x.iva ? ' (IVA incl.)' : '') + '</span><b>' + fmt(c.total) + '</b></div>'
+      + '</div></div>';
+  });
+  h += '</div>';
+
+  h += '<div class="sec">Para el cliente</div><div class="card grid" style="grid-template-columns:1fr 1fr">'
+    + fld('Notas (aparecen en la cotización)', '<textarea data-f="notas" placeholder="Ej: personalizamos la tarjeta con el logo de su empresa">' + esc(x.notas) + '</textarea>')
+    + fld('Condiciones', '<textarea data-f="condiciones">' + esc(x.condiciones) + '</textarea>')
+    + '</div>';
+  $('main').innerHTML = h;
+  conectarEditor();
+}
+function fld(lbl, html){ return '<label class="f">' + esc(lbl) + html + '</label>'; }
+function conectarEditor(){
+  var x = S.cur.data, recalc = false;
+  $('bVolver').onclick = volver;
+  $('bPdf').onclick = function(){ if (S.dirty) guardar(S.cur, true); abrirDocumento(); };
+  $('bCopy').onclick = function(){ copiar(textoWhatsApp()); };
+  $('bWa').onclick = function(){ var tel = String(x.tel || '').replace(/\D/g, ''); if (tel && tel.length === 10) tel = '57' + tel; window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(textoWhatsApp()), '_blank'); if (x.estado === 'Borrador') { x.estado = 'Enviada'; programarGuardado(); pintarEditor(); } };
+  $('bAuto').onclick = function(){ if (x.opciones.some(function(o){ return o.items.length; }) && !confirm('¿Reemplazar los ítems de las 3 opciones por una propuesta automática desde el catálogo?')) return; autollenar(S.cur); programarGuardado(); pintarEditor(); };
+  $('fFecha').onchange = function(){ S.cur.fecha = this.value || hoy(); programarGuardado(); };
+  if ($('bAddOpt')) $('bAddOpt').onclick = function(){ x.opciones.push({ nombre: 'Kit ' + TIERS[x.opciones.length], desc: '', items: [], dcto: 0, manual: 0 }); programarGuardado(); pintarEditor(); };
+  Array.prototype.forEach.call(document.querySelectorAll('[data-f]'), function(el){
+    el.addEventListener(el.type === 'checkbox' || el.tagName === 'SELECT' ? 'change' : 'input', function(){
+      var f = el.getAttribute('data-f');
+      x[f] = el.type === 'checkbox' ? el.checked : el.getAttribute('data-num') ? Math.max(1, Math.round(n(el.value)) || 1) : el.value;
+      programarGuardado();
+      if (f === 'cantidad' || f === 'iva') refrescarLuego();
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-of]'), function(el){
+    el.addEventListener('input', function(){
+      var o = x.opciones[n(el.getAttribute('data-o'))], f = el.getAttribute('data-of');
+      o[f] = (f === 'dcto' || f === 'manual') ? n(el.value) : el.value;
+      programarGuardado(); if (f === 'dcto' || f === 'manual') refrescarLuego();
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-if]'), function(el){
+    el.addEventListener('input', function(){
+      var it = x.opciones[n(el.getAttribute('data-o'))].items[n(el.getAttribute('data-i'))], f = el.getAttribute('data-if');
+      it[f] = f === 'desc' ? el.value : n(el.value);
+      programarGuardado(); if (f !== 'desc') refrescarLuego();
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-add]'), function(el){
+    el.onchange = function(){
+      var o = x.opciones[n(el.getAttribute('data-add'))], v = el.value; if (!v) return;
+      if (v === 'libre') o.items.push({ tipo: 'libre', ref: '', desc: 'Ítem', qty: 1, costo: 0, precio: 0 });
+      else if (v.charAt(0) === 'c') o.items.push(itemCafe(S.cafes[n(v.slice(1))]));
+      else if (v.charAt(0) === 'e') o.items.push(itemEq(S.eq[n(v.slice(1))]));
+      else o.items.push(itemIns(S.ins[n(v.slice(1))]));
+      programarGuardado(); pintarEditor();
+    };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-delit]'), function(b){ b.onclick = function(){ var p = b.getAttribute('data-delit').split(':'); x.opciones[n(p[0])].items.splice(n(p[1]), 1); programarGuardado(); pintarEditor(); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-delopt]'), function(b){ b.onclick = function(){ var i = n(b.getAttribute('data-delopt')); if (!confirm('¿Quitar "' + x.opciones[i].nombre + '"?')) return; x.opciones.splice(i, 1); if (x.elegida === i) x.elegida = null; else if (x.elegida > i) x.elegida--; programarGuardado(); pintarEditor(); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-pick]'), function(b){ b.onclick = function(){ var i = n(b.getAttribute('data-pick')); x.elegida = x.elegida === i ? null : i; if (x.elegida !== null) x.estado = 'Aprobada'; programarGuardado(); pintarEditor(); }; });
+  function refrescarLuego(){ clearTimeout(refrescarLuego._t); refrescarLuego._t = setTimeout(function(){ var a = document.activeElement, sel = a && a.getAttribute ? ['data-f', 'data-of', 'data-if', 'data-o', 'data-i'].map(function(k){ return a.getAttribute(k); }) : null, pos = a && a.selectionStart; pintarEditor(); restaurarFoco(sel, pos); }, 450); }
+}
+function restaurarFoco(sel, pos){
+  if (!sel) return;
+  var q = '';
+  if (sel[0]) q = '[data-f="' + sel[0] + '"]';
+  else if (sel[1]) q = '[data-o="' + sel[3] + '"][data-of="' + sel[1] + '"]';
+  else if (sel[2]) q = '[data-o="' + sel[3] + '"][data-i="' + sel[4] + '"][data-if="' + sel[2] + '"]';
+  var el = q && document.querySelector(q); if (!el) return;
+  el.focus(); try { if (pos != null) el.setSelectionRange(pos, pos); } catch (e) {}
+}
+
+// =============== VISTA: MÉTODOS Y EQUIPOS ===============
+function pintarEquipos(){
+  S.vista = 'equipos';
+  var h = '<div class="top"><button class="btn sm ghost" id="bVolverEq">← Cotizaciones</button><h1>Métodos y equipos</h1><span class="sp"></span>'
+    + '<button class="btn" id="bEqAdd">+ Agregar</button><button class="btn pri" id="bEqSave">Guardar</button></div>'
+    + '<p class="muted small" style="margin:0 0 10px">Lista de equipos para armar kits (V60, prensa, molino, filtros, tazas…). Registra cuánto te cuesta y a cuánto lo vendes (sin IVA). Los que tengan precio se usan en el ↻ Autollenar.</p>'
+    + '<div class="tbl-w"><table class="t"><thead><tr><th>Nombre</th><th>Tipo</th><th class="num">Costo</th><th class="num">Precio venta</th><th class="num">Margen</th><th></th></tr></thead><tbody>';
+  S.eq.forEach(function(e, i){
+    var mg = n(e.precio) > 0 ? Math.round((n(e.precio) - n(e.costo)) / n(e.precio) * 100) : null;
+    h += '<tr><td><input type="text" data-eq="' + i + '" data-ef="nombre" value="' + esc(e.nombre) + '"></td>'
+      + '<td><select data-eq="' + i + '" data-ef="cat">' + EQ_CATS.map(function(c){ return '<option' + (c === e.cat ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select></td>'
+      + '<td><input type="number" min="0" data-eq="' + i + '" data-ef="costo" value="' + esc(e.costo || '') + '" placeholder="0"></td>'
+      + '<td><input type="number" min="0" data-eq="' + i + '" data-ef="precio" value="' + esc(e.precio || '') + '" placeholder="0"></td>'
+      + '<td class="num ' + (mg == null ? 'dim' : mgClase(mg)) + '">' + (mg == null ? '—' : mg + '%') + '</td>'
+      + '<td class="num"><button class="x" data-eqdel="' + i + '" title="Quitar">✕</button></td></tr>';
+  });
+  h += '</tbody></table></div>';
+  $('main').innerHTML = h;
+  $('bVolverEq').onclick = function(){ guardarEquipos(); S.vista = 'lista'; pintarLista(); };
+  $('bEqSave').onclick = function(){ guardarEquipos(); pintarEquipos(); };
+  $('bEqAdd').onclick = function(){ S.eq.push({ id: uid('eq'), nombre: 'Nuevo equipo', cat: 'Método', costo: 0, precio: 0 }); pintarEquipos(); var ins = document.querySelectorAll('[data-ef="nombre"]'); if (ins.length) { ins[ins.length - 1].focus(); ins[ins.length - 1].select(); } };
+  Array.prototype.forEach.call(document.querySelectorAll('[data-ef]'), function(el){
+    el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', function(){ var e = S.eq[n(el.getAttribute('data-eq'))], f = el.getAttribute('data-ef'); e[f] = (f === 'costo' || f === 'precio') ? n(el.value) : el.value; lsSet('bru_kitcot_eq', { id: 'kitequipos', tipo: 'kit_cfg', data: { lista: S.eq, actualizada: new Date().toISOString() } }); });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-eqdel]'), function(b){ b.onclick = function(){ var i = n(b.getAttribute('data-eqdel')); if (!confirm('¿Quitar "' + S.eq[i].nombre + '" de la lista? (las cotizaciones ya hechas no cambian)')) return; S.eq.splice(i, 1); pintarEquipos(); }; });
+}
+
+// =============== SALIDA AL CLIENTE ===============
+function textoWhatsApp(){
+  var x = S.cur.data, L = [];
+  L.push('Hola ' + (x.cliente || '') + ', te comparto la cotización de kits de café B.R.U' + (x.empresa ? ' para ' + x.empresa : '') + ' (' + x.cantidad + ' kit' + (x.cantidad > 1 ? 's' : '') + '):');
+  x.opciones.forEach(function(o, i){
+    var c = calcOpcion(o, x.cantidad, x.iva);
+    L.push(''); L.push('*' + (i + 1) + '. ' + o.nombre + '* — ' + fmt(c.precioUIva) + ' por kit' + (x.iva ? ' (IVA incl.)' : ''));
+    if (o.desc) L.push(o.desc);
+    o.items.forEach(function(it){ if (n(it.qty) > 0) L.push('• ' + it.qty + ' × ' + it.desc); });
+    L.push('Total ' + x.cantidad + ' kits: ' + fmt(c.total));
+  });
+  L.push(''); L.push('Vigencia: ' + x.vigencia + ' días.');
+  if (x.notas) L.push(x.notas);
+  L.push(''); L.push('Quedo atento a cuál opción prefieres. — B.R.U · Brew Respect Unite');
+  return L.join('\n');
+}
+function htmlDocumento(){
+  var d = S.cur, x = d.data, vence = sumaDias(d.fecha || hoy(), x.vigencia);
+  var cols = x.opciones.map(function(o, i){
+    var c = calcOpcion(o, x.cantidad, x.iva);
+    var items = o.items.filter(function(it){ return n(it.qty) > 0; }).map(function(it){ return '<li><span class="q">' + esc(it.qty) + '×</span> ' + esc(it.desc) + '</li>'; }).join('');
+    return '<div class="op' + (i === 1 && x.opciones.length === 3 ? ' mid' : '') + '"><div class="ti">Opción ' + (i + 1) + '</div><h3>' + esc(o.nombre) + '</h3>'
+      + (o.desc ? '<p class="de">' + esc(o.desc) + '</p>' : '') + '<ul>' + items + '</ul>'
+      + '<div class="pr"><div class="lb">Precio por kit</div><div class="v">' + fmt(c.precioU) + '</div>'
+      + (x.iva ? '<div class="sm">+ IVA ' + fmt(c.precioUIva - c.precioU) + ' = ' + fmt(c.precioUIva) + '</div>' : '')
+      + '<div class="tt">' + x.cantidad + ' kits · <b>' + fmt(c.total) + '</b>' + (x.iva ? ' IVA incl.' : '') + '</div></div></div>';
+  }).join('');
+  var css = '*{box-sizing:border-box}body{font-family:Inter,Arial,sans-serif;margin:0;background:#fff;color:#1a1510;font-size:13px}'
+    + '.pg{max-width:900px;margin:0 auto;padding:36px 32px}'
+    + '.hd{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:20px;border-bottom:1px solid #e0d8d0;margin-bottom:22px}'
+    + '.lg{font-size:22px;font-weight:700;letter-spacing:5px}.lg small{display:block;font-size:7px;letter-spacing:2.5px;color:#9c7c3c;font-weight:500;margin-top:3px;text-transform:uppercase}'
+    + '.nr{text-align:right}.nr .k{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#888}.nr .n{font-size:24px;font-weight:300;color:#9c7c3c}'
+    + '.meta{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px}.meta .k{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:#888;margin-bottom:3px}.meta .v{font-size:12px;line-height:1.55}'
+    + 'h2{font-family:Georgia,serif;font-weight:400;font-size:20px;margin:0 0 4px}.intro{color:#666;margin:0 0 18px}'
+    + '.ops{display:grid;grid-template-columns:repeat(' + x.opciones.length + ',1fr);gap:14px;margin-bottom:24px}'
+    + '.op{border:1px solid #e0d8d0;border-radius:10px;padding:18px 16px;display:flex;flex-direction:column;break-inside:avoid}.op.mid{border-color:#9c7c3c;box-shadow:0 0 0 1px #9c7c3c inset}'
+    + '.ti{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#9c7c3c}.op h3{font-family:Georgia,serif;font-weight:400;font-size:18px;margin:4px 0 6px}'
+    + '.de{color:#666;font-size:11.5px;margin:0 0 10px;line-height:1.5}ul{list-style:none;padding:0;margin:0 0 14px;flex:1}li{padding:5px 0;border-bottom:1px dashed #eee;font-size:12px;line-height:1.4}.q{color:#9c7c3c;font-weight:600}'
+    + '.pr{border-top:1px solid #e0d8d0;padding-top:10px}.lb{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:#888}.v{font-size:24px;font-weight:300;color:#1a1510}.sm{font-size:10.5px;color:#888}.tt{margin-top:6px;font-size:11.5px;color:#444}'
+    + '.nt{border-top:1px solid #e0d8d0;padding-top:14px;font-size:11px;color:#666;line-height:1.6;white-space:pre-line}.nt b{color:#1a1510}'
+    + '.ft{margin-top:22px;font-size:10px;color:#999;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}'
+    + '.bar{position:sticky;top:0;background:#1a1510;padding:10px;text-align:center}.bar button{background:#c9a84c;border:none;padding:9px 18px;border-radius:8px;font-weight:600;cursor:pointer;font-family:inherit}'
+    + '@media(max-width:700px){.ops{grid-template-columns:1fr}.meta{grid-template-columns:1fr 1fr}}'
+    + '@media print{.bar{display:none}.pg{padding:0}@page{margin:1.2cm}.ops{grid-template-columns:repeat(' + x.opciones.length + ',1fr)}}';
+  var cliente = [x.cliente, x.empresa, x.nit ? 'NIT/CC ' + x.nit : '', x.ciudad].filter(Boolean).map(esc).join('<br>');
+  return '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cotización kits B.R.U #' + esc(x.num) + (x.cliente ? ' · ' + esc(x.cliente) : '') + '</title>'
+    + '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>' + css + '</style></head><body>'
+    + '<div class="bar"><button onclick="window.print()">Imprimir / Guardar como PDF</button></div>'
+    + '<div class="pg"><div class="hd"><div class="lg">B·R·U<small>Brew · Respect · Unite — Specialty Coffee</small></div><div class="nr"><div class="k">Cotización</div><div class="n">#' + esc(x.num) + '</div></div></div>'
+    + '<div class="meta"><div><div class="k">Para</div><div class="v">' + (cliente || '—') + '</div></div>'
+    + '<div><div class="k">Fecha</div><div class="v">' + fFecha(d.fecha) + '</div></div>'
+    + '<div><div class="k">Válida hasta</div><div class="v">' + fFecha(vence) + '</div></div>'
+    + '<div><div class="k">Cantidad</div><div class="v">' + esc(x.cantidad) + ' kit' + (x.cantidad > 1 ? 's' : '') + '</div></div></div>'
+    + '<h2>Kits de café de especialidad</h2><p class="intro">Te presentamos ' + x.opciones.length + ' opciones para que elijas la que mejor se ajusta: café colombiano tostado por nosotros sobre pedido y métodos para prepararlo.</p>'
+    + '<div class="ops">' + cols + '</div>'
+    + '<div class="nt">' + (x.notas ? '<b>Notas.</b> ' + esc(x.notas) + '\n\n' : '') + (x.condiciones ? '<b>Condiciones.</b> ' + esc(x.condiciones) : '') + '</div>'
+    + '<div class="ft"><span>B.R.U · brucoffeeshop.online · Instagram @BruCoffeeRoasters_</span><span>WhatsApp +57 304 492 7790</span></div>'
+    + '</div></body></html>';
+}
+function abrirDocumento(){
+  var w = window.open('', '_blank');
+  if (!w) { toast('El navegador bloqueó la ventana. Permite pop-ups para este sitio.', true); return; }
+  w.document.open(); w.document.write(htmlDocumento()); w.document.close();
+}
+
+// =============== INICIO ===============
+window.addEventListener('beforeunload', function(){ if (S.dirty && S.cur) { respaldoLocal(); } });
+cargar().then(pintarLista).catch(function(e){ $('main').innerHTML = '<div class="card empty">No se pudo cargar: ' + esc(e.message) + '</div>'; });
+})();
+</script>
+</body>
+</html>
