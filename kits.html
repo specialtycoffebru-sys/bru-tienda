@@ -210,6 +210,15 @@ function guardarEquipos(){
   lsSet('bru_kitcot_eq', S.eqDoc);
   return subir(S.eqDoc).then(function(){ toast('Equipos guardados'); }).catch(function(){ toast('Sin conexión: guardados en este equipo', true); });
 }
+// Mantiene el consecutivo sin huecos: 1, 2, 3… en orden de creación (las eliminadas no cuentan)
+function compactarNumeros(){
+  var vivos = S.docs.filter(function(d){ return !d.data.eliminada; }).sort(function(a, b){
+    return n(a.data.num) - n(b.data.num) || String(a.data.creada || '').localeCompare(String(b.data.creada || ''));
+  });
+  var cambios = [];
+  vivos.forEach(function(d, i){ if (n(d.data.num) !== i + 1) { d.data.num = i + 1; cambios.push(d); } });
+  return Promise.all(cambios.map(function(d){ return guardar(d, true); }));
+}
 function sigNum(){ var m = 0; S.docs.forEach(function(d){ if (!d.data.eliminada) m = Math.max(m, n(d.data.num)); }); return m + 1; }
 
 // =============== CÁLCULOS ===============
@@ -304,7 +313,7 @@ function eliminar(d){
   if (!confirm('¿Eliminar la cotización #' + d.data.num + (d.data.cliente ? ' de ' + d.data.cliente : '') + '? Ya no aparecerá en la lista.')) return;
   clearTimeout(S.tSave); S.dirty = false;
   d.data.eliminada = true;
-  guardar(d, true).then(function(){ toast('Cotización eliminada'); if (S.vista === 'editor') { S.cur = null; S.vista = 'lista'; } pintarLista(); });
+  guardar(d, true).then(compactarNumeros).then(function(){ toast('Cotización eliminada'); if (S.vista === 'editor') { S.cur = null; S.vista = 'lista'; } pintarLista(); });
 }
 function duplicar(d){
   var c = clone(d); c.id = uid('kc'); c.fecha = hoy();
@@ -681,7 +690,7 @@ function abrirDocumento(){
 
 // =============== INICIO ===============
 window.addEventListener('beforeunload', function(){ if (S.dirty && S.cur) { respaldoLocal(); } });
-cargar().then(pintarLista).catch(function(e){ $('main').innerHTML = '<div class="card empty">No se pudo cargar: ' + esc(e.message) + '</div>'; });
+cargar().then(function(){ return compactarNumeros().catch(function(){}); }).then(pintarLista).catch(function(e){ $('main').innerHTML = '<div class="card empty">No se pudo cargar: ' + esc(e.message) + '</div>'; });
 })();
 </script>
 </body>
