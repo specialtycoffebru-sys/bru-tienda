@@ -541,9 +541,9 @@ function htmlDocumento(){
     var ahorro = c.listaU - c.precioU;
     var rs = verP ? '<div class="rs"><div><span>Valor por separado</span><span>' + fmt(c.listaU) + '</span></div>'
       + (ahorro > 0 ? '<div class="ah"><span>Ahorro con el kit (' + Math.round(ahorro / (c.listaU || 1) * 100) + '%)</span><span>−' + fmt(ahorro) + '</span></div>' : '') + '</div>' : '';
-    return '<article class="op ' + tiers[i] + (i === reco ? ' reco' : '') + '">'
+    return '<article class="op ' + tiers[i] + (i === reco ? ' reco' : '') + (nOp === 1 ? ' solo' : '') + '">'
       + (i === reco ? '<div class="badge">★ Recomendado</div>' : '')
-      + '<header><div class="ti">Opción ' + (i + 1) + '</div><h3>' + esc(o.nombre) + '</h3>' + (o.desc ? '<p>' + esc(o.desc) + '</p>' : '') + '</header>'
+      + '<header><div class="ti">' + (nOp === 1 ? 'Tu kit' : 'Opción ' + (i + 1)) + '</div><h3>' + esc(o.nombre) + '</h3>' + (o.desc ? '<p>' + esc(o.desc) + '</p>' : '') + '</header>'
       + '<ul>' + filas + '</ul>' + rs
       + '<footer><div class="lb">Precio por kit' + (x.iva ? ' · antes de IVA' : '') + '</div><div class="big">' + fmt(c.precioU) + '</div>'
       + (x.iva ? '<div class="iv">IVA 19% ' + fmt(c.precioUIva - c.precioU) + ' · <b>' + fmt(c.precioUIva) + ' con IVA</b></div>' : '')
@@ -583,7 +583,15 @@ function htmlDocumento(){
     '.body{padding:30px 34px 10px}',
     '.sec{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 16px}.sec h2{font-family:Fraunces,Georgia,serif;font-weight:400;font-size:24px;margin:0;color:var(--plum)}.sec span{font-size:11px;color:var(--mauve)}',
     '.ops{display:grid;grid-template-columns:repeat(' + Math.min(nOp, 3) + ',minmax(0,1fr));gap:16px;align-items:stretch}',
-    (nOp === 1 ? '.ops{max-width:560px;margin:0 auto}' : ''),
+    (nOp === 1 ? '.ops{grid-template-columns:1fr}'
+      + '.op.solo{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);grid-template-rows:auto 1fr auto}'
+      + '.op.solo header{grid-column:1/-1;padding:22px 24px 18px}.op.solo h3{font-size:26px}'
+      + '.op.solo ul{grid-column:1;grid-row:2;padding:8px 22px}.op.solo .rs{grid-column:1;grid-row:3;margin:0 22px 18px}'
+      + '.op.solo footer{grid-column:2;grid-row:2/4;border-top:none;border-left:1px solid #ecd6cf;background:linear-gradient(160deg,var(--plum),var(--berry));color:var(--cream);display:flex;flex-direction:column;justify-content:center;padding:26px 24px}'
+      + '.op.solo .lb{color:var(--gold)}.op.solo .big{color:var(--cream);font-size:40px}.op.solo .iv{color:var(--blush)}.op.solo .iv b{color:var(--gold)}'
+      + '.op.solo .tot{color:var(--blush);border-top-color:rgba(251,228,216,.25)}.op.solo .tot b{color:var(--cream);font-size:20px}.op.solo .tsm{color:var(--blush)}'
+      + '@media(max-width:760px){.op.solo{grid-template-columns:1fr;grid-template-rows:none}.op.solo header,.op.solo ul,.op.solo .rs,.op.solo footer{grid-column:1;grid-row:auto}.op.solo footer{border-left:none}}'
+      + '@media print{.op.solo{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}}' : ''),
     '.op{position:relative;background:#fff;border:1px solid #ecd6cf;border-radius:18px;overflow:hidden;display:flex;flex-direction:column;break-inside:avoid;page-break-inside:avoid}',
     '.op header{padding:18px 18px 14px;color:var(--plum)}.op .ti{font-size:9px;letter-spacing:3px;text-transform:uppercase;opacity:.75}',
     '.op h3{font-family:Fraunces,Georgia,serif;font-weight:400;font-size:21px;margin:4px 0 4px;line-height:1.15}.op header p{margin:0;font-size:11.5px;opacity:.85}',
@@ -621,9 +629,9 @@ function htmlDocumento(){
     + '<section class="cover">' + (M.hero ? '<div class="ph" style="background-image:url(' + esc(M.hero) + ')"></div>' : '') + '<div class="gl"></div>'
     + '<div class="top"><div class="brand"><img src="' + logo + '" alt="B.R.U"><div><div class="w">B·R·U</div><div class="s">Brew · Respect · Unite</div></div></div>'
     + '<div class="num"><div class="k">Cotización</div><div class="n">N.° ' + String(x.num).padStart(4, '0') + '</div><div class="f">' + fFecha(d.fecha) + ' · válida hasta ' + fFecha(vence) + '</div></div></div>'
-    + '<div class="ttl"><div class="ey">Café de especialidad colombiano</div><h1>Kits de café <em>B.R.U</em></h1>'
+    + '<div class="ttl"><div class="ey">Café de especialidad colombiano</div><h1>' + (nOp === 1 ? esc(x.opciones[0].nombre || 'Kit de café') + ' <em>B.R.U</em>' : 'Kits de café <em>B.R.U</em>') + '</h1>'
     + '<div class="pa">Preparada para <b>' + para + '</b>' + (contacto ? '<small>' + contacto + '</small>' : '') + '</div>'
-    + '<div class="chips"><span><b>' + esc(x.cantidad) + '</b> ' + plural(n(x.cantidad), 'kit', 'kits') + '</span><span><b>' + nOp + '</b> ' + plural(nOp, 'opción', 'opciones') + '</span>' + (verP ? '<span>Precios unitarios ' + (x.iva ? 'antes de IVA' : 'finales') + '</span>' : '') + '</div></div>'
+    + '<div class="chips"><span><b>' + esc(x.cantidad) + '</b> ' + plural(n(x.cantidad), 'kit', 'kits') + '</span>' + (nOp > 1 ? '<span><b>' + nOp + '</b> opciones</span>' : '') + (verP ? '<span>Precios unitarios ' + (x.iva ? 'antes de IVA' : 'finales') + '</span>' : '') + '</div></div>'
     + '</section>'
     + '<section class="vals">'
     + '<div>' + ico('<path d="M12 2l3 7h7l-5.5 4.5 2 7.5-6.5-4.5L5.5 21l2-7.5L2 9h7z"/>') + '<span><b>Café de competencia</b>Lotes 85+ puntos SCA</span></div>'
@@ -633,7 +641,7 @@ function htmlDocumento(){
     + '<section class="body"><div class="sec"><h2>' + plural(nOp, 'Nuestra propuesta', 'Elige tu kit') + '</h2><span>Valores en pesos colombianos (COP)</span></div>'
     + '<div class="ops">' + cols + '</div>'
     + '<div class="next"><div class="steps"><h4>Cómo seguimos</h4><ol>'
-    + '<li><i>1</i><span><b>Elige tu opción</b>Ajustamos cantidades o contenido si lo necesitas.</span></li>'
+    + '<li><i>1</i><span><b>' + (nOp === 1 ? 'Confirma tu pedido' : 'Elige tu opción') + '</b>Ajustamos cantidades o contenido si lo necesitas.</span></li>'
     + '<li><i>2</i><span><b>Anticipo del 50%</b>Confirmamos el pedido y separamos el café.</span></li>'
     + '<li><i>3</i><span><b>Tostamos y empacamos</b>Cada kit armado a mano.</span></li>'
     + '<li><i>4</i><span><b>Entrega</b>Coordinamos fecha y lugar contigo.</span></li>'
