@@ -345,6 +345,7 @@ function pintarEditor(){
     + fld('Fecha', '<input type="date" id="fFecha" value="' + esc(d.fecha) + '">')
     + fld('Estado', '<select data-f="estado">' + ESTADOS.map(function(e){ return '<option' + (e === x.estado ? ' selected' : '') + '>' + e + '</option>'; }).join('') + '</select>')
     + '<label class="chk" style="align-self:end;padding-bottom:9px"><input type="checkbox" data-f="iva"' + (x.iva ? ' checked' : '') + '> Sumar IVA 19% al cliente</label>'
+    + '<label class="chk" style="align-self:end;padding-bottom:9px"><input type="checkbox" data-f="verPrecios"' + (x.verPrecios !== false ? ' checked' : '') + '> Mostrar al cliente el precio de cada producto</label>'
     + '</div></div>';
 
   h += '<div class="sec row"><span>Opciones de kit · precios sin IVA por unidad</span><span class="sp"></span>'
@@ -483,7 +484,8 @@ function textoWhatsApp(){
     var c = calcOpcion(o, x.cantidad, x.iva);
     L.push(''); L.push('*' + (i + 1) + '. ' + o.nombre + '* — ' + fmt(c.precioUIva) + ' por kit' + (x.iva ? ' (IVA incl.)' : ''));
     if (o.desc) L.push(o.desc);
-    o.items.forEach(function(it){ if (n(it.qty) > 0) L.push('• ' + it.qty + ' × ' + it.desc); });
+    o.items.forEach(function(it){ if (n(it.qty) > 0) L.push('• ' + it.qty + ' × ' + it.desc + (x.verPrecios !== false ? ' — ' + (n(it.precio) ? fmt(n(it.qty) * n(it.precio)) : 'incluido') : '')); });
+    if (x.verPrecios !== false && c.listaU > c.precioU) L.push('Valor por separado ' + fmt(c.listaU) + ' · ahorras ' + fmt(c.listaU - c.precioU) + ' (precios sin IVA)');
     L.push('Total ' + x.cantidad + ' kits: ' + fmt(c.total));
   });
   L.push(''); L.push('Vigencia: ' + x.vigencia + ' días.');
@@ -495,9 +497,18 @@ function htmlDocumento(){
   var d = S.cur, x = d.data, vence = sumaDias(d.fecha || hoy(), x.vigencia);
   var cols = x.opciones.map(function(o, i){
     var c = calcOpcion(o, x.cantidad, x.iva);
-    var items = o.items.filter(function(it){ return n(it.qty) > 0; }).map(function(it){ return '<li><span class="q">' + esc(it.qty) + '×</span> ' + esc(it.desc) + '</li>'; }).join('');
+    var verP = x.verPrecios !== false;
+    var items = o.items.filter(function(it){ return n(it.qty) > 0; }).map(function(it){
+      var lin = n(it.qty) * n(it.precio);
+      return '<li><span class="nm"><span class="q">' + esc(it.qty) + '×</span> ' + esc(it.desc)
+        + (verP && n(it.qty) > 1 && n(it.precio) ? '<span class="pu">' + fmt(it.precio) + ' c/u</span>' : '') + '</span>'
+        + (verP ? '<span class="pi">' + (n(it.precio) ? fmt(lin) : 'Incluido') + '</span>' : '') + '</li>';
+    }).join('');
+    var ahorro = c.listaU - c.precioU;
+    var resumen = verP ? '<div class="rs"><div><span>Valor por separado</span><span>' + fmt(c.listaU) + '</span></div>'
+      + (ahorro > 0 ? '<div class="ah"><span>Ahorro con el kit' + (c.listaU ? ' (' + Math.round(ahorro / c.listaU * 100) + '%)' : '') + '</span><span>−' + fmt(ahorro) + '</span></div>' : '') + '</div>' : '';
     return '<div class="op' + (i === 1 && x.opciones.length === 3 ? ' mid' : '') + '"><div class="ti">Opción ' + (i + 1) + '</div><h3>' + esc(o.nombre) + '</h3>'
-      + (o.desc ? '<p class="de">' + esc(o.desc) + '</p>' : '') + '<ul>' + items + '</ul>'
+      + (o.desc ? '<p class="de">' + esc(o.desc) + '</p>' : '') + '<ul>' + items + '</ul>' + resumen
       + '<div class="pr"><div class="lb">Precio por kit</div><div class="v">' + fmt(c.precioU) + '</div>'
       + (x.iva ? '<div class="sm">+ IVA ' + fmt(c.precioUIva - c.precioU) + ' = ' + fmt(c.precioUIva) + '</div>' : '')
       + '<div class="tt">' + x.cantidad + ' kits · <b>' + fmt(c.total) + '</b>' + (x.iva ? ' IVA incl.' : '') + '</div></div></div>';
@@ -512,7 +523,8 @@ function htmlDocumento(){
     + '.ops{display:grid;grid-template-columns:repeat(' + x.opciones.length + ',1fr);gap:14px;margin-bottom:24px}'
     + '.op{border:1px solid #e0d8d0;border-radius:10px;padding:18px 16px;display:flex;flex-direction:column;break-inside:avoid}.op.mid{border-color:#9c7c3c;box-shadow:0 0 0 1px #9c7c3c inset}'
     + '.ti{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#9c7c3c}.op h3{font-family:Georgia,serif;font-weight:400;font-size:18px;margin:4px 0 6px}'
-    + '.de{color:#666;font-size:11.5px;margin:0 0 10px;line-height:1.5}ul{list-style:none;padding:0;margin:0 0 14px;flex:1}li{padding:5px 0;border-bottom:1px dashed #eee;font-size:12px;line-height:1.4}.q{color:#9c7c3c;font-weight:600}'
+    + '.de{color:#666;font-size:11.5px;margin:0 0 10px;line-height:1.5}ul{list-style:none;padding:0;margin:0 0 14px;flex:1}li{padding:6px 0;border-bottom:1px dashed #eee;font-size:12px;line-height:1.4;display:flex;justify-content:space-between;gap:8px}li .nm{min-width:0}li .pu{display:block;font-size:10.5px;color:#999}li .pi{white-space:nowrap;font-variant-numeric:tabular-nums;color:#444}.q{color:#9c7c3c;font-weight:600}'
+    + '.rs{font-size:11.5px;color:#666;margin:-6px 0 12px}.rs div{display:flex;justify-content:space-between;padding:2px 0}.rs .ah{color:#2e7d4f;font-weight:600}'
     + '.pr{border-top:1px solid #e0d8d0;padding-top:10px}.lb{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:#888}.v{font-size:24px;font-weight:300;color:#1a1510}.sm{font-size:10.5px;color:#888}.tt{margin-top:6px;font-size:11.5px;color:#444}'
     + '.nt{border-top:1px solid #e0d8d0;padding-top:14px;font-size:11px;color:#666;line-height:1.6;white-space:pre-line}.nt b{color:#1a1510}'
     + '.ft{margin-top:22px;font-size:10px;color:#999;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}'
@@ -528,7 +540,7 @@ function htmlDocumento(){
     + '<div><div class="k">Fecha</div><div class="v">' + fFecha(d.fecha) + '</div></div>'
     + '<div><div class="k">Válida hasta</div><div class="v">' + fFecha(vence) + '</div></div>'
     + '<div><div class="k">Cantidad</div><div class="v">' + esc(x.cantidad) + ' kit' + (x.cantidad > 1 ? 's' : '') + '</div></div></div>'
-    + '<h2>Kits de café de especialidad</h2><p class="intro">Te presentamos ' + x.opciones.length + ' opciones para que elijas la que mejor se ajusta: café colombiano tostado por nosotros sobre pedido y métodos para prepararlo.</p>'
+    + '<h2>Kits de café de especialidad</h2><p class="intro">' + (x.verPrecios !== false ? 'Precios sin IVA. ' : '') + 'Te presentamos ' + x.opciones.length + ' opciones para que elijas la que mejor se ajusta: café colombiano tostado por nosotros sobre pedido y métodos para prepararlo.</p>'
     + '<div class="ops">' + cols + '</div>'
     + '<div class="nt">' + (x.notas ? '<b>Notas.</b> ' + esc(x.notas) + '\n\n' : '') + (x.condiciones ? '<b>Condiciones.</b> ' + esc(x.condiciones) : '') + '</div>'
     + '<div class="ft"><span>B.R.U · brucoffeeshop.online · Instagram @BruCoffeeRoasters_</span><span>WhatsApp +57 304 492 7790</span></div>'
