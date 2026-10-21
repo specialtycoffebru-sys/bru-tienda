@@ -86,7 +86,8 @@ table.t tr.click:hover td{background:rgba(255,255,255,.02)}
 .kv b{font-variant-numeric:tabular-nums;font-weight:500}
 .kv.big{font-size:15px;padding-top:6px;margin-top:4px;border-top:1px solid var(--line)}
 .kv.big b{color:var(--gold2);font-family:Fraunces,serif;font-size:21px;font-weight:300}
-.mini{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.mini{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0}
+.mini label.hl{color:var(--gold2)}.mini label.hl input{border-color:var(--line2)}
 .mini label{font-size:10px;color:var(--dim);display:flex;flex-direction:column;gap:3px;text-transform:uppercase;letter-spacing:.05em}
 .mini input{padding:6px 8px}
 .mg-ok{color:var(--ok)}.mg-warn{color:var(--warn)}.mg-bad{color:var(--bad)}
@@ -221,6 +222,8 @@ function calcOpcion(o, cant, conIva){
   var util = precioU - costoU, mg = precioU > 0 ? util / precioU * 100 : 0;
   return { costoU: costoU, listaU: listaU, precioU: precioU, precioUIva: conIva ? Math.round(precioU * (1 + IVA)) : precioU, cant: c, sub: sub, iva: iva, total: sub + iva, util: util, utilTot: util * c, mg: mg, sinCosto: (o.items || []).some(function(it){ return n(it.qty) > 0 && !n(it.costo); }) };
 }
+function precioConUtilidad(costo, mg){ return n(costo) > 0 && n(mg) > 0 && n(mg) < 95 ? r100(n(costo) / (1 - n(mg) / 100)) : null; }
+function aplicarUtilidad(o){ (o.items || []).forEach(function(it){ var p = precioConUtilidad(it.costo, o.mg); if (p != null) it.precio = p; }); }
 function mgClase(m){ return m >= 35 ? 'mg-ok' : m >= 20 ? 'mg-warn' : 'mg-bad'; }
 
 // =============== MODELO ===============
@@ -362,6 +365,7 @@ function pintarEditor(){
     + '</div></div>';
 
   h += '<div class="sec row"><span>Opciones de kit · precios sin IVA por unidad</span><span class="sp"></span>'
+    + '<label class="small muted row" style="gap:6px">Utilidad % para todas<input type="number" min="0" max="90" id="mgTodas" placeholder="ej. 40" style="width:80px;padding:5px 8px"></label><button class="btn sm" id="bMgTodas">Aplicar</button>'
     + (x.opciones.length < 4 ? '<button class="btn sm ghost" id="bAddOpt">+ Opción</button>' : '') + '</div>';
   h += '<div class="opts">';
   x.opciones.forEach(function(o, oi){
@@ -387,7 +391,8 @@ function pintarEditor(){
       + '<div class="opt-ft">'
       + '<div class="kv"><span class="muted">Costo por kit</span><b>' + fmt(c.costoU) + '</b></div>'
       + '<div class="kv"><span class="muted">Suma a precio de lista</span><b>' + fmt(c.listaU) + '</b></div>'
-      + '<div class="mini"><label>Descuento %<input type="number" min="0" max="90" data-o="' + oi + '" data-of="dcto" value="' + esc(o.dcto || 0) + '"></label>'
+      + '<div class="mini"><label class="hl" title="Margen que quieres ganar sobre el precio. Recalcula el precio de cada ítem desde su costo">Utilidad %<input type="number" min="0" max="90" step="1" data-o="' + oi + '" data-of="mg" value="' + esc(o.mg || '') + '" placeholder="—"></label>'
+      + '<label>Descuento %<input type="number" min="0" max="90" data-o="' + oi + '" data-of="dcto" value="' + esc(o.dcto || 0) + '"></label>'
       + '<label>Precio manual / kit<input type="number" min="0" data-o="' + oi + '" data-of="manual" value="' + esc(o.manual || '') + '" placeholder="auto"></label></div>'
       + '<div class="kv"><span class="muted">Utilidad por kit</span><b class="' + mgClase(c.mg) + '">' + fmt(c.util) + ' · ' + Math.round(c.mg) + '%</b></div>'
       + '<div class="kv"><span class="muted">Utilidad total (' + c.cant + ' kits)</span><b class="' + mgClase(c.mg) + '">' + fmt(c.utilTot) + '</b></div>'
@@ -415,6 +420,7 @@ function conectarEditor(){
   $('bWa').onclick = function(){ var tel = String(x.tel || '').replace(/\D/g, ''); if (tel && tel.length === 10) tel = '57' + tel; window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(textoWhatsApp()), '_blank'); if (x.estado === 'Borrador') { x.estado = 'Enviada'; programarGuardado(); pintarEditor(); } };
   $('bAuto').onclick = function(){ if (x.opciones.some(function(o){ return o.items.length; }) && !confirm('¿Reemplazar los ítems de las 3 opciones por una propuesta automática desde el catálogo?')) return; autollenar(S.cur); programarGuardado(); pintarEditor(); };
   $('fFecha').onchange = function(){ S.cur.fecha = this.value || hoy(); programarGuardado(); };
+  $('bMgTodas').onclick = function(){ var m = n($('mgTodas').value); if (!(m > 0 && m < 95)) { toast('Escribe una utilidad entre 1 y 90%', true); return; } x.opciones.forEach(function(o){ o.mg = m; aplicarUtilidad(o); }); programarGuardado(); pintarEditor(); toast('Utilidad del ' + m + '% aplicada a todas las opciones'); };
   if ($('bAddOpt')) $('bAddOpt').onclick = function(){ x.opciones.push({ nombre: 'Kit ' + TIERS[x.opciones.length], desc: '', items: [], dcto: 0, manual: 0 }); programarGuardado(); pintarEditor(); };
   Array.prototype.forEach.call(document.querySelectorAll('[data-f]'), function(el){
     el.addEventListener(el.type === 'checkbox' || el.tagName === 'SELECT' ? 'change' : 'input', function(){
@@ -427,14 +433,18 @@ function conectarEditor(){
   Array.prototype.forEach.call(document.querySelectorAll('[data-of]'), function(el){
     el.addEventListener('input', function(){
       var o = x.opciones[n(el.getAttribute('data-o'))], f = el.getAttribute('data-of');
-      o[f] = (f === 'dcto' || f === 'manual') ? n(el.value) : el.value;
-      programarGuardado(); if (f === 'dcto' || f === 'manual') refrescarLuego();
+      o[f] = (f === 'dcto' || f === 'manual' || f === 'mg') ? n(el.value) : el.value;
+      if (f === 'mg') aplicarUtilidad(o);
+      programarGuardado(); if (f === 'dcto' || f === 'manual' || f === 'mg') refrescarLuego();
     });
   });
   Array.prototype.forEach.call(document.querySelectorAll('[data-if]'), function(el){
     el.addEventListener('input', function(){
       var it = x.opciones[n(el.getAttribute('data-o'))].items[n(el.getAttribute('data-i'))], f = el.getAttribute('data-if');
+      var op = x.opciones[n(el.getAttribute('data-o'))];
       it[f] = f === 'desc' ? el.value : n(el.value);
+      if (f === 'precio' && op.mg) op.mg = 0;
+      if (f === 'costo' && op.mg) { var pp = precioConUtilidad(it.costo, op.mg); if (pp != null) it.precio = pp; }
       programarGuardado(); if (f !== 'desc') refrescarLuego();
     });
   });
@@ -445,6 +455,7 @@ function conectarEditor(){
       else if (v.charAt(0) === 'c') o.items.push(itemCafe(S.cafes[n(v.slice(1))]));
       else if (v.charAt(0) === 'e') o.items.push(itemEq(S.eq[n(v.slice(1))]));
       else o.items.push(itemIns(S.ins[n(v.slice(1))]));
+      if (o.mg) aplicarUtilidad(o);
       programarGuardado(); pintarEditor();
     };
   });
