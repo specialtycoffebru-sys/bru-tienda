@@ -5303,6 +5303,8 @@ function bruFmtMercado(n){
 /* ---------- pedido por WhatsApp al representante ---------- */
 function bruPedidoExterior(){
   if (!cart || !cart.length) return;
+  /* Mercados con compra directa (EU): formulario de envio + pago con SumUp */
+  if (_bruGeo.modo === 'MERCADO' && bruEuCfg(_bruGeo.codigo)) return bruEuAbrir();
   var M = bruMercados();
   var m = M[_bruGeo.codigo] || {};
   var num = String(m.whatsapp || (typeof WA !== 'undefined' ? WA : '')).replace(/[^0-9]/g,'');
@@ -5586,6 +5588,287 @@ function bruUsarMiUbicacion(){
     }).catch(function(){ aplicar(''); });
   }
 })();
+
+/* =====================================================================
+   B.R.U · COMPRA DIRECTA DESDE EUROPA (España) · pago con SumUp en EUR
+   - En el mercado EU el boton "Pedir" abre un formulario de envio.
+   - El total lo calcula el servidor (/api/sumup) con los precios publicados.
+   - Si SumUp esta configurado en Vercel: se crea el cobro y la persona paga
+     con tarjeta / Apple Pay / Google Pay en la pagina segura de SumUp.
+   - Si SumUp aun no esta configurado: el pedido queda guardado y se abre
+     WhatsApp para coordinar el pago (la tienda nunca queda sin vender).
+   - Envio: por defecto solo a España (peninsula y Baleares), incluido en el
+     precio. Se cambia en tienda_config.mercados.EU.checkout
+   ===================================================================== */
+var BRU_EU_CHECKOUT_BASE = { EU: { envioPaises: ['ES'], envio: { ES: 0 }, envioBaleares: 0 } };
+var _bruEuSumup = null;   /* null = sin consultar · true/false = SumUp listo */
+var BRU_EU_PAISES = { ES:'España', PT:'Portugal', FR:'Francia', DE:'Alemania', IT:'Italia', NL:'Países Bajos', BE:'Bélgica', AT:'Austria', IE:'Irlanda' };
+
+function bruEuCfg(cod){
+  var base = BRU_EU_CHECKOUT_BASE[cod];
+  if (!base) return null;
+  var m = bruMercados()[cod] || {};
+  if (m.checkout === false) return null;
+  var out = {};
+  for (var k in base){ if (Object.prototype.hasOwnProperty.call(base,k)) out[k] = base[k]; }
+  var c = m.checkout || {};
+  for (var j in c){ if (Object.prototype.hasOwnProperty.call(c,j)) out[j] = c[j]; }
+  return out;
+}
+
+function bruEuSumupListo(cb){
+  if (_bruEuSumup !== null){ cb(_bruEuSumup); return; }
+  fetch('/api/sumup', { cache:'no-store' }).then(function(r){ return r.json(); })
+    .then(function(j){ _bruEuSumup = !!(j && j.activo); cb(_bruEuSumup); })
+    .catch(function(){ _bruEuSumup = false; cb(false); });
+}
+
+function bruEuEsc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function bruEuModal(){
+  var w = document.getElementById('eu-wrap');
+  if (w) return w;
+  w = document.createElement('div');
+  w.className = 'om-wrap'; w.id = 'eu-wrap';
+  w.innerHTML =
+    '<div class="om">'
+    + '<div class="om-head"><span class="om-title" id="eu-title"></span>'
+    + '<button class="om-x" onclick="bruEuCerrar()">&#215;</button></div>'
+    + '<div id="eu-form"><div class="om-body">'
+    +   '<div class="om-sum" id="eu-sum"></div>'
+    +   '<div class="f-row">'
+    +     '<div class="f"><label id="eu-l-nombre"></label><input id="eu-nombre" type="text" autocomplete="name"/></div>'
+    +     '<div class="f"><label id="eu-l-email"></label><input id="eu-email" type="email" autocomplete="email"/></div>'
+    +   '</div>'
+    +   '<div class="f-row">'
+    +     '<div class="f"><label id="eu-l-tel"></label><input id="eu-tel" type="tel" autocomplete="tel" placeholder="+34 600 000 000"/></div>'
+    +     '<div class="f"><label id="eu-l-pais"></label><select id="eu-pais" onchange="bruEuPintarResumen()"></select></div>'
+    +   '</div>'
+    +   '<div class="f"><label id="eu-l-dir"></label><input id="eu-dir" type="text" autocomplete="street-address"/></div>'
+    +   '<div class="f-row">'
+    +     '<div class="f"><label id="eu-l-cp"></label><input id="eu-cp" type="text" inputmode="numeric" maxlength="10" autocomplete="postal-code" oninput="bruEuPintarResumen()"/></div>'
+    +     '<div class="f"><label id="eu-l-ciudad"></label><input id="eu-ciudad" type="text" autocomplete="address-level2"/></div>'
+    +   '</div>'
+    +   '<div class="f"><label id="eu-l-prov"></label><input id="eu-prov" type="text" autocomplete="address-level1"/></div>'
+    +   '<div class="f"><label id="eu-l-notas"></label><textarea id="eu-notas"></textarea></div>'
+    +   '<div id="eu-msg" style="display:none;font-size:13px;line-height:1.5;margin:.2rem 0 .9rem;padding:.7rem .9rem;border:.5px solid var(--bd);border-radius:12px"></div>'
+    +   '<button class="btn-confirm" id="eu-btn" onclick="bruEuEnviar()"></button>'
+    +   '<div id="eu-seguro" style="font-size:11.5px;opacity:.65;text-align:center;margin-top:.7rem;line-height:1.5"></div>'
+    + '</div></div>'
+    + '<div class="success" id="eu-ok" style="display:none">'
+    +   '<div class="success-check" id="eu-ok-check">✓</div>'
+    +   '<div class="success-h" id="eu-ok-h"></div>'
+    +   '<p class="success-p" id="eu-ok-p"></p>'
+    +   '<button class="btn-wa" id="eu-ok-wa" style="display:none"></button>'
+    + '</div>'
+    + '</div>';
+  document.body.appendChild(w);
+  w.addEventListener('click', function(e){ if (e.target === w) bruEuCerrar(); });
+  return w;
+}
+
+function bruEuTextos(){
+  var s = function(id, t){ var el = document.getElementById(id); if (el) el.textContent = t; };
+  s('eu-title', bruT('Finalizar compra', 'Checkout'));
+  s('eu-l-nombre', bruT('Nombre y apellidos *', 'Full name *'));
+  s('eu-l-email', bruT('Email *', 'Email *'));
+  s('eu-l-tel', bruT('Teléfono / WhatsApp *', 'Phone / WhatsApp *'));
+  s('eu-l-pais', bruT('País de envío', 'Shipping country'));
+  s('eu-l-dir', bruT('Dirección (calle, número, piso) *', 'Address (street, number, floor) *'));
+  s('eu-l-cp', bruT('Código postal *', 'Postcode *'));
+  s('eu-l-ciudad', bruT('Ciudad *', 'City *'));
+  s('eu-l-prov', bruT('Provincia', 'Province / region'));
+  s('eu-l-notas', bruT('Notas (molienda, indicaciones...)', 'Notes (grind, delivery notes...)'));
+  var n = document.getElementById('eu-notas'); if (n) n.placeholder = bruT('Grano entero, molido para V60, espresso...', 'Whole bean, ground for V60, espresso...');
+}
+
+function bruEuEnvio(cfg, pais, cp){
+  cp = String(cp || '').replace(/\s/g, '');
+  if (pais === 'ES' && /^(35|38|51|52)/.test(cp)) return { ok:false, motivo:'aduana' };
+  var v = (cfg.envio && cfg.envio[pais]) || 0;
+  if (pais === 'ES' && /^07/.test(cp)) v += Number(cfg.envioBaleares) || 0;
+  return { ok:true, valor: Math.round(v*100)/100 };
+}
+
+function bruEuPintarResumen(){
+  var cfg = bruEuCfg(_bruGeo.codigo); if (!cfg) return;
+  var pais = (document.getElementById('eu-pais') || {}).value || 'ES';
+  var cp = (document.getElementById('eu-cp') || {}).value || '';
+  var sub = cart.reduce(function(s,c){ return s + c.precio*c.qty; }, 0);
+  var env = bruEuEnvio(cfg, pais, cp);
+  var envTxt = !env.ok ? bruT('No disponible', 'Not available')
+             : (env.valor > 0 ? bruFmtMercado(env.valor) : bruT('Incluido', 'Included'));
+  var h = '<div class="om-sum-title">' + bruT('Resumen', 'Summary') + '</div>'
+    + cart.map(function(c){
+        return '<div class="om-sum-line"><span>' + bruEuEsc(c.nombre + (c.tamano ? ' — ' + c.tamano : '')) + ' × ' + c.qty + '</span><span>' + bruFmtMercado(c.precio*c.qty) + '</span></div>';
+      }).join('')
+    + '<div class="om-sum-line"><span>' + bruT('Envío', 'Shipping') + '</span><span>' + envTxt + '</span></div>'
+    + '<div class="om-sum-total"><span>' + bruT('Total (IVA incluido)', 'Total (VAT included)') + '</span><span>' + bruFmtMercado(sub + (env.ok ? env.valor : 0)) + '</span></div>';
+  document.getElementById('eu-sum').innerHTML = h;
+  var msg = document.getElementById('eu-msg');
+  if (!env.ok){
+    bruEuAviso(bruT('Para Canarias, Ceuta y Melilla el envío necesita trámite de aduana. Escríbenos por WhatsApp y te damos el precio con envío.',
+                    'Shipping to the Canary Islands, Ceuta and Melilla requires customs. Message us on WhatsApp for a quote.'), true);
+  } else if (msg && msg.getAttribute('data-tipo') === 'envio'){ msg.style.display = 'none'; }
+}
+
+function bruEuAviso(txt, envio){
+  var msg = document.getElementById('eu-msg'); if (!msg) return;
+  msg.textContent = txt; msg.style.display = txt ? 'block' : 'none';
+  msg.setAttribute('data-tipo', envio ? 'envio' : 'error');
+}
+
+function bruEuAbrir(){
+  if (!cart || !cart.length) return;
+  var cfg = bruEuCfg(_bruGeo.codigo);
+  try{ if (document.getElementById('cart-el') && document.getElementById('cart-el').classList.contains('on')) toggleCart(); }catch(e){}
+  bruEuModal(); bruEuTextos();
+  var sel = document.getElementById('eu-pais');
+  var paises = (cfg.envioPaises || ['ES']);
+  sel.innerHTML = paises.map(function(p){ return '<option value="' + p + '">' + bruEuEsc(BRU_EU_PAISES[p] || p) + '</option>'; }).join('');
+  if (paises.indexOf(_bruGeo.pais) >= 0) sel.value = _bruGeo.pais;
+  var u = null; try{ u = (typeof bruUser === 'function') ? bruUser() : null; }catch(e){}
+  if (u){
+    var nm = document.getElementById('eu-nombre'), em = document.getElementById('eu-email');
+    if (nm && !nm.value) nm.value = u.nombre || '';
+    if (em && !em.value) em.value = u.email || '';
+  }
+  document.getElementById('eu-form').style.display = 'block';
+  document.getElementById('eu-ok').style.display = 'none';
+  bruEuAviso('');
+  bruEuPintarResumen();
+
+  /* aviso si el visitante esta en un pais de la UE al que aun no enviamos */
+  if (_bruGeo.pais && paises.indexOf(_bruGeo.pais) < 0){
+    bruEuAviso(bruT('Por ahora enviamos solo a ' + paises.map(function(p){ return BRU_EU_PAISES[p] || p; }).join(', ') + '. Si estás en otro país, escríbenos por WhatsApp.',
+                    'For now we only ship to ' + paises.join(', ') + '. If you are elsewhere, message us on WhatsApp.'), true);
+  }
+
+  var btn = document.getElementById('eu-btn'), seg = document.getElementById('eu-seguro');
+  btn.disabled = true; btn.textContent = bruT('Cargando...', 'Loading...');
+  bruEuSumupListo(function(ok){
+    btn.disabled = false;
+    btn.textContent = ok ? bruT('Pagar con tarjeta', 'Pay by card') : bruT('Confirmar pedido', 'Place order');
+    seg.textContent = ok ? bruT('Pago seguro con SumUp · Tarjeta, Apple Pay y Google Pay', 'Secure payment by SumUp · Card, Apple Pay and Google Pay')
+                         : bruT('Te escribiremos por WhatsApp para coordinar el pago.', 'We will message you on WhatsApp to arrange payment.');
+  });
+  document.getElementById('eu-wrap').classList.add('on');
+}
+
+function bruEuCerrar(){ var w = document.getElementById('eu-wrap'); if (w) w.classList.remove('on'); }
+
+function bruEuWhatsapp(datos, total){
+  var m = bruMercados()[_bruGeo.codigo] || {};
+  var num = String(m.whatsapp || (typeof WA !== 'undefined' ? WA : '')).replace(/[^0-9]/g,'');
+  var lineas = cart.map(function(c){ return '• ' + c.nombre + (c.tamano ? ' ' + c.tamano : '') + ' x' + c.qty + ' — ' + bruFmtMercado(c.precio*c.qty); });
+  var msg = 'Hola B.R.U, quiero hacer este pedido (' + (m.nombre || 'Europa') + '):\n\n' + lineas.join('\n')
+    + '\n\nTotal: ' + bruFmtMercado(total)
+    + '\n\nEnvío a: ' + datos.nombre + '\n' + datos.dir + '\n' + datos.cp + ' ' + datos.ciudad + (datos.prov ? ' (' + datos.prov + ')' : '') + ', ' + (BRU_EU_PAISES[datos.pais] || datos.pais)
+    + '\nEmail: ' + datos.email + '\nTel: ' + datos.tel;
+  return 'https://wa.me/' + num + '?text=' + encodeURIComponent(msg);
+}
+
+function bruEuPedido(datos, items, total, envio, pago, ref){
+  return {
+    cliente: datos.nombre, tel: datos.tel, envio: envio,
+    envioZona: (BRU_EU_PAISES[datos.pais] || datos.pais) + ' · EUR',
+    ciudad: datos.ciudad + (datos.prov ? ' (' + datos.prov + ')' : '') + ', ' + (BRU_EU_PAISES[datos.pais] || datos.pais),
+    barrio: 'CP ' + datos.cp, dir: datos.dir, pago: pago,
+    notas: ('💶 Pedido en EUR · ' + ref + ' · ' + datos.email + (datos.notas ? ' · ' + datos.notas : '')
+            + ((typeof bruUser === 'function' && bruUser()) ? ' · Cliente registrado: ' + bruUser().email : '')).trim(),
+    items: items.map(function(c){ return { nombre:c.nombre, tamano:c.tamano||'', sku:c.sku||'', qty:c.qty, precio:c.precio }; }),
+    subtotal: Math.round((total - envio)*100)/100, iva: 0, total: total, estado: 'Pendiente', visto: false
+  };
+}
+
+function bruEuEnviar(){
+  var g = function(id){ var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  var datos = { nombre:g('eu-nombre'), email:g('eu-email'), tel:g('eu-tel'), pais:g('eu-pais') || 'ES',
+                dir:g('eu-dir'), cp:g('eu-cp'), ciudad:g('eu-ciudad'), prov:g('eu-prov'), notas:g('eu-notas') };
+  if (!datos.nombre || !datos.email || !datos.tel || !datos.dir || !datos.cp || !datos.ciudad){
+    bruEuAviso(bruT('Completa los campos marcados con *.', 'Please fill in the fields marked with *.')); return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(datos.email)){ bruEuAviso(bruT('Revisa el email.', 'Please check your email.')); return; }
+  if (datos.pais === 'ES' && !/^\d{5}$/.test(datos.cp.replace(/\s/g,''))){ bruEuAviso(bruT('El código postal español tiene 5 dígitos.', 'Spanish postcodes have 5 digits.')); return; }
+  var cfg = bruEuCfg(_bruGeo.codigo);
+  var env = bruEuEnvio(cfg, datos.pais, datos.cp);
+  if (!env.ok){ bruEuPintarResumen(); return; }
+  bruEuAviso('');
+
+  var btn = document.getElementById('eu-btn');
+  btn.disabled = true; btn.textContent = bruT('Procesando...', 'Processing...');
+  var listaCart = cart.slice();
+  var totalLocal = Math.round((listaCart.reduce(function(s,c){ return s + c.precio*c.qty; }, 0) + env.valor)*100)/100;
+
+  if (!_bruEuSumup){
+    /* Sin pasarela: se guarda el pedido y se coordina el pago por WhatsApp */
+    var ref0 = 'eu_' + Date.now().toString(36);
+    var wa = bruEuWhatsapp(datos, totalLocal);
+    Promise.resolve(bruGuardarPedido(bruEuPedido(datos, listaCart, totalLocal, env.valor, 'Por coordinar (EUR)', ref0))).then(function(){
+      bruEuExito(bruT('¡Pedido recibido!', 'Order received!'),
+                 bruT('Te escribiremos por WhatsApp para confirmar el pago y el envío.', 'We will message you on WhatsApp to confirm payment and shipping.'), wa);
+      cart = []; try{ renderCart(); }catch(e){}
+    });
+    return;
+  }
+
+  fetch('/api/sumup', {
+    method:'POST', headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify({ origen: location.origin, pedido: {
+      mercado: _bruGeo.codigo, pais: datos.pais, cp: datos.cp,
+      items: listaCart.map(function(c){ return { nombre:c.nombre, tamano:c.tamano||'', qty:c.qty }; })
+    }})
+  }).then(function(r){ return r.json(); }).then(function(j){
+    if (!j || !j.url) throw new Error((j && j.error) || 'Error');
+    var ped = bruEuPedido(datos, j.items || listaCart, j.total, j.envio || 0, 'SumUp (EUR) · pendiente', j.ref);
+    try{ localStorage.setItem('bru_sumup', JSON.stringify({ ref:j.ref, id:j.id, total:j.total, wa: bruEuWhatsapp(datos, j.total), t:Date.now() })); }catch(e){}
+    return Promise.resolve(bruGuardarPedido(ped)).then(function(){ window.location.href = j.url; });
+  }).catch(function(e){
+    btn.disabled = false; btn.textContent = bruT('Pagar con tarjeta', 'Pay by card');
+    bruEuAviso(bruT('No pudimos iniciar el pago: ', 'We could not start the payment: ') + (e && e.message ? e.message : '') + '. '
+      + bruT('Puedes intentarlo de nuevo o escribirnos por WhatsApp.', 'Try again or message us on WhatsApp.'));
+  });
+}
+
+function bruEuExito(titulo, texto, waUrl, error){
+  bruEuModal(); bruEuTextos();
+  document.getElementById('eu-form').style.display = 'none';
+  document.getElementById('eu-ok').style.display = 'block';
+  document.getElementById('eu-ok-check').textContent = error ? '!' : '✓';
+  document.getElementById('eu-ok-h').textContent = titulo;
+  document.getElementById('eu-ok-p').textContent = texto;
+  var b = document.getElementById('eu-ok-wa');
+  if (waUrl){ b.style.display = ''; b.textContent = bruT('Escribir por WhatsApp', 'Message us on WhatsApp'); b.onclick = function(){ window.open(waUrl, '_blank'); }; }
+  else b.style.display = 'none';
+  document.getElementById('eu-wrap').classList.add('on');
+}
+
+/* Vuelta desde SumUp: ?sumup=<ref> */
+function bruEuRevisarRetorno(){
+  var qs; try{ qs = new URLSearchParams(location.search); }catch(e){ return; }
+  var ref = qs.get('sumup'); if (!ref) return;
+  var guardado = null; try{ guardado = JSON.parse(localStorage.getItem('bru_sumup') || 'null'); }catch(e){}
+  try{ qs.delete('sumup'); history.replaceState(null, '', location.pathname + (qs.toString() ? '?' + qs.toString() : '') + location.hash); }catch(e){}
+  if (!guardado || guardado.ref !== ref || !guardado.id) return;
+  var fin = function(estado){
+    if (estado === 'PAID'){
+      try{ localStorage.removeItem('bru_sumup'); }catch(e){}
+      bruEuExito(bruT('¡Pago recibido!', 'Payment received!'),
+                 bruT('Gracias por tu compra. Te enviaremos la confirmación del envío por email o WhatsApp.', 'Thank you! We will send you shipping confirmation by email or WhatsApp.'), null);
+    } else if (estado === 'PENDING'){
+      bruEuExito(bruT('Pago en proceso', 'Payment processing'),
+                 bruT('Aún no vemos el pago confirmado. Si ya pagaste, escríbenos y lo revisamos.', 'We cannot see the payment confirmed yet. If you already paid, message us and we will check.'), guardado.wa, true);
+    } else {
+      bruEuExito(bruT('El pago no se completó', 'Payment not completed'),
+                 bruT('No se realizó ningún cargo. Puedes volver a intentarlo o escribirnos por WhatsApp.', 'You have not been charged. You can try again or message us on WhatsApp.'), guardado.wa, true);
+    }
+  };
+  fetch('/api/sumup?id=' + encodeURIComponent(guardado.id) + '&ref=' + encodeURIComponent(ref), { cache:'no-store' })
+    .then(function(r){ return r.json(); }).then(function(j){ fin((j && j.estado) || 'PENDING'); })
+    .catch(function(){ fin('PENDING'); });
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(bruEuRevisarRetorno, 600); });
+else setTimeout(bruEuRevisarRetorno, 600);
 </script>
 <style id="bru-mercados-css">
 html.bru-geo-wait body{visibility:hidden}
