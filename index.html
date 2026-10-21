@@ -5232,6 +5232,12 @@ function bruPrecioEn(obj, codigo){
 /* Filtro del catalogo: se llama cada vez que la tienda carga productos */
 function bruMercado(arr){
   _bruCatRaw = arr || [];
+  /* El pais quedo en 'Consultar precio' porque el catalogo o la config aun no habian llegado:
+     si ahora si hay precios para su mercado, se vuelve a resolver. */
+  if (_bruGeo.listo && _bruGeo.modo === 'CONSULTAR' && _bruGeo.pais){
+    var _cRe = bruMercadoDePais(_bruGeo.pais);
+    if (_cRe && bruHayPrecios(_cRe)) setTimeout(function(){ bruGeoResolver(_bruGeo.pais); }, 0);
+  }
   if (!_bruGeo.listo || _bruGeo.modo === 'CO') return _bruCatRaw;
   if (_bruGeo.modo === 'CONSULTAR') return _bruCatRaw;
 
@@ -7649,6 +7655,9 @@ async function loadFromCloud(){
         subs: r.subs||[]
       };
       window.__bruCloudCfg = r.tienda_config || {};
+      /* Si el pais ya se resolvio con la config por defecto (antes de que llegara la de la nube),
+         se vuelve a resolver: asi un mercado activado en el dashboard (ej. US) se aplica de verdad. */
+      try{ if (typeof _bruGeo !== 'undefined' && _bruGeo.listo && _bruGeo.pais && _bruGeo.pais !== 'CO') setTimeout(function(){ bruGeoResolver(_bruGeo.pais); }, 0); }catch(e){}
       window.__bruCloudSubs = r.subs || [];
       bruSetPreciosFinales(window.__bruCloudCfg);
       // Try to save stripped version to localStorage (no base64)
