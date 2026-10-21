@@ -557,6 +557,11 @@ function htmlDocumento(){
   var verP = x.verPrecios !== false, nOp = x.opciones.length;
   var plural = function(k, a, b){ return k === 1 ? a : b; };
   var tiers = ['t1', 't2', 't3', 't4'];
+  var todos = []; x.opciones.forEach(function(o){ (o.items || []).forEach(function(it){ if (n(it.qty) > 0) todos.push(it); }); });
+  var hayCafe = todos.some(function(it){ return it.tipo === 'cafe'; }), hayEq = todos.some(function(it){ return it.tipo === 'equipo'; });
+  if (!hayCafe && !hayEq) hayCafe = true;
+  var queSeparamos = hayCafe && hayEq ? 'el café y tus equipos' : hayCafe ? 'el café' : 'tus equipos';
+  var condiciones = hayCafe ? x.condiciones : String(x.condiciones || '').replace(/\s*Café tostado sobre pedido\.?/i, '');
   var reco = nOp >= 3 ? 1 : -1;
   var cols = x.opciones.map(function(o, i){
     var c = calcOpcion(o, x.cantidad, x.iva);
@@ -583,7 +588,7 @@ function htmlDocumento(){
   var para = x.empresa ? esc(x.empresa) : esc(x.cliente || 'Cliente');
   var contacto = [x.empresa && x.cliente ? 'Atención: ' + esc(x.cliente) : '', x.nit ? 'NIT/CC ' + esc(x.nit) : '', esc(x.ciudad || ''), esc(x.email || '')].filter(Boolean).join(' · ');
   var css = [
-    '@page{size:A4;margin:0}',
+    '@page{size:A4;margin:12mm 0}@page:first{margin-top:0}',
     ':root{--ink:#190D19;--plum:#2B124C;--berry:#522B5B;--mauve:#854F6C;--blush:#DFB6B2;--cream:#FBE4D8;--gold:#EDBE6D;--gold2:#C9A84C;--paper:#FFFCFA}',
     '*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}',
     'body{margin:0;background:#efe7e4;color:var(--ink);font-family:Inter,Arial,sans-serif;font-size:13px;line-height:1.45}',
@@ -647,39 +652,45 @@ function htmlDocumento(){
     /* pie */
     '.foot{background:var(--ink);color:var(--blush);padding:18px 34px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:11px}.foot img{height:34px}.foot .sp{flex:1}.foot a{color:var(--cream);text-decoration:none}.foot .c{display:flex;gap:16px;flex-wrap:wrap}',
     '@media(max-width:760px){.doc{margin:0;border-radius:0}.cover{padding:24px 20px}.ttl h1{font-size:30px}.brand img{height:54px}.brand .w{font-size:22px;letter-spacing:5px}.vals{grid-template-columns:1fr}.vals div+div{border-left:none;border-top:1px solid #ecd6cf}.body{padding:22px 14px 6px}.ops{grid-template-columns:1fr}.next{grid-template-columns:1fr}.steps ol{grid-template-columns:1fr}.foot{padding:18px 20px}}',
-    '@media print{body{background:#fff}.bar{display:none}.doc{margin:0;max-width:none;box-shadow:none;border-radius:0}.ops{grid-template-columns:repeat(' + Math.min(nOp, 3) + ',minmax(0,1fr))}.next{break-inside:avoid}}'
+    'html.pm body{background:#fff}html.pm .bar{display:none}html.pm .doc{margin:0;max-width:none;width:210mm;box-shadow:none;border-radius:0;overflow:visible}html.pm .cover{padding:20px 30px 18px}html.pm .brand img{height:52px}html.pm .brand .w{font-size:22px;letter-spacing:6px}html.pm .num .n{font-size:26px}html.pm .ttl{margin-top:14px}html.pm .ttl h1{font-size:28px;margin:4px 0 6px}html.pm .chips{margin-top:10px}html.pm .chips span{padding:4px 10px;font-size:10.5px}html.pm .vals div{padding:8px 18px;font-size:10.5px}html.pm .vals svg{width:20px;height:20px;flex-basis:20px}html.pm .body{padding:16px 24px 4px}html.pm .sec{margin-bottom:10px}html.pm .sec h2{font-size:19px}html.pm .ops{gap:12px}html.pm .op header{padding:12px 14px 10px}html.pm .op h3{font-size:17px}html.pm .op header p{font-size:10.5px}html.pm .op ul{padding:2px 12px}html.pm .op li{padding:5px 0;grid-template-columns:30px minmax(0,1fr) auto;gap:8px;break-inside:avoid;page-break-inside:avoid}html.pm .th{width:30px;height:30px;border-radius:8px}html.pm .th svg{width:17px;height:17px}html.pm .it b{font-size:11px}html.pm .it small{font-size:9px}html.pm .pr2 b{font-size:11.5px}html.pm .pr2 .un{font-size:9px}html.pm .rs{margin:0 12px 8px;padding:6px 10px;font-size:10px}html.pm .op footer{padding:10px 14px 12px}html.pm .big{font-size:24px}html.pm .iv{font-size:10px}html.pm .tot{margin-top:6px;padding-top:6px}html.pm .tot b{font-size:14px}html.pm .op.solo header{padding:14px 18px 12px}html.pm .op.solo h3{font-size:20px}html.pm .op.solo ul{padding:4px 18px}html.pm .op.solo .rs{margin:0 18px 12px}html.pm .op.solo footer{padding:16px 18px}html.pm .op.solo .big{font-size:30px}html.pm .next{margin:14px 0 4px;gap:12px;grid-template-columns:1fr 170px;break-inside:avoid;page-break-inside:avoid}html.pm .steps{padding:12px 16px}html.pm .steps h4{font-size:15px;margin-bottom:8px}html.pm .steps ol{gap:6px 14px}html.pm .steps li{font-size:10px}html.pm .steps li b{font-size:11px}html.pm .steps li i{flex-basis:20px;height:20px;font-size:10px}html.pm .qr{padding:10px;gap:4px}html.pm .qr img{width:84px;height:84px;padding:5px}html.pm .qr b{font-size:11.5px}html.pm .nt{margin:10px 0 14px;font-size:9.5px;line-height:1.5}html.pm .foot{padding:12px 24px;font-size:10px;break-inside:avoid}html.pm .foot img{height:26px}html.pm .op{break-inside:auto;page-break-inside:auto}',
+    '@media print{body{background:#fff}.bar{display:none}.doc{margin:0;max-width:none;width:210mm;box-shadow:none;border-radius:0;overflow:visible}.cover{padding:20px 30px 18px}.brand img{height:52px}.brand .w{font-size:22px;letter-spacing:6px}.num .n{font-size:26px}.ttl{margin-top:14px}.ttl h1{font-size:28px;margin:4px 0 6px}.chips{margin-top:10px}.chips span{padding:4px 10px;font-size:10.5px}.vals div{padding:8px 18px;font-size:10.5px}.vals svg{width:20px;height:20px;flex-basis:20px}.body{padding:16px 24px 4px}.sec{margin-bottom:10px}.sec h2{font-size:19px}.ops{gap:12px}.op header{padding:12px 14px 10px}.op h3{font-size:17px}.op header p{font-size:10.5px}.op ul{padding:2px 12px}.op li{padding:5px 0;grid-template-columns:30px minmax(0,1fr) auto;gap:8px;break-inside:avoid;page-break-inside:avoid}.th{width:30px;height:30px;border-radius:8px}.th svg{width:17px;height:17px}.it b{font-size:11px}.it small{font-size:9px}.pr2 b{font-size:11.5px}.pr2 .un{font-size:9px}.rs{margin:0 12px 8px;padding:6px 10px;font-size:10px}.op footer{padding:10px 14px 12px}.big{font-size:24px}.iv{font-size:10px}.tot{margin-top:6px;padding-top:6px}.tot b{font-size:14px}.op.solo header{padding:14px 18px 12px}.op.solo h3{font-size:20px}.op.solo ul{padding:4px 18px}.op.solo .rs{margin:0 18px 12px}.op.solo footer{padding:16px 18px}.op.solo .big{font-size:30px}.next{margin:14px 0 4px;gap:12px;grid-template-columns:1fr 170px;break-inside:avoid;page-break-inside:avoid}.steps{padding:12px 16px}.steps h4{font-size:15px;margin-bottom:8px}.steps ol{gap:6px 14px}.steps li{font-size:10px}.steps li b{font-size:11px}.steps li i{flex-basis:20px;height:20px;font-size:10px}.qr{padding:10px;gap:4px}.qr img{width:84px;height:84px;padding:5px}.qr b{font-size:11.5px}.nt{margin:10px 0 14px;font-size:9.5px;line-height:1.5}.foot{padding:12px 24px;font-size:10px;break-inside:avoid}.foot img{height:26px}.op{break-inside:auto;page-break-inside:auto}body{background:#fff}.bar{display:none}.doc{margin:0;max-width:none;box-shadow:none;border-radius:0}.ops{grid-template-columns:repeat(' + Math.min(nOp, 3) + ',minmax(0,1fr))}.next{break-inside:avoid}}'
   ].join('');
   var ico = function(p){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>'; };
   return '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
     + '<title>Cotización B.R.U N.° ' + esc(x.num) + ' · ' + para + '</title>'
     + '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&display=swap" rel="stylesheet">'
     + '<style>' + css + '</style></head><body>'
-    + '<div class="bar"><button onclick="window.print()">Imprimir / Guardar PDF</button><a href="' + esc(waUrl) + '" target="_blank">Confirmar por WhatsApp</a></div>'
+    + '<div class="bar"><button onclick="bruPrint()">Imprimir / Guardar PDF</button><a href="' + esc(waUrl) + '" target="_blank">Confirmar por WhatsApp</a></div>'
     + '<div class="doc">'
     + '<section class="cover">' + (M.hero ? '<div class="ph" style="background-image:url(' + esc(M.hero) + ')"></div>' : '') + '<div class="gl"></div>'
     + '<div class="top"><div class="brand"><img src="' + logo + '" alt="B.R.U"><div><div class="w">B·R·U</div><div class="s">Brew · Respect · Unite</div></div></div>'
     + '<div class="num"><div class="k">Cotización</div><div class="n">N.° ' + String(x.num).padStart(4, '0') + '</div><div class="f">' + fFecha(d.fecha) + ' · válida hasta ' + fFecha(vence) + '</div></div></div>'
-    + '<div class="ttl"><div class="ey">Café de especialidad colombiano</div><h1>' + (nOp === 1 ? esc(x.opciones[0].nombre || 'Kit de café') + ' <em>B.R.U</em>' : 'Kits de café <em>B.R.U</em>') + '</h1>'
+    + '<div class="ttl"><div class="ey">' + (hayCafe && hayEq ? 'Café de especialidad y métodos de preparación' : hayCafe ? 'Café de especialidad colombiano' : 'Métodos y equipos de café') + '</div><h1>' + (nOp === 1 ? esc(x.opciones[0].nombre || 'Kit de café') + ' <em>B.R.U</em>' : (hayCafe ? 'Kits de café' : 'Kits de preparación') + ' <em>B.R.U</em>') + '</h1>'
     + '<div class="pa">Preparada para <b>' + para + '</b>' + (contacto ? '<small>' + contacto + '</small>' : '') + '</div>'
     + '<div class="chips"><span><b>' + esc(x.cantidad) + '</b> ' + plural(n(x.cantidad), 'kit', 'kits') + '</span>' + (nOp > 1 ? '<span><b>' + nOp + '</b> opciones</span>' : '') + (verP ? '<span>Precios unitarios ' + (x.iva ? 'antes de IVA' : 'finales') + '</span>' : '') + '</div></div>'
     + '</section>'
     + '<section class="vals">'
-    + '<div>' + ico('<path d="M12 2l3 7h7l-5.5 4.5 2 7.5-6.5-4.5L5.5 21l2-7.5L2 9h7z"/>') + '<span><b>Café de competencia</b>Lotes 85+ puntos SCA</span></div>'
-    + '<div>' + ico('<path d="M8 21h8M12 17v4M7 4h10l-1 13H8z"/><path d="M17 7h2a2 2 0 0 1 0 4h-2"/>') + '<span><b>Tostado sobre pedido</b>Fresco para tu entrega</span></div>'
-    + '<div>' + ico('<path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>') + '<span><b>Trazable</b>De la finca a la taza</span></div>'
+    + (hayCafe ? '<div>' + ico('<path d="M12 2l3 7h7l-5.5 4.5 2 7.5-6.5-4.5L5.5 21l2-7.5L2 9h7z"/>') + '<span><b>Café de competencia</b>Lotes 85+ puntos SCA</span></div>'
+      + '<div>' + ico('<path d="M8 21h8M12 17v4M7 4h10l-1 13H8z"/><path d="M17 7h2a2 2 0 0 1 0 4h-2"/>') + '<span><b>Tostado sobre pedido</b>Fresco para tu entrega</span></div>'
+      : '<div>' + ico('<path d="M12 2l3 7h7l-5.5 4.5 2 7.5-6.5-4.5L5.5 21l2-7.5L2 9h7z"/>') + '<span><b>Equipos seleccionados</b>Elegidos por baristas</span></div>'
+      + '<div>' + ico('<path d="M5 6h14l-4 9H9z"/><path d="M9 15v3h6v-3"/><path d="M8 21h8"/>') + '<span><b>Listo para preparar</b>Todo lo que necesitas en casa</span></div>')
+    + (hayCafe && !hayEq ? '<div>' + ico('<path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>') + '<span><b>Trazable</b>De la finca a la taza</span></div>'
+      : hayCafe ? '<div>' + ico('<path d="M5 6h14l-4 9H9z"/><path d="M9 15v3h6v-3"/><path d="M8 21h8"/>') + '<span><b>Todo para preparar</b>Café y método en un solo kit</span></div>'
+      : '<div>' + ico('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>') + '<span><b>Te acompañamos</b>Asesoría por WhatsApp</span></div>')
     + '</section>'
     + '<section class="body"><div class="sec"><h2>' + plural(nOp, 'Nuestra propuesta', 'Elige tu kit') + '</h2><span>Valores en pesos colombianos (COP)</span></div>'
     + '<div class="ops">' + cols + '</div>'
     + '<div class="next"><div class="steps"><h4>Cómo seguimos</h4><ol>'
     + '<li><i>1</i><span><b>' + (nOp === 1 ? 'Confirma tu pedido' : 'Elige tu opción') + '</b>Ajustamos cantidades o contenido si lo necesitas.</span></li>'
-    + '<li><i>2</i><span><b>Anticipo del 50%</b>Confirmamos el pedido y separamos el café.</span></li>'
-    + '<li><i>3</i><span><b>Tostamos y empacamos</b>Cada kit armado a mano.</span></li>'
+    + '<li><i>2</i><span><b>Anticipo del 50%</b>Confirmamos el pedido y separamos ' + queSeparamos + '.</span></li>'
+    + '<li><i>3</i><span><b>' + (hayCafe ? 'Tostamos y empacamos' : 'Alistamos y empacamos') + '</b>' + (hayCafe && hayEq ? 'Café recién tostado y cada kit armado a mano.' : hayCafe ? 'Café recién tostado, cada kit armado a mano.' : 'Revisamos cada equipo y armamos tu kit a mano.') + '</span></li>'
     + '<li><i>4</i><span><b>Entrega</b>Coordinamos fecha y lugar contigo.</span></li>'
     + '</ol></div><a class="qr" href="' + esc(waUrl) + '" target="_blank"><img src="' + qr + '" alt="QR WhatsApp"><b>Escanea y confirma</b><span>WhatsApp ' + esc(waFmt) + '</span></a></div>'
-    + '<div class="nt">' + (x.notas ? '<b>Notas.</b> ' + esc(x.notas) + '\n' : '') + (x.condiciones ? '<b>Condiciones.</b> ' + esc(x.condiciones) : '') + '</div>'
+    + '<div class="nt">' + (x.notas ? '<b>Notas.</b> ' + esc(x.notas) + '\n' : '') + (condiciones ? '<b>Condiciones.</b> ' + esc(condiciones) : '') + '</div>'
     + '</section>'
     + '<div class="foot"><img src="' + logo + '" alt=""><div><b style="color:var(--cream)">B.R.U Coffee Roasters</b><br>Café de especialidad · Colombia</div><span class="sp"></span>'
     + '<div class="c"><a href="https://www.brucoffeeshop.online">brucoffeeshop.online</a><a href="https://instagram.com/BruCoffeeRoasters_">@BruCoffeeRoasters_</a><a href="' + esc(waUrl) + '">WhatsApp ' + esc(waFmt) + '</a>' + (M.email ? '<a href="mailto:' + esc(M.email) + '">' + esc(M.email) + '</a>' : '') + '</div></div>'
+    + '<script>(function(){var PAGE=1075;function fit(){var h=document.documentElement,d=document.querySelector(".doc");h.classList.add("pm");d.style.zoom="";var H=d.getBoundingClientRect().height;var z=1;if(H>PAGE&&H<PAGE*1.4){z=Math.floor(PAGE/H*1000)/1000;}d.style.zoom=z<1?String(z):"";return {alto:Math.round(H),zoom:z};}function unfit(){document.documentElement.classList.remove("pm");var d=document.querySelector(".doc");if(d)d.style.zoom="";}window.bruFit=fit;window.addEventListener("beforeprint",fit);window.addEventListener("afterprint",unfit);window.bruPrint=function(){fit();setTimeout(function(){window.print();},60);};})();<\/script>'
     + '</div></body></html>';
 }
 function abrirDocumento(){
