@@ -2151,7 +2151,7 @@ function cotTab(t){
   var bk=document.getElementById('cot-tab-kits'), bs=document.getElementById('cot-tab-simple');
   if(bk) bk.className='btn btn-sm '+(t==='kits'?'btn-p':'btn-g');
   if(bs) bs.className='btn btn-sm '+(t==='simple'?'btn-p':'btn-g');
-  if(t==='kits'){ var f=document.getElementById('kits-frame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/kits.html?embed=1'); }
+  if(t==='kits'){ var f=document.getElementById('kits-frame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/kits.html?embed=1&v='+Date.now()); }
 }
 </script>
 
