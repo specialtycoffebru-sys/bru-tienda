@@ -114,7 +114,7 @@ var ESTADOS = ['Borrador', 'Enviada', 'Aprobada', 'Rechazada'];
 var EQ_CATS = ['Método', 'Molino', 'Accesorio', 'Filtros', 'Taza / vaso', 'Otro'];
 var EQ_DEF = [['Dripper V60 02 (plástico)','Método'],['Dripper V60 02 (cerámica)','Método'],['Chemex 6 tazas','Método'],['Prensa francesa 350 ml','Método'],['AeroPress','Método'],['Cafetera moka 3 tazas','Método'],['Cold brew (jarra)','Método'],
   ['Molino manual','Molino'],['Filtros V60 x40','Filtros'],['Filtros Chemex x100','Filtros'],['Tetera cuello de cisne','Accesorio'],['Balanza con temporizador','Accesorio'],['Server / jarra 600 ml','Accesorio'],['Cuchara medidora','Accesorio'],['Taza de cerámica B.R.U','Taza / vaso'],['Vaso térmico','Taza / vaso']];
-var S = { docs: [], byId: {}, cafes: [], ins: [], eq: [], eqDoc: null, cur: null, vista: 'lista', offline: false, verArch: false, dirty: false, tSave: null };
+var S = { marca: null, docs: [], byId: {}, cafes: [], ins: [], eq: [], eqDoc: null, cur: null, vista: 'lista', offline: false, verArch: false, dirty: false, tSave: null };
 
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
@@ -144,23 +144,27 @@ function armarCatalogo(store){
   cat.forEach(function(c){
     if (!c || !c.nombre || c.activo === false) return;
     var pres = c.presentaciones || [];
+    var img = c.img || (c.fotos && c.fotos[0]) || '';
+    var sub = [c.proceso, c.origen, c.notas].filter(Boolean).join(' · ').slice(0, 90);
     if (pres.length) {
       pres.forEach(function(p){
         var precio = n(p.precio) || (n(p.precioIva) ? n(p.precioIva) / (1 + IVA) : 0);
-        out.push({ key: c.nombre + '|' + (p.label || ''), nombre: c.nombre, pres: p.label || '', precio: Math.round(precio), costo: Math.round(n(p.costo)), stock: n(c.stock) });
+        out.push({ key: c.nombre + '|' + (p.label || ''), nombre: c.nombre, pres: p.label || '', precio: Math.round(precio), costo: Math.round(n(p.costo)), stock: n(c.stock), img: img, sub: sub });
       });
     } else {
-      out.push({ key: c.nombre + '|', nombre: c.nombre, pres: c.cantidad ? c.cantidad + 'g' : '', precio: Math.round(n(c.precio)), costo: Math.round(n(c.costo)), stock: n(c.stock) });
+      out.push({ key: c.nombre + '|', nombre: c.nombre, pres: c.cantidad ? c.cantidad + 'g' : '', precio: Math.round(n(c.precio)), costo: Math.round(n(c.costo)), stock: n(c.stock), img: img, sub: sub });
     }
   });
   out.sort(function(a, b){ return a.nombre === b.nombre ? a.precio - b.precio : (a.nombre < b.nombre ? -1 : 1); });
   S.cafes = out;
+  var tc = (store && store.tienda_config) || {};
+  S.marca = { wa: String(tc.wa || WA_BRU).replace(/\D/g, ''), email: tc.email || '', hero: tc.heroBg || '' };
   S.ins = (fin.insumos || []).filter(function(i){ return i && i.nombre; }).map(function(i){ return { key: i.id || i.nombre, nombre: i.nombre, tipo: i.tipo || '', costo: Math.round(n(i.costoUnit)), qty: n(i.qty) }; });
 }
 function cargar(){
   var bk = lsGet(LS_BK, {});
   return Promise.all([
-    sb('bru_store?id=eq.main&select=catalogo,finanzas').catch(function(){ return null; }),
+    sb('bru_store?id=eq.main&select=catalogo,finanzas,tienda_config').catch(function(){ return null; }),
     sb(T + '?tipo=eq.' + TIPO + '&select=id,tipo,fecha,data,created_at&order=created_at.asc').catch(function(){ return null; }),
     sb(T + '?id=eq.kitequipos&select=id,tipo,data').catch(function(){ return null; })
   ]).then(function(r){
@@ -168,8 +172,8 @@ function cargar(){
     if (eqN && eqL && String(eqL.data.actualizada || '') > String(eqN.data.actualizada || '')) eqN = eqL;
     S.eqDoc = eqN || eqL || { id: 'kitequipos', tipo: 'kit_cfg', data: { lista: EQ_DEF.map(function(e, i){ return { id: 'eq' + i, nombre: e[0], cat: e[1], costo: 0, precio: 0 }; }) } };
     S.eq = S.eqDoc.data.lista || [];
-    if (r[0] && r[0][0]) { armarCatalogo(r[0][0]); lsSet('bru_kitcot_cat', { cafes: S.cafes, ins: S.ins }); }
-    else { var cc = lsGet('bru_kitcot_cat', null); if (cc) { S.cafes = cc.cafes || []; S.ins = cc.ins || []; } }
+    if (r[0] && r[0][0]) { armarCatalogo(r[0][0]); lsSet('bru_kitcot_cat', { cafes: S.cafes, ins: S.ins, marca: S.marca }); }
+    else { var cc = lsGet('bru_kitcot_cat', null); if (cc) { S.cafes = cc.cafes || []; S.ins = cc.ins || []; S.marca = cc.marca || null; } }
     var nube = r[1];
     S.offline = !nube;
     var mapa = {};
@@ -220,7 +224,7 @@ function calcOpcion(o, cant, conIva){
 function mgClase(m){ return m >= 35 ? 'mg-ok' : m >= 20 ? 'mg-warn' : 'mg-bad'; }
 
 // =============== MODELO ===============
-function itemCafe(c, qty){ return { tipo: 'cafe', ref: c.key, desc: c.nombre + (c.pres ? ' · ' + c.pres : ''), qty: qty || 1, costo: c.costo, precio: c.precio }; }
+function itemCafe(c, qty){ return { tipo: 'cafe', ref: c.key, desc: c.nombre + (c.pres ? ' · ' + c.pres : ''), qty: qty || 1, costo: c.costo, precio: c.precio, img: c.img || '' }; }
 function itemIns(i, qty){ return { tipo: 'insumo', ref: i.key, desc: i.nombre, qty: qty || 1, costo: i.costo, precio: r100(i.costo * 1.3) }; }
 function itemEq(e, qty){ return { tipo: 'equipo', ref: e.id, desc: e.nombre, qty: qty || 1, costo: n(e.costo), precio: n(e.precio) }; }
 function nuevaCot(){
@@ -455,11 +459,12 @@ function pintarEquipos(){
   var h = '<div class="top"><button class="btn sm ghost" id="bVolverEq">← Cotizaciones</button><h1>Métodos y equipos</h1><span class="sp"></span>'
     + '<button class="btn" id="bEqAdd">+ Agregar</button><button class="btn pri" id="bEqSave">Guardar</button></div>'
     + '<p class="muted small" style="margin:0 0 10px">Lista de equipos para armar kits (V60, prensa, molino, filtros, tazas…). Registra cuánto te cuesta y a cuánto lo vendes (sin IVA). Los que tengan precio se usan en el ↻ Autollenar.</p>'
-    + '<div class="tbl-w"><table class="t"><thead><tr><th>Nombre</th><th>Tipo</th><th class="num">Costo</th><th class="num">Precio venta</th><th class="num">Margen</th><th></th></tr></thead><tbody>';
+    + '<div class="tbl-w"><table class="t"><thead><tr><th>Nombre</th><th>Tipo</th><th>Foto (link, opcional)</th><th class="num">Costo</th><th class="num">Precio venta</th><th class="num">Margen</th><th></th></tr></thead><tbody>';
   S.eq.forEach(function(e, i){
     var mg = n(e.precio) > 0 ? Math.round((n(e.precio) - n(e.costo)) / n(e.precio) * 100) : null;
     h += '<tr><td><input type="text" data-eq="' + i + '" data-ef="nombre" value="' + esc(e.nombre) + '"></td>'
       + '<td><select data-eq="' + i + '" data-ef="cat">' + EQ_CATS.map(function(c){ return '<option' + (c === e.cat ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select></td>'
+      + '<td><input type="text" data-eq="' + i + '" data-ef="img" value="' + esc(e.img || '') + '" placeholder="https://…"></td>'
       + '<td><input type="number" min="0" data-eq="' + i + '" data-ef="costo" value="' + esc(e.costo || '') + '" placeholder="0"></td>'
       + '<td><input type="number" min="0" data-eq="' + i + '" data-ef="precio" value="' + esc(e.precio || '') + '" placeholder="0"></td>'
       + '<td class="num ' + (mg == null ? 'dim' : mgClase(mg)) + '">' + (mg == null ? '—' : mg + '%') + '</td>'
@@ -484,7 +489,7 @@ function textoWhatsApp(){
     var c = calcOpcion(o, x.cantidad, x.iva);
     L.push(''); L.push('*' + (i + 1) + '. ' + o.nombre + '* — ' + fmt(c.precioUIva) + ' por kit' + (x.iva ? ' (IVA incl.)' : ''));
     if (o.desc) L.push(o.desc);
-    o.items.forEach(function(it){ if (n(it.qty) > 0) L.push('• ' + it.qty + ' × ' + it.desc + (x.verPrecios !== false ? ' — ' + (n(it.precio) ? fmt(n(it.qty) * n(it.precio)) : 'incluido') : '')); });
+    o.items.forEach(function(it){ if (n(it.qty) > 0) L.push('• ' + it.qty + ' × ' + it.desc + (x.verPrecios !== false ? ' — ' + (n(it.precio) ? (n(it.qty) > 1 ? fmt(it.precio) + ' c/u = ' : '') + fmt(n(it.qty) * n(it.precio)) : 'incluido') : '')); });
     if (x.verPrecios !== false && c.listaU > c.precioU) L.push('Valor por separado ' + fmt(c.listaU) + ' · ahorras ' + fmt(c.listaU - c.precioU) + ' (precios sin IVA)');
     L.push('Total ' + x.cantidad + ' kits: ' + fmt(c.total));
   });
@@ -493,57 +498,150 @@ function textoWhatsApp(){
   L.push(''); L.push('Quedo atento a cuál opción prefieres. — B.R.U · Brew Respect Unite');
   return L.join('\n');
 }
+function iconoEq(cat){
+  var P = {
+    'Método': '<path d="M5 6h14l-4 9H9z"/><path d="M9 15v3h6v-3"/><path d="M8 21h8"/><path d="M12 2v2"/>',
+    'Molino': '<rect x="7" y="9" width="10" height="12" rx="2"/><path d="M9 9V6h6v3"/><path d="M12 6V3h5"/>',
+    'Accesorio': '<path d="M4 12h11a3 3 0 0 1 0 6H8a4 4 0 0 1-4-4z"/><path d="M15 12l4-5h2"/>',
+    'Filtros': '<path d="M4 5h16l-6 9v5l-4 2v-7z"/>',
+    'Taza / vaso': '<path d="M4 8h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 10h2a2 2 0 0 1 0 4h-2"/><path d="M8 3v2M12 3v2"/>',
+    'Café': '<ellipse cx="12" cy="12" rx="6" ry="9" transform="rotate(30 12 12)"/><path d="M9 5c3 3 3 11 6 14"/>',
+    'Insumo': '<path d="M3 8l9-5 9 5-9 5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>'
+  };
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + (P[cat] || P['Insumo']) + '</svg>';
+}
+function infoItem(it){
+  if (it.tipo === 'cafe') { var c = S.cafes.filter(function(k){ return k.key === it.ref; })[0] || {}; return { img: it.img || c.img || '', sub: c.sub || 'Café de especialidad', cat: 'Café' }; }
+  if (it.tipo === 'equipo') { var e = S.eq.filter(function(k){ return k.id === it.ref; })[0] || {}; return { img: e.img || '', sub: e.cat || 'Equipo', cat: e.cat || 'Accesorio' }; }
+  if (it.tipo === 'insumo') return { img: '', sub: 'Empaque', cat: 'Insumo' };
+  return { img: '', sub: '', cat: 'Insumo' };
+}
 function htmlDocumento(){
-  var d = S.cur, x = d.data, vence = sumaDias(d.fecha || hoy(), x.vigencia);
+  var d = S.cur, x = d.data, vence = sumaDias(d.fecha || hoy(), x.vigencia), M = S.marca || {};
+  var origin = /^https?:/.test(location.origin) ? location.origin : 'https://www.brucoffeeshop.online';
+  var logo = origin + '/bru-logo.svg';
+  var waNum = M.wa || WA_BRU, waFmt = '+' + waNum.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})$/, '$1 $2 $3 $4');
+  var waTxt = 'Hola B.R.U, quiero continuar con la cotización de kits N.° ' + x.num;
+  var waUrl = 'https://wa.me/' + waNum + '?text=' + encodeURIComponent(waTxt);
+  var qr = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&color=2B124C&bgcolor=FBE4D8&data=' + encodeURIComponent(waUrl);
+  var verP = x.verPrecios !== false, nOp = x.opciones.length;
+  var plural = function(k, a, b){ return k === 1 ? a : b; };
+  var tiers = ['t1', 't2', 't3', 't4'];
+  var reco = nOp >= 3 ? 1 : -1;
   var cols = x.opciones.map(function(o, i){
     var c = calcOpcion(o, x.cantidad, x.iva);
-    var verP = x.verPrecios !== false;
-    var items = o.items.filter(function(it){ return n(it.qty) > 0; }).map(function(it){
-      var lin = n(it.qty) * n(it.precio);
-      return '<li><span class="nm"><span class="q">' + esc(it.qty) + '×</span> ' + esc(it.desc)
-        + (verP && n(it.qty) > 1 && n(it.precio) ? '<span class="pu">' + fmt(it.precio) + ' c/u</span>' : '') + '</span>'
-        + (verP ? '<span class="pi">' + (n(it.precio) ? fmt(lin) : 'Incluido') + '</span>' : '') + '</li>';
+    var filas = o.items.filter(function(it){ return n(it.qty) > 0; }).map(function(it){
+      var inf = infoItem(it), lin = n(it.qty) * n(it.precio);
+      var th = inf.img ? '<span class="th"><img src="' + esc(inf.img) + '" alt=""></span>' : '<span class="th ic">' + iconoEq(inf.cat) + '</span>';
+      return '<li>' + th + '<span class="it"><b>' + esc(it.desc) + '</b><small>' + esc(inf.sub) + '</small></span>'
+        + (verP ? '<span class="pr2"><span class="un">' + esc(it.qty) + ' × ' + (n(it.precio) ? fmt(it.precio) : '—') + '</span><b>' + (n(it.precio) ? fmt(lin) : 'Incluido') + '</b></span>'
+               : '<span class="pr2"><b>× ' + esc(it.qty) + '</b></span>')
+        + '</li>';
     }).join('');
     var ahorro = c.listaU - c.precioU;
-    var resumen = verP ? '<div class="rs"><div><span>Valor por separado</span><span>' + fmt(c.listaU) + '</span></div>'
-      + (ahorro > 0 ? '<div class="ah"><span>Ahorro con el kit' + (c.listaU ? ' (' + Math.round(ahorro / c.listaU * 100) + '%)' : '') + '</span><span>−' + fmt(ahorro) + '</span></div>' : '') + '</div>' : '';
-    return '<div class="op' + (i === 1 && x.opciones.length === 3 ? ' mid' : '') + '"><div class="ti">Opción ' + (i + 1) + '</div><h3>' + esc(o.nombre) + '</h3>'
-      + (o.desc ? '<p class="de">' + esc(o.desc) + '</p>' : '') + '<ul>' + items + '</ul>' + resumen
-      + '<div class="pr"><div class="lb">Precio por kit</div><div class="v">' + fmt(c.precioU) + '</div>'
-      + (x.iva ? '<div class="sm">+ IVA ' + fmt(c.precioUIva - c.precioU) + ' = ' + fmt(c.precioUIva) + '</div>' : '')
-      + '<div class="tt">' + x.cantidad + ' kits · <b>' + fmt(c.total) + '</b>' + (x.iva ? ' IVA incl.' : '') + '</div></div></div>';
+    var rs = verP ? '<div class="rs"><div><span>Valor por separado</span><span>' + fmt(c.listaU) + '</span></div>'
+      + (ahorro > 0 ? '<div class="ah"><span>Ahorro con el kit (' + Math.round(ahorro / (c.listaU || 1) * 100) + '%)</span><span>−' + fmt(ahorro) + '</span></div>' : '') + '</div>' : '';
+    return '<article class="op ' + tiers[i] + (i === reco ? ' reco' : '') + '">'
+      + (i === reco ? '<div class="badge">★ Recomendado</div>' : '')
+      + '<header><div class="ti">Opción ' + (i + 1) + '</div><h3>' + esc(o.nombre) + '</h3>' + (o.desc ? '<p>' + esc(o.desc) + '</p>' : '') + '</header>'
+      + '<ul>' + filas + '</ul>' + rs
+      + '<footer><div class="lb">Precio por kit' + (x.iva ? ' · antes de IVA' : '') + '</div><div class="big">' + fmt(c.precioU) + '</div>'
+      + (x.iva ? '<div class="iv">IVA 19% ' + fmt(c.precioUIva - c.precioU) + ' · <b>' + fmt(c.precioUIva) + ' con IVA</b></div>' : '')
+      + '<div class="tot"><span>' + c.cant + ' ' + plural(c.cant, 'kit', 'kits') + '</span><b>' + fmt(c.total) + '</b></div>'
+      + (x.iva ? '<div class="tsm">Total con IVA incluido</div>' : '') + '</footer></article>';
   }).join('');
-  var css = '*{box-sizing:border-box}body{font-family:Inter,Arial,sans-serif;margin:0;background:#fff;color:#1a1510;font-size:13px}'
-    + '.pg{max-width:900px;margin:0 auto;padding:36px 32px}'
-    + '.hd{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:20px;border-bottom:1px solid #e0d8d0;margin-bottom:22px}'
-    + '.lg{font-size:22px;font-weight:700;letter-spacing:5px}.lg small{display:block;font-size:7px;letter-spacing:2.5px;color:#9c7c3c;font-weight:500;margin-top:3px;text-transform:uppercase}'
-    + '.nr{text-align:right}.nr .k{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#888}.nr .n{font-size:24px;font-weight:300;color:#9c7c3c}'
-    + '.meta{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px}.meta .k{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:#888;margin-bottom:3px}.meta .v{font-size:12px;line-height:1.55}'
-    + 'h2{font-family:Georgia,serif;font-weight:400;font-size:20px;margin:0 0 4px}.intro{color:#666;margin:0 0 18px}'
-    + '.ops{display:grid;grid-template-columns:repeat(' + x.opciones.length + ',1fr);gap:14px;margin-bottom:24px}'
-    + '.op{border:1px solid #e0d8d0;border-radius:10px;padding:18px 16px;display:flex;flex-direction:column;break-inside:avoid}.op.mid{border-color:#9c7c3c;box-shadow:0 0 0 1px #9c7c3c inset}'
-    + '.ti{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#9c7c3c}.op h3{font-family:Georgia,serif;font-weight:400;font-size:18px;margin:4px 0 6px}'
-    + '.de{color:#666;font-size:11.5px;margin:0 0 10px;line-height:1.5}ul{list-style:none;padding:0;margin:0 0 14px;flex:1}li{padding:6px 0;border-bottom:1px dashed #eee;font-size:12px;line-height:1.4;display:flex;justify-content:space-between;gap:8px}li .nm{min-width:0}li .pu{display:block;font-size:10.5px;color:#999}li .pi{white-space:nowrap;font-variant-numeric:tabular-nums;color:#444}.q{color:#9c7c3c;font-weight:600}'
-    + '.rs{font-size:11.5px;color:#666;margin:-6px 0 12px}.rs div{display:flex;justify-content:space-between;padding:2px 0}.rs .ah{color:#2e7d4f;font-weight:600}'
-    + '.pr{border-top:1px solid #e0d8d0;padding-top:10px}.lb{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:#888}.v{font-size:24px;font-weight:300;color:#1a1510}.sm{font-size:10.5px;color:#888}.tt{margin-top:6px;font-size:11.5px;color:#444}'
-    + '.nt{border-top:1px solid #e0d8d0;padding-top:14px;font-size:11px;color:#666;line-height:1.6;white-space:pre-line}.nt b{color:#1a1510}'
-    + '.ft{margin-top:22px;font-size:10px;color:#999;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}'
-    + '.bar{position:sticky;top:0;background:#1a1510;padding:10px;text-align:center}.bar button{background:#c9a84c;border:none;padding:9px 18px;border-radius:8px;font-weight:600;cursor:pointer;font-family:inherit}'
-    + '@media(max-width:700px){.ops{grid-template-columns:1fr}.meta{grid-template-columns:1fr 1fr}}'
-    + '@media print{.bar{display:none}.pg{padding:0}@page{margin:1.2cm}.ops{grid-template-columns:repeat(' + x.opciones.length + ',1fr)}}';
-  var cliente = [x.cliente, x.empresa, x.nit ? 'NIT/CC ' + x.nit : '', x.ciudad].filter(Boolean).map(esc).join('<br>');
-  return '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cotización kits B.R.U #' + esc(x.num) + (x.cliente ? ' · ' + esc(x.cliente) : '') + '</title>'
-    + '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>' + css + '</style></head><body>'
-    + '<div class="bar"><button onclick="window.print()">Imprimir / Guardar como PDF</button></div>'
-    + '<div class="pg"><div class="hd"><div class="lg">B·R·U<small>Brew · Respect · Unite — Specialty Coffee</small></div><div class="nr"><div class="k">Cotización</div><div class="n">#' + esc(x.num) + '</div></div></div>'
-    + '<div class="meta"><div><div class="k">Para</div><div class="v">' + (cliente || '—') + '</div></div>'
-    + '<div><div class="k">Fecha</div><div class="v">' + fFecha(d.fecha) + '</div></div>'
-    + '<div><div class="k">Válida hasta</div><div class="v">' + fFecha(vence) + '</div></div>'
-    + '<div><div class="k">Cantidad</div><div class="v">' + esc(x.cantidad) + ' kit' + (x.cantidad > 1 ? 's' : '') + '</div></div></div>'
-    + '<h2>Kits de café de especialidad</h2><p class="intro">' + (x.verPrecios !== false ? 'Precios sin IVA. ' : '') + 'Te presentamos ' + x.opciones.length + ' opciones para que elijas la que mejor se ajusta: café colombiano tostado por nosotros sobre pedido y métodos para prepararlo.</p>'
+  var para = x.empresa ? esc(x.empresa) : esc(x.cliente || 'Cliente');
+  var contacto = [x.empresa && x.cliente ? 'Atención: ' + esc(x.cliente) : '', x.nit ? 'NIT/CC ' + esc(x.nit) : '', esc(x.ciudad || ''), esc(x.email || '')].filter(Boolean).join(' · ');
+  var css = [
+    '@page{size:A4;margin:0}',
+    ':root{--ink:#190D19;--plum:#2B124C;--berry:#522B5B;--mauve:#854F6C;--blush:#DFB6B2;--cream:#FBE4D8;--gold:#EDBE6D;--gold2:#C9A84C;--paper:#FFFCFA}',
+    '*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}',
+    'body{margin:0;background:#efe7e4;color:var(--ink);font-family:Inter,Arial,sans-serif;font-size:13px;line-height:1.45}',
+    '.bar{position:sticky;top:0;z-index:5;background:var(--ink);padding:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}',
+    '.bar button,.bar a{background:var(--gold);color:var(--ink);border:none;padding:10px 18px;border-radius:999px;font-weight:600;cursor:pointer;font:600 13px Inter,sans-serif;text-decoration:none}',
+    '.bar a{background:#25D366;color:#fff}',
+    '.doc{max-width:900px;margin:22px auto;background:var(--paper);box-shadow:0 20px 60px rgba(25,13,25,.18);border-radius:18px;overflow:hidden}',
+    '.serif{font-family:Fraunces,Georgia,serif}',
+    /* portada */
+    '.cover{position:relative;color:var(--cream);padding:34px 40px 30px;background:linear-gradient(135deg,var(--ink) 0%,var(--plum) 55%,var(--berry) 100%);overflow:hidden}',
+    '.cover .ph{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.22;mix-blend-mode:luminosity}',
+    '.cover .gl{position:absolute;right:-90px;top:-60px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(237,190,109,.28),transparent 65%)}',
+    '.cover>*{position:relative}',
+    '.top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}',
+    '.brand{display:flex;align-items:center;gap:14px}.brand img{height:74px;width:auto;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35))}',
+    '.brand .w{font-family:Fraunces,Georgia,serif;font-size:30px;letter-spacing:8px;font-weight:400;line-height:1}.brand .s{font-size:9px;letter-spacing:3.5px;text-transform:uppercase;color:var(--gold);margin-top:7px}',
+    '.num{text-align:right}.num .k{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--blush)}.num .n{font-family:Fraunces,Georgia,serif;font-size:34px;font-weight:300;color:var(--gold);line-height:1.1}.num .f{font-size:11px;color:var(--blush);margin-top:2px}',
+    '.ttl{margin-top:34px}.ttl .ey{font-size:10px;letter-spacing:3.5px;text-transform:uppercase;color:var(--gold)}',
+    '.ttl h1{font-family:Fraunces,Georgia,serif;font-weight:300;font-size:40px;line-height:1.05;margin:8px 0 10px}.ttl h1 em{color:var(--gold);font-style:italic}',
+    '.ttl .pa{font-size:14px;color:var(--cream)}.ttl .pa small{display:block;color:var(--blush);font-size:11.5px;margin-top:3px}',
+    '.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.chips span{border:1px solid rgba(251,228,216,.28);border-radius:999px;padding:6px 12px;font-size:11.5px;background:rgba(25,13,25,.25)}.chips b{color:var(--gold);font-weight:600}',
+    /* valores */
+    '.vals{display:grid;grid-template-columns:repeat(3,1fr);gap:0;background:var(--cream);border-bottom:1px solid #ecd6cf}',
+    '.vals div{padding:14px 20px;display:flex;gap:10px;align-items:center;font-size:11.5px;color:var(--berry)}.vals div+div{border-left:1px solid #ecd6cf}',
+    '.vals svg{width:26px;height:26px;flex:0 0 26px;color:var(--mauve)}.vals b{display:block;color:var(--plum);font-size:12.5px}',
+    /* opciones */
+    '.body{padding:30px 34px 10px}',
+    '.sec{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 16px}.sec h2{font-family:Fraunces,Georgia,serif;font-weight:400;font-size:24px;margin:0;color:var(--plum)}.sec span{font-size:11px;color:var(--mauve)}',
+    '.ops{display:grid;grid-template-columns:repeat(' + Math.min(nOp, 3) + ',minmax(0,1fr));gap:16px;align-items:stretch}',
+    (nOp === 1 ? '.ops{max-width:560px;margin:0 auto}' : ''),
+    '.op{position:relative;background:#fff;border:1px solid #ecd6cf;border-radius:18px;overflow:hidden;display:flex;flex-direction:column;break-inside:avoid;page-break-inside:avoid}',
+    '.op header{padding:18px 18px 14px;color:var(--plum)}.op .ti{font-size:9px;letter-spacing:3px;text-transform:uppercase;opacity:.75}',
+    '.op h3{font-family:Fraunces,Georgia,serif;font-weight:400;font-size:21px;margin:4px 0 4px;line-height:1.15}.op header p{margin:0;font-size:11.5px;opacity:.85}',
+    '.op.t1 header{background:var(--cream)}.op.t2 header{background:var(--blush)}.op.t3 header,.op.t4 header{background:linear-gradient(135deg,var(--plum),var(--berry));color:var(--cream)}.op.t3 .ti,.op.t4 .ti{color:var(--gold);opacity:1}',
+    '.op.reco{border:2px solid var(--gold2);box-shadow:0 14px 34px rgba(82,43,91,.18)}',
+    '.badge{position:absolute;top:14px;right:14px;background:var(--plum);color:var(--gold);font-size:9.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 9px;border-radius:999px;z-index:2}',
+    '.op ul{list-style:none;margin:0;padding:6px 16px;flex:1}',
+    '.op li{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px dashed #efdfda}.op li:last-child{border-bottom:none}',
+    '.th{width:40px;height:40px;border-radius:10px;overflow:hidden;background:var(--cream);display:flex;align-items:center;justify-content:center}.th img{width:100%;height:100%;object-fit:cover}.th.ic{color:var(--mauve)}.th svg{width:22px;height:22px}',
+    '.it{min-width:0}.it b{display:block;font-weight:600;font-size:12px;color:var(--ink);line-height:1.25}.it small{display:block;font-size:10px;color:#9a8790;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+    '.pr2{text-align:right;white-space:nowrap}.pr2 .un{display:block;font-size:10px;color:#9a8790}.pr2 b{font-size:12.5px;color:var(--plum);font-variant-numeric:tabular-nums}',
+    '.rs{margin:0 16px 12px;padding:10px 12px;background:#fbf4f1;border-radius:10px;font-size:11px;color:#7a6670}.rs div{display:flex;justify-content:space-between;gap:8px;padding:1px 0}.rs .ah{color:#2e7d4f;font-weight:600}',
+    '.op footer{padding:14px 18px 16px;border-top:1px solid #ecd6cf;background:#fffaf8}',
+    '.lb{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--mauve)}.big{font-family:Fraunces,Georgia,serif;font-size:32px;font-weight:300;color:var(--plum);line-height:1.1;margin-top:2px}',
+    '.iv{font-size:11px;color:#7a6670;margin-top:2px}.iv b{color:var(--plum)}',
+    '.tot{display:flex;justify-content:space-between;align-items:baseline;margin-top:10px;padding-top:10px;border-top:1px dashed #ecd6cf;font-size:12px;color:var(--berry)}.tot b{font-size:16px;color:var(--ink)}.tsm{font-size:9.5px;color:#9a8790;text-align:right}',
+    /* pasos + QR */
+    '.next{display:grid;grid-template-columns:1fr 210px;gap:18px;margin:26px 0 8px;align-items:stretch}',
+    '.steps{background:var(--cream);border-radius:16px;padding:18px 20px}.steps h4{margin:0 0 12px;font-family:Fraunces,Georgia,serif;font-weight:400;font-size:18px;color:var(--plum)}',
+    '.steps ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}.steps li{display:flex;gap:10px;font-size:11.5px;color:var(--berry)}.steps li i{flex:0 0 24px;height:24px;border-radius:50%;background:var(--plum);color:var(--gold);font-style:normal;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center}.steps li b{display:block;color:var(--plum);font-size:12px}',
+    '.qr{background:var(--plum);color:var(--cream);border-radius:16px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-decoration:none}.qr img{width:120px;height:120px;border-radius:10px;background:var(--cream);padding:8px}.qr b{color:var(--gold);font-size:13px}.qr span{font-size:10.5px;color:var(--blush)}',
+    '.nt{margin:18px 0 26px;font-size:11px;color:#7a6670;line-height:1.6;white-space:pre-line}.nt b{color:var(--plum)}',
+    /* pie */
+    '.foot{background:var(--ink);color:var(--blush);padding:18px 34px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:11px}.foot img{height:34px}.foot .sp{flex:1}.foot a{color:var(--cream);text-decoration:none}.foot .c{display:flex;gap:16px;flex-wrap:wrap}',
+    '@media(max-width:760px){.doc{margin:0;border-radius:0}.cover{padding:24px 20px}.ttl h1{font-size:30px}.brand img{height:54px}.brand .w{font-size:22px;letter-spacing:5px}.vals{grid-template-columns:1fr}.vals div+div{border-left:none;border-top:1px solid #ecd6cf}.body{padding:22px 14px 6px}.ops{grid-template-columns:1fr}.next{grid-template-columns:1fr}.steps ol{grid-template-columns:1fr}.foot{padding:18px 20px}}',
+    '@media print{body{background:#fff}.bar{display:none}.doc{margin:0;max-width:none;box-shadow:none;border-radius:0}.ops{grid-template-columns:repeat(' + Math.min(nOp, 3) + ',minmax(0,1fr))}.next{break-inside:avoid}}'
+  ].join('');
+  var ico = function(p){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>'; };
+  return '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+    + '<title>Cotización B.R.U N.° ' + esc(x.num) + ' · ' + para + '</title>'
+    + '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&display=swap" rel="stylesheet">'
+    + '<style>' + css + '</style></head><body>'
+    + '<div class="bar"><button onclick="window.print()">Imprimir / Guardar PDF</button><a href="' + esc(waUrl) + '" target="_blank">Confirmar por WhatsApp</a></div>'
+    + '<div class="doc">'
+    + '<section class="cover">' + (M.hero ? '<div class="ph" style="background-image:url(' + esc(M.hero) + ')"></div>' : '') + '<div class="gl"></div>'
+    + '<div class="top"><div class="brand"><img src="' + logo + '" alt="B.R.U"><div><div class="w">B·R·U</div><div class="s">Brew · Respect · Unite</div></div></div>'
+    + '<div class="num"><div class="k">Cotización</div><div class="n">N.° ' + String(x.num).padStart(4, '0') + '</div><div class="f">' + fFecha(d.fecha) + ' · válida hasta ' + fFecha(vence) + '</div></div></div>'
+    + '<div class="ttl"><div class="ey">Café de especialidad colombiano</div><h1>Kits de café <em>B.R.U</em></h1>'
+    + '<div class="pa">Preparada para <b>' + para + '</b>' + (contacto ? '<small>' + contacto + '</small>' : '') + '</div>'
+    + '<div class="chips"><span><b>' + esc(x.cantidad) + '</b> ' + plural(n(x.cantidad), 'kit', 'kits') + '</span><span><b>' + nOp + '</b> ' + plural(nOp, 'opción', 'opciones') + '</span>' + (verP ? '<span>Precios unitarios ' + (x.iva ? 'antes de IVA' : 'finales') + '</span>' : '') + '</div></div>'
+    + '</section>'
+    + '<section class="vals">'
+    + '<div>' + ico('<path d="M12 2l3 7h7l-5.5 4.5 2 7.5-6.5-4.5L5.5 21l2-7.5L2 9h7z"/>') + '<span><b>Café de competencia</b>Lotes 85+ puntos SCA</span></div>'
+    + '<div>' + ico('<path d="M8 21h8M12 17v4M7 4h10l-1 13H8z"/><path d="M17 7h2a2 2 0 0 1 0 4h-2"/>') + '<span><b>Tostado sobre pedido</b>Fresco para tu entrega</span></div>'
+    + '<div>' + ico('<path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>') + '<span><b>Trazable</b>De la finca a la taza</span></div>'
+    + '</section>'
+    + '<section class="body"><div class="sec"><h2>' + plural(nOp, 'Nuestra propuesta', 'Elige tu kit') + '</h2><span>Valores en pesos colombianos (COP)</span></div>'
     + '<div class="ops">' + cols + '</div>'
-    + '<div class="nt">' + (x.notas ? '<b>Notas.</b> ' + esc(x.notas) + '\n\n' : '') + (x.condiciones ? '<b>Condiciones.</b> ' + esc(x.condiciones) : '') + '</div>'
-    + '<div class="ft"><span>B.R.U · brucoffeeshop.online · Instagram @BruCoffeeRoasters_</span><span>WhatsApp +57 304 492 7790</span></div>'
+    + '<div class="next"><div class="steps"><h4>Cómo seguimos</h4><ol>'
+    + '<li><i>1</i><span><b>Elige tu opción</b>Ajustamos cantidades o contenido si lo necesitas.</span></li>'
+    + '<li><i>2</i><span><b>Anticipo del 50%</b>Confirmamos el pedido y separamos el café.</span></li>'
+    + '<li><i>3</i><span><b>Tostamos y empacamos</b>Cada kit armado a mano.</span></li>'
+    + '<li><i>4</i><span><b>Entrega</b>Coordinamos fecha y lugar contigo.</span></li>'
+    + '</ol></div><a class="qr" href="' + esc(waUrl) + '" target="_blank"><img src="' + qr + '" alt="QR WhatsApp"><b>Escanea y confirma</b><span>WhatsApp ' + esc(waFmt) + '</span></a></div>'
+    + '<div class="nt">' + (x.notas ? '<b>Notas.</b> ' + esc(x.notas) + '\n' : '') + (x.condiciones ? '<b>Condiciones.</b> ' + esc(x.condiciones) : '') + '</div>'
+    + '</section>'
+    + '<div class="foot"><img src="' + logo + '" alt=""><div><b style="color:var(--cream)">B.R.U Coffee Roasters</b><br>Café de especialidad · Colombia</div><span class="sp"></span>'
+    + '<div class="c"><a href="https://www.brucoffeeshop.online">brucoffeeshop.online</a><a href="https://instagram.com/BruCoffeeRoasters_">@BruCoffeeRoasters_</a><a href="' + esc(waUrl) + '">WhatsApp ' + esc(waFmt) + '</a>' + (M.email ? '<a href="mailto:' + esc(M.email) + '">' + esc(M.email) + '</a>' : '') + '</div></div>'
     + '</div></body></html>';
 }
 function abrirDocumento(){
