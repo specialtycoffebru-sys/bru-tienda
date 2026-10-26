@@ -233,7 +233,7 @@ function calcOpcion(o, cant, conIva){
 }
 function precioConUtilidad(costo, mg){ return n(costo) > 0 && n(mg) > 0 && n(mg) < 95 ? r100(n(costo) / (1 - n(mg) / 100)) : null; }
 function aplicarUtilidad(o){ (o.items || []).forEach(function(it){ var p = precioConUtilidad(it.costo, o.mg); if (p != null) it.precio = p; }); }
-function mgClase(m){ return m >= 35 ? 'mg-ok' : m >= 20 ? 'mg-warn' : 'mg-bad'; }
+function mgClase(m){ return m >= 34.95 ? 'mg-ok' : m >= 20 ? 'mg-warn' : 'mg-bad'; }
 
 // =============== MODELO ===============
 function itemCafe(c, qty){ return { tipo: 'cafe', ref: c.key, desc: c.nombre + (c.pres ? ' · ' + c.pres : ''), qty: qty || 1, costo: c.costo, precio: c.precio, img: c.img || '' }; }
@@ -248,6 +248,45 @@ function nuevaCot(){
     opciones: [0, 1, 2].map(function(k){ return { nombre: 'Kit ' + TIERS[k], desc: '', items: [], dcto: 0, manual: 0 }; }),
     creada: new Date().toISOString()
   } };
+}
+function EV(x){ return !!(x && x.modo === 'evento'); }
+function nuevaCotEvento(){
+  var c = nuevaCot();
+  c.id = uid('ke');
+  c.data.modo = 'evento'; c.data.iva = false; c.data.evento = ''; c.data.alcance = '';
+  c.data.condiciones = 'Valores antes de IVA. Anticipo del 50% para confirmar la fecha del evento y saldo al finalizar. Forma de pago por confirmar.';
+  c.data.opciones = [0, 1].map(function(k){ return { nombre: 'Opción ' + 'AB'.charAt(k), desc: '', items: [], dcto: 0, manual: 0, mg: 35 }; });
+  return c;
+}
+// Cotización del evento Corferias (11 días). Se crea UNA sola vez con id fijo; si se elimina queda marcada y no vuelve.
+var SEMILLAS = [{ id: 'ke_corferias_2026', fecha: '2026-10-26', data: {
+  modo: 'evento', evento: 'Evento Corferias · 11 días', cliente: '', empresa: '', nit: '', tel: '', email: '', ciudad: 'Bogotá',
+  cantidad: 1, vigencia: 15, iva: false, estado: 'Borrador', elegida: null, archivada: false, verPrecios: true,
+  alcance: 'Corferias, Bogotá · 11 días de evento\n3 estaciones de café, cada una con 2 máquinas KitchenAid KF3\n3 baristas profesionales durante todo el evento\n13.200 bebidas en vaso de 6 oz: 40% americano (5.280) · 30% cappuccino (3.960) · 30% latte (3.960)\nIncluye café de especialidad colombiano (14 g por bebida), leche, agua, vasos y operación de barra',
+  notas: '', condiciones: 'Valores en pesos colombianos (COP), antes de IVA. Forma de pago: por confirmar.',
+  opciones: [
+    { nombre: 'Opción A · Leche de vaca', desc: 'Servicio completo con leche entera de vaca.', dcto: 0, manual: 34491938, mg: 35, items: [
+      { tipo: 'libre', ref: '', cat: 'Café', desc: 'Café de especialidad colombiano', sub: '74 bolsas de 2,5 kg · 14 g por bebida', qty: 1, costo: 11840000, precio: 18215385 },
+      { tipo: 'libre', ref: '', cat: 'Persona', desc: 'Baristas profesionales', sub: '3 baristas × 11 días', qty: 1, costo: 4950000, precio: 7615385 },
+      { tipo: 'libre', ref: '', cat: 'Taza / vaso', desc: 'Vasos 6 oz', sub: '13.200 unidades', qty: 1, costo: 2640000, precio: 4061537 },
+      { tipo: 'libre', ref: '', cat: 'Gota', desc: 'Agua', sub: '43 bidones de 20 L', qty: 1, costo: 344000, precio: 529231 },
+      { tipo: 'libre', ref: '', cat: 'Gota', desc: 'Leche de vaca', sub: 'Aprox. 827 L', qty: 1, costo: 2645760, precio: 4070400 } ] },
+    { nombre: 'Opción B · Leche de avena', desc: 'Servicio completo con leche vegetal de avena NUDE.', dcto: 0, manual: 45750523, mg: 35, items: [
+      { tipo: 'libre', ref: '', cat: 'Café', desc: 'Café de especialidad colombiano', sub: '74 bolsas de 2,5 kg · 14 g por bebida', qty: 1, costo: 11840000, precio: 18215385 },
+      { tipo: 'libre', ref: '', cat: 'Persona', desc: 'Baristas profesionales', sub: '3 baristas × 11 días', qty: 1, costo: 4950000, precio: 7615385 },
+      { tipo: 'libre', ref: '', cat: 'Taza / vaso', desc: 'Vasos 6 oz', sub: '13.200 unidades', qty: 1, costo: 2640000, precio: 4061537 },
+      { tipo: 'libre', ref: '', cat: 'Gota', desc: 'Agua', sub: '43 bidones de 20 L', qty: 1, costo: 344000, precio: 529231 },
+      { tipo: 'libre', ref: '', cat: 'Gota', desc: 'Leche vegetal de avena NUDE', sub: 'Aprox. 830 L', qty: 1, costo: 9963840, precio: 15328985 } ] }
+  ] } }];
+function sembrar(){
+  var nuevos = [];
+  SEMILLAS.forEach(function(sm){
+    if (S.byId[sm.id]) return;
+    var d = { id: sm.id, tipo: TIPO, fecha: sm.fecha, data: clone(sm.data) };
+    d.data.num = sigNum(); d.data.creada = new Date().toISOString();
+    nuevos.push(guardar(d, true));
+  });
+  return Promise.all(nuevos);
 }
 function autollenar(cot){
   var cafes = S.cafes.filter(function(c){ return c.precio > 0 && !/drip/i.test(c.nombre + ' ' + c.pres); }).slice().sort(function(a, b){ return a.precio - b.precio; });
@@ -281,26 +320,28 @@ function autollenar(cot){
 function pintarLista(){
   var docs = S.docs.filter(function(d){ return !d.data.eliminada && (S.verArch ? d.data.archivada : !d.data.archivada); })
     .sort(function(a, b){ return n(b.data.num) - n(a.data.num); });
-  var h = '<div class="top"><h1>Cotizador de kits</h1><span class="sp"></span>'
+  var h = '<div class="top"><h1>Cotizaciones · kits y eventos</h1><span class="sp"></span>'
     + '<label class="chk small muted"><input type="checkbox" id="verArch"' + (S.verArch ? ' checked' : '') + '> Ver archivadas</label>'
     + '<button class="btn" id="bEq">☕ Métodos y equipos</button>'
+    + '<button class="btn" id="bNuevaEv">+ Cotización de evento</button>'
     + '<button class="btn pri" id="bNueva">+ Nueva cotización de kits</button></div>';
   if (S.offline) h += '<div class="banner warn">No hay conexión con la nube: estás viendo la copia de este equipo. Lo que guardes se sube cuando vuelva la conexión.</div>';
   if (!S.cafes.length) h += '<div class="banner warn">No se pudo leer el catálogo. Puedes agregar ítems libres, o abrir el catálogo del dashboard y pulsar ☁ Sincronizar.</div>';
   if (!docs.length) {
     h += '<div class="card empty">' + (S.verArch ? 'No hay cotizaciones archivadas.' : 'Aún no hay cotizaciones de kits.<br><span class="small">Arma 3 opciones (económica, intermedia y premium) con los cafés del catálogo y envíaselas al cliente en PDF o por WhatsApp.</span>') + '</div>';
   } else {
-    h += '<div class="tbl-w"><table class="t"><thead><tr><th>N°</th><th>Cliente</th><th>Fecha</th><th class="num">Kits</th><th>Opciones (precio por kit)</th><th>Estado</th><th></th></tr></thead><tbody>';
+    h += '<div class="tbl-w"><table class="t"><thead><tr><th>N°</th><th>Cliente</th><th>Fecha</th><th class="num">Cant.</th><th>Opciones (precio)</th><th>Estado</th><th></th></tr></thead><tbody>';
     docs.forEach(function(d){
       var x = d.data, precios = (x.opciones || []).map(function(o, i){ var c = calcOpcion(o, x.cantidad, x.iva); return (x.elegida === i ? '★ ' : '') + fmt(c.precioUIva); }).join(' · ');
       var est = x.estado || 'Borrador', cls = est === 'Aprobada' ? 'ok' : est === 'Enviada' ? 'info' : est === 'Rechazada' ? 'bad' : '';
-      h += '<tr class="click" data-open="' + esc(d.id) + '"><td>#' + esc(x.num) + '</td><td><b>' + esc(x.cliente || '—') + '</b>' + (x.empresa ? '<div class="small muted">' + esc(x.empresa) + '</div>' : '') + '</td><td>' + fFecha(d.fecha) + '</td><td class="num">' + esc(x.cantidad) + '</td><td class="small">' + precios + '</td><td><span class="st ' + cls + '">' + esc(est) + '</span></td>'
+      h += '<tr class="click" data-open="' + esc(d.id) + '"><td>#' + esc(x.num) + '</td><td><b>' + esc(x.cliente || '—') + '</b>' + (x.empresa ? '<div class="small muted">' + esc(x.empresa) + '</div>' : '') + + (EV(x) ? '<div class="small muted">🎪 ' + esc(x.evento || 'Evento') + '</div>' : '') + '</td><td>' + fFecha(d.fecha) + '</td><td class="num">' + (EV(x) ? 'Evento' : esc(x.cantidad)) + '</td><td class="small">' + precios + '</td><td><span class="st ' + cls + '">' + esc(est) + '</span></td>'
         + '<td class="num"><button class="btn sm ghost" data-dup="' + esc(d.id) + '">Duplicar</button> <button class="btn sm ghost" data-arch="' + esc(d.id) + '">' + (x.archivada ? 'Restaurar' : 'Archivar') + '</button> <button class="btn sm dang" data-del="' + esc(d.id) + '">Eliminar</button></td></tr>';
     });
     h += '</tbody></table></div>';
   }
   $('main').innerHTML = h;
   $('bNueva').onclick = function(){ var c = nuevaCot(); if (S.cafes.length) autollenar(c); abrir(c); guardar(c, true); };
+  $('bNuevaEv').onclick = function(){ var c = nuevaCotEvento(); abrir(c); guardar(c, true); };
   $('bEq').onclick = pintarEquipos;
   $('verArch').onchange = function(){ S.verArch = this.checked; pintarLista(); };
   Array.prototype.forEach.call(document.querySelectorAll('[data-open]'), function(tr){ tr.onclick = function(e){ if (e.target.closest('button')) return; abrir(S.byId[tr.getAttribute('data-open')]); }; });
@@ -349,9 +390,9 @@ function pintarEditor(){
   var d = S.cur, x = d.data, optsHtml = opcionesItems();
   var h = '<div class="sticky"><div class="row">'
     + '<button class="btn sm ghost" id="bVolver">← Cotizaciones</button>'
-    + '<h1 style="font-size:22px">Cotización de kits #' + esc(x.num) + '</h1><span class="sp"></span>'
+    + '<h1 style="font-size:22px">' + (EV(x) ? 'Cotización de evento #' : 'Cotización de kits #') + esc(x.num) + '</h1><span class="sp"></span>'
     + '<span class="save-st" id="saveSt">' + (S.dirty ? 'Cambios sin guardar…' : 'Guardado ✓') + '</span>'
-    + '<button class="btn" id="bAuto" title="Reemplaza los ítems con una propuesta armada desde el catálogo">↻ Autollenar</button>'
+    + (EV(x) ? '' : '<button class="btn" id="bAuto" title="Reemplaza los ítems con una propuesta armada desde el catálogo">↻ Autollenar</button>')
     + '<button class="btn wa" id="bWa">WhatsApp</button>'
     + '<button class="btn" id="bCopy">Copiar texto</button>'
     + '<button class="btn pri" id="bPdf">Ver / PDF para el cliente</button>'
@@ -365,7 +406,8 @@ function pintarEditor(){
     + fld('WhatsApp del cliente', '<input type="text" data-f="tel" value="' + esc(x.tel) + '" placeholder="57300…">')
     + fld('Email', '<input type="email" data-f="email" value="' + esc(x.email) + '">')
     + fld('Ciudad', '<input type="text" data-f="ciudad" value="' + esc(x.ciudad) + '">')
-    + fld('Cantidad de kits', '<input type="number" min="1" data-f="cantidad" data-num="1" value="' + esc(x.cantidad) + '">')
+    + (EV(x) ? fld('Evento', '<input type="text" data-f="evento" value="' + esc(x.evento) + '" placeholder="Ej: Feria Corferias · 11 días">')
+             : fld('Cantidad de kits', '<input type="number" min="1" data-f="cantidad" data-num="1" value="' + esc(x.cantidad) + '">'))
     + fld('Vigencia (días)', '<input type="number" min="1" data-f="vigencia" data-num="1" value="' + esc(x.vigencia) + '">')
     + fld('Fecha', '<input type="date" id="fFecha" value="' + esc(d.fecha) + '">')
     + fld('Estado', '<select data-f="estado">' + ESTADOS.map(function(e){ return '<option' + (e === x.estado ? ' selected' : '') + '>' + e + '</option>'; }).join('') + '</select>')
@@ -373,7 +415,8 @@ function pintarEditor(){
     + '<label class="chk" style="align-self:end;padding-bottom:9px"><input type="checkbox" data-f="verPrecios"' + (x.verPrecios !== false ? ' checked' : '') + '> Mostrar al cliente el precio de cada producto</label>'
     + '</div></div>';
 
-  h += '<div class="sec row"><span>Opciones de kit · precios sin IVA por unidad</span><span class="sp"></span>'
+  if (EV(x)) h += '<div class="sec">Alcance del servicio (una línea por punto, lo ve el cliente)</div><div class="card"><textarea data-f="alcance" style="min-height:110px" placeholder="Lugar y días&#10;Estaciones y equipos&#10;Bebidas incluidas">' + esc(x.alcance) + '</textarea></div>';
+  h += '<div class="sec row"><span>' + (EV(x) ? 'Opciones del servicio · costo interno y precio sin IVA' : 'Opciones de kit · precios sin IVA por unidad') + '</span><span class="sp"></span>'
     + '<label class="small muted row" style="gap:6px">Utilidad % para todas<input type="number" min="0" max="90" id="mgTodas" placeholder="ej. 40" style="width:80px;padding:5px 8px"></label><button class="btn sm" id="bMgTodas">Aplicar</button>'
     + (x.opciones.length < 4 ? '<button class="btn sm ghost" id="bAddOpt">+ Opción</button>' : '') + '</div>';
   h += '<div class="opts">';
@@ -391,6 +434,7 @@ function pintarEditor(){
       var k = 'data-o="' + oi + '" data-i="' + ii + '"';
       h += '<div class="it"><input type="number" min="0" step="1" ' + k + ' data-if="qty" value="' + esc(it.qty) + '" title="Cantidad por kit">'
         + '<div><input type="text" ' + k + ' data-if="desc" value="' + esc(it.desc) + '">'
+        + (EV(x) ? '<input type="text" ' + k + ' data-if="sub" value="' + esc(it.sub || '') + '" placeholder="Detalle para el cliente (ej. 3 baristas × 11 días)" style="margin-top:4px;font-size:12px">' : '')
         + '<div class="m"><label>Costo unit.<input type="number" min="0" ' + k + ' data-if="costo" value="' + esc(it.costo) + '"></label>'
         + '<label>Precio unit.<input type="number" min="0" ' + k + ' data-if="precio" value="' + esc(it.precio) + '"></label></div>'
         + '<div class="tag">' + (it.tipo === 'cafe' ? 'Producto del catálogo' : it.tipo === 'equipo' ? 'Método / equipo' : it.tipo === 'insumo' ? 'Insumo' : 'Ítem libre') + (!n(it.precio) ? ' · <span class="mg-bad">sin precio</span>' : '') + (it.tipo !== 'libre' && !n(it.costo) ? ' · <span class="mg-warn">sin costo registrado</span>' : '') + '</div></div>'
@@ -398,16 +442,17 @@ function pintarEditor(){
     });
     h += '<select class="opt-add" data-add="' + oi + '">' + optsHtml + '</select></div>'
       + '<div class="opt-ft">'
-      + '<div class="kv"><span class="muted">Costo por kit</span><b>' + fmt(c.costoU) + '</b></div>'
+      + '<div class="kv"><span class="muted">' + (EV(x) ? 'Costo total' : 'Costo por kit') + '</span><b>' + fmt(c.costoU) + '</b></div>'
       + '<div class="kv"><span class="muted">Suma a precio de lista</span><b>' + fmt(c.listaU) + '</b></div>'
       + '<div class="mini"><label class="hl" title="Margen que quieres ganar sobre el precio. Recalcula el precio de cada ítem desde su costo">Utilidad %<input type="number" min="0" max="90" step="1" data-o="' + oi + '" data-of="mg" value="' + esc(o.mg || '') + '" placeholder="—"></label>'
       + '<label>Descuento %<input type="number" min="0" max="90" data-o="' + oi + '" data-of="dcto" value="' + esc(o.dcto || 0) + '"></label>'
-      + '<label>Precio manual / kit<input type="number" min="0" data-o="' + oi + '" data-of="manual" value="' + esc(o.manual || '') + '" placeholder="auto"></label></div>'
-      + '<div class="kv"><span class="muted">Utilidad por kit</span><b class="' + mgClase(c.mg) + '">' + fmt(c.util) + ' · ' + Math.round(c.mg) + '%</b></div>'
-      + '<div class="kv"><span class="muted">Utilidad total (' + c.cant + ' kits)</span><b class="' + mgClase(c.mg) + '">' + fmt(c.utilTot) + '</b></div>'
+      + '<label>' + (EV(x) ? 'Precio manual' : 'Precio manual / kit') + '<input type="number" min="0" data-o="' + oi + '" data-of="manual" value="' + esc(o.manual || '') + '" placeholder="auto"></label></div>'
+      + '<div class="kv"><span class="muted">' + (EV(x) ? 'Ganancia · margen' : 'Utilidad por kit') + '</span><b class="' + mgClase(c.mg) + '">' + fmt(c.util) + ' · ' + Math.round(c.mg) + '%</b></div>'
+      + (EV(x) ? '<div class="kv"><span class="muted">Markup sobre costo</span><b>' + (c.costoU ? Math.round(c.util / c.costoU * 1000) / 10 : 0) + '%</b></div>'
+               : '<div class="kv"><span class="muted">Utilidad total (' + c.cant + ' kits)</span><b class="' + mgClase(c.mg) + '">' + fmt(c.utilTot) + '</b></div>')
       + (c.sinCosto ? '<div class="small mg-warn" style="margin-top:4px">Hay ítems sin costo: la utilidad real es menor.</div>' : '')
-      + '<div class="kv big"><span>Precio por kit' + (x.iva ? ' + IVA' : '') + '</span><b>' + fmt(c.precioUIva) + '</b></div>'
-      + '<div class="kv"><span class="muted">Total ' + c.cant + ' kits' + (x.iva ? ' (IVA incl.)' : '') + '</span><b>' + fmt(c.total) + '</b></div>'
+      + '<div class="kv big"><span>' + (EV(x) ? 'Precio al cliente' : 'Precio por kit') + (x.iva ? ' + IVA' : '') + '</span><b>' + fmt(c.precioUIva) + '</b></div>'
+      + (EV(x) ? '' : '<div class="kv"><span class="muted">Total ' + c.cant + ' kits' + (x.iva ? ' (IVA incl.)' : '') + '</span><b>' + fmt(c.total) + '</b></div>')
       + '</div></div>';
   });
   h += '</div>';
@@ -427,10 +472,10 @@ function conectarEditor(){
   $('bPdf').onclick = function(){ if (S.dirty) guardar(S.cur, true); abrirDocumento(); };
   $('bCopy').onclick = function(){ copiar(textoWhatsApp()); };
   $('bWa').onclick = function(){ var tel = String(x.tel || '').replace(/\D/g, ''); if (tel && tel.length === 10) tel = '57' + tel; window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(textoWhatsApp()), '_blank'); if (x.estado === 'Borrador') { x.estado = 'Enviada'; programarGuardado(); pintarEditor(); } };
-  $('bAuto').onclick = function(){ if (x.opciones.some(function(o){ return o.items.length; }) && !confirm('¿Reemplazar los ítems de las 3 opciones por una propuesta automática desde el catálogo?')) return; autollenar(S.cur); programarGuardado(); pintarEditor(); };
+  if ($('bAuto')) $('bAuto').onclick = function(){ if (x.opciones.some(function(o){ return o.items.length; }) && !confirm('¿Reemplazar los ítems de las 3 opciones por una propuesta automática desde el catálogo?')) return; autollenar(S.cur); programarGuardado(); pintarEditor(); };
   $('fFecha').onchange = function(){ S.cur.fecha = this.value || hoy(); programarGuardado(); };
   $('bMgTodas').onclick = function(){ var m = n($('mgTodas').value); if (!(m > 0 && m < 95)) { toast('Escribe una utilidad entre 1 y 90%', true); return; } x.opciones.forEach(function(o){ o.mg = m; aplicarUtilidad(o); }); programarGuardado(); pintarEditor(); toast('Utilidad del ' + m + '% aplicada a todas las opciones'); };
-  if ($('bAddOpt')) $('bAddOpt').onclick = function(){ x.opciones.push({ nombre: 'Kit ' + TIERS[x.opciones.length], desc: '', items: [], dcto: 0, manual: 0 }); programarGuardado(); pintarEditor(); };
+  if ($('bAddOpt')) $('bAddOpt').onclick = function(){ x.opciones.push({ nombre: EV(x) ? 'Opción ' + 'ABCD'.charAt(x.opciones.length) : 'Kit ' + TIERS[x.opciones.length], desc: '', items: [], dcto: 0, manual: 0 }); programarGuardado(); pintarEditor(); };
   Array.prototype.forEach.call(document.querySelectorAll('[data-f]'), function(el){
     el.addEventListener(el.type === 'checkbox' || el.tagName === 'SELECT' ? 'change' : 'input', function(){
       var f = el.getAttribute('data-f');
@@ -451,10 +496,10 @@ function conectarEditor(){
     el.addEventListener('input', function(){
       var it = x.opciones[n(el.getAttribute('data-o'))].items[n(el.getAttribute('data-i'))], f = el.getAttribute('data-if');
       var op = x.opciones[n(el.getAttribute('data-o'))];
-      it[f] = f === 'desc' ? el.value : n(el.value);
+      it[f] = (f === 'desc' || f === 'sub') ? el.value : n(el.value);
       if (f === 'precio' && op.mg) op.mg = 0;
       if (f === 'costo' && op.mg) { var pp = precioConUtilidad(it.costo, op.mg); if (pp != null) it.precio = pp; }
-      programarGuardado(); if (f !== 'desc') refrescarLuego();
+      programarGuardado(); if (f !== 'desc' && f !== 'sub') refrescarLuego();
     });
   });
   Array.prototype.forEach.call(document.querySelectorAll('[data-add]'), function(el){
@@ -514,6 +559,7 @@ function pintarEquipos(){
 // =============== SALIDA AL CLIENTE ===============
 function textoWhatsApp(){
   var x = S.cur.data, L = [];
+  if (EV(x)) return textoWhatsAppEvento(x);
   L.push('Hola ' + (x.cliente || '') + ', te comparto la cotización de kits de café B.R.U' + (x.empresa ? ' para ' + x.empresa : '') + ' (' + x.cantidad + ' kit' + (x.cantidad > 1 ? 's' : '') + '):');
   x.opciones.forEach(function(o, i){
     var c = calcOpcion(o, x.cantidad, x.iva);
@@ -528,6 +574,20 @@ function textoWhatsApp(){
   L.push(''); L.push('Quedo atento a cuál opción prefieres. — B.R.U · Brew Respect Unite');
   return L.join('\n');
 }
+function textoWhatsAppEvento(x){
+  var L = [];
+  L.push('Hola ' + (x.cliente || '') + ', te comparto la cotización del servicio de café B.R.U' + (x.evento ? ' para ' + x.evento : '') + (x.empresa ? ' (' + x.empresa + ')' : '') + ':');
+  String(x.alcance || '').split('\n').forEach(function(l){ if (l.trim()) L.push('• ' + l.trim()); });
+  x.opciones.forEach(function(o){
+    var c = calcOpcion(o, 1, x.iva);
+    L.push(''); L.push('*' + o.nombre + '* — ' + fmt(c.precioUIva) + (x.iva ? ' (IVA incl.)' : ' (antes de IVA)'));
+    if (o.desc) L.push(o.desc);
+  });
+  L.push(''); L.push('Vigencia: ' + x.vigencia + ' días.');
+  if (x.notas) L.push(x.notas);
+  L.push(''); L.push('Quedo atento a cuál opción prefieres. — B.R.U · Brew Respect Unite');
+  return L.join('\n');
+}
 function iconoEq(cat){
   var P = {
     'Método': '<path d="M5 6h14l-4 9H9z"/><path d="M9 15v3h6v-3"/><path d="M8 21h8"/><path d="M12 2v2"/>',
@@ -536,6 +596,8 @@ function iconoEq(cat){
     'Filtros': '<path d="M4 5h16l-6 9v5l-4 2v-7z"/>',
     'Taza / vaso': '<path d="M4 8h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 10h2a2 2 0 0 1 0 4h-2"/><path d="M8 3v2M12 3v2"/>',
     'Café': '<ellipse cx="12" cy="12" rx="6" ry="9" transform="rotate(30 12 12)"/><path d="M9 5c3 3 3 11 6 14"/>',
+    'Persona': '<circle cx="12" cy="7" r="4"/><path d="M4 21v-1a7 7 0 0 1 16 0v1"/>',
+    'Gota': '<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/>',
     'Insumo': '<path d="M3 8l9-5 9 5-9 5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>'
   };
   return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + (P[cat] || P['Insumo']) + '</svg>';
@@ -544,14 +606,15 @@ function infoItem(it){
   if (it.tipo === 'cafe') { var c = S.cafes.filter(function(k){ return k.key === it.ref; })[0] || {}; return { img: it.img || c.img || '', sub: c.sub || 'Café de especialidad', cat: 'Café' }; }
   if (it.tipo === 'equipo') { var e = S.eq.filter(function(k){ return k.id === it.ref; })[0] || {}; return { img: e.img || '', sub: e.cat || 'Equipo', cat: e.cat || 'Accesorio' }; }
   if (it.tipo === 'insumo') return { img: '', sub: 'Empaque', cat: 'Insumo' };
-  return { img: '', sub: '', cat: 'Insumo' };
+  return { img: '', sub: it.sub || '', cat: it.cat || 'Insumo' };
 }
 function htmlDocumento(){
   var d = S.cur, x = d.data, vence = sumaDias(d.fecha || hoy(), x.vigencia), M = S.marca || {};
   var origin = /^https?:/.test(location.origin) ? location.origin : 'https://www.brucoffeeshop.online';
   var logo = origin + '/bru-logo.svg';
   var waNum = M.wa || WA_BRU, waFmt = '+' + waNum.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})$/, '$1 $2 $3 $4');
-  var waTxt = 'Hola B.R.U, quiero continuar con la cotización de kits N.° ' + x.num;
+  var ev = EV(x);
+  var waTxt = 'Hola B.R.U, quiero continuar con la cotización ' + (ev ? 'del evento' : 'de kits') + ' N.° ' + x.num;
   var waUrl = 'https://wa.me/' + waNum + '?text=' + encodeURIComponent(waTxt);
   var qr = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&color=2B124C&bgcolor=FBE4D8&data=' + encodeURIComponent(waUrl);
   var verP = x.verPrecios !== false, nOp = x.opciones.length;
@@ -562,27 +625,31 @@ function htmlDocumento(){
   if (!hayCafe && !hayEq) hayCafe = true;
   var queSeparamos = hayCafe && hayEq ? 'el café y tus equipos' : hayCafe ? 'el café' : 'tus equipos';
   var condiciones = hayCafe ? x.condiciones : String(x.condiciones || '').replace(/\s*Café tostado sobre pedido\.?/i, '');
-  var reco = nOp >= 3 ? 1 : -1;
+  var reco = nOp >= 3 && !ev ? 1 : -1;
+  var alc = String(x.alcance || '').split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+  var mBeb = /([\d.]+)\s*bebidas/i.exec(x.alcance || ''), nBeb = ev && mBeb ? n(mBeb[1].replace(/\./g, '')) : 0;
+  if (ev) { hayCafe = true; hayEq = false; }
   var cols = x.opciones.map(function(o, i){
     var c = calcOpcion(o, x.cantidad, x.iva);
     var filas = o.items.filter(function(it){ return n(it.qty) > 0; }).map(function(it){
       var inf = infoItem(it), lin = n(it.qty) * n(it.precio);
       var th = inf.img ? '<span class="th" style="background-image:url(\'' + esc(inf.img) + '\')"></span>' : '<span class="th ic">' + iconoEq(inf.cat) + '</span>';
       return '<li>' + th + '<span class="it"><b>' + esc(it.desc) + '</b><small>' + esc(inf.sub) + '</small></span>'
-        + (verP ? '<span class="pr2"><span class="un">' + esc(it.qty) + ' × ' + (n(it.precio) ? fmt(it.precio) : '—') + '</span><b>' + (n(it.precio) ? fmt(lin) : 'Incluido') + '</b></span>'
-               : '<span class="pr2"><b>× ' + esc(it.qty) + '</b></span>')
+        + (verP ? '<span class="pr2">' + (ev && n(it.qty) === 1 ? '' : '<span class="un">' + esc(it.qty) + ' × ' + (n(it.precio) ? fmt(it.precio) : '—') + '</span>') + '<b>' + (n(it.precio) ? fmt(lin) : 'Incluido') + '</b></span>'
+               : (ev ? '<span></span>' : '<span class="pr2"><b>× ' + esc(it.qty) + '</b></span>'))
         + '</li>';
     }).join('');
     var ahorro = c.listaU - c.precioU;
-    var rs = verP ? '<div class="rs"><div><span>Valor por separado</span><span>' + fmt(c.listaU) + '</span></div>'
-      + (ahorro > 0 ? '<div class="ah"><span>Ahorro con el kit (' + Math.round(ahorro / (c.listaU || 1) * 100) + '%)</span><span>−' + fmt(ahorro) + '</span></div>' : '') + '</div>' : '';
+    var rs = verP && !(ev && ahorro <= 0) ? '<div class="rs"><div><span>Valor por separado</span><span>' + fmt(c.listaU) + '</span></div>'
+      + (ahorro > 0 ? '<div class="ah"><span>' + (ev ? 'Descuento' : 'Ahorro con el kit') + ' (' + Math.round(ahorro / (c.listaU || 1) * 100) + '%)</span><span>−' + fmt(ahorro) + '</span></div>' : '') + '</div>' : '';
     return '<article class="op ' + tiers[i] + (i === reco ? ' reco' : '') + (nOp === 1 ? ' solo' : '') + '">'
       + (i === reco ? '<div class="badge">★ Recomendado</div>' : '')
-      + '<header><div class="ti">' + (nOp === 1 ? 'Tu kit' : 'Opción ' + (i + 1)) + '</div><h3>' + esc(o.nombre) + '</h3>' + (o.desc ? '<p>' + esc(o.desc) + '</p>' : '') + '</header>'
+      + '<header><div class="ti">' + (nOp === 1 ? (ev ? 'Tu servicio' : 'Tu kit') : 'Opción ' + (i + 1)) + '</div><h3>' + esc(o.nombre) + '</h3>' + (o.desc ? '<p>' + esc(o.desc) + '</p>' : '') + '</header>'
       + '<ul>' + filas + '</ul>' + rs
-      + '<footer><div class="lb">Precio por kit' + (x.iva ? ' · antes de IVA' : '') + '</div><div class="big">' + fmt(c.precioU) + '</div>'
+      + '<footer><div class="lb">' + (ev ? 'Valor total del servicio' + (x.iva ? '' : ' · antes de IVA') : 'Precio por kit' + (x.iva ? ' · antes de IVA' : '')) + '</div><div class="big">' + fmt(c.precioU) + '</div>'
       + (x.iva ? '<div class="iv">IVA 19% ' + fmt(c.precioUIva - c.precioU) + ' · <b>' + fmt(c.precioUIva) + ' con IVA</b></div>' : '')
-      + '<div class="tot"><span>' + c.cant + ' ' + plural(c.cant, 'kit', 'kits') + '</span><b>' + fmt(c.total) + '</b></div>'
+      + (ev ? '<div class="tot"><span>Por bebida' + (nBeb ? ' (' + nBeb.toLocaleString('es-CO') + ')' : '') + '</span><b>' + (nBeb ? fmt(c.precioU / nBeb) : '—') + '</b></div>'
+            : '<div class="tot"><span>' + c.cant + ' ' + plural(c.cant, 'kit', 'kits') + '</span><b>' + fmt(c.total) + '</b></div>')
       + (x.iva ? '<div class="tsm">Total con IVA incluido</div>' : '') + '</footer></article>';
   }).join('');
   var para = x.empresa ? esc(x.empresa) : esc(x.cliente || 'Cliente');
@@ -648,6 +715,7 @@ function htmlDocumento(){
     '.steps{background:var(--cream);border-radius:16px;padding:18px 20px}.steps h4{margin:0 0 12px;font-family:Fraunces,Georgia,serif;font-weight:400;font-size:18px;color:var(--plum)}',
     '.steps ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}.steps li{display:flex;gap:10px;font-size:11.5px;color:var(--berry)}.steps li i{flex:0 0 24px;height:24px;border-radius:50%;background:var(--plum);color:var(--gold);font-style:normal;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center}.steps li b{display:block;color:var(--plum);font-size:12px}',
     '.qr{background:var(--plum);color:var(--cream);border-radius:16px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-decoration:none}.qr img{width:120px;height:120px;border-radius:10px;background:var(--cream);padding:8px}.qr b{color:var(--gold);font-size:13px}.qr span{font-size:10.5px;color:var(--blush)}',
+    '.alc{list-style:none;margin:0 0 24px;padding:14px 18px;background:var(--cream);border-radius:14px;display:grid;gap:6px}.alc li{position:relative;padding-left:16px;font-size:12px;color:var(--berry)}.alc li:before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:50%;background:var(--mauve)}',
     '.nt{margin:18px 0 26px;font-size:11px;color:#7a6670;line-height:1.6;white-space:pre-line}.nt b{color:var(--plum)}',
     /* pie */
     '.foot{background:var(--ink);color:var(--blush);padding:18px 34px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:11px}.foot img{height:34px}.foot .sp{flex:1}.foot a{color:var(--cream);text-decoration:none}.foot .c{display:flex;gap:16px;flex-wrap:wrap}',
@@ -665,26 +733,34 @@ function htmlDocumento(){
     + '<section class="cover">' + (M.hero ? '<div class="ph" style="background-image:url(' + esc(M.hero) + ')"></div>' : '') + '<div class="gl"></div>'
     + '<div class="top"><div class="brand"><img src="' + logo + '" alt="B.R.U"><div><div class="w">B·R·U</div><div class="s">Brew · Respect · Unite</div></div></div>'
     + '<div class="num"><div class="k">Cotización</div><div class="n">N.° ' + String(x.num).padStart(4, '0') + '</div><div class="f">' + fFecha(d.fecha) + ' · válida hasta ' + fFecha(vence) + '</div></div></div>'
-    + '<div class="ttl"><div class="ey">' + (hayCafe && hayEq ? 'Café de especialidad y métodos de preparación' : hayCafe ? 'Café de especialidad colombiano' : 'Métodos y equipos de café') + '</div><h1>' + (nOp === 1 ? esc(x.opciones[0].nombre || 'Kit de café') + ' <em>B.R.U</em>' : (hayCafe ? 'Kits de café' : 'Kits de preparación') + ' <em>B.R.U</em>') + '</h1>'
+    + '<div class="ttl"><div class="ey">' + (ev ? 'Servicio de café de especialidad para eventos' : hayCafe && hayEq ? 'Café de especialidad y métodos de preparación' : hayCafe ? 'Café de especialidad colombiano' : 'Métodos y equipos de café') + '</div><h1>' + (ev ? esc(x.evento || 'Servicio de café') + ' <em>B.R.U</em>' : nOp === 1 ? esc(x.opciones[0].nombre || 'Kit de café') + ' <em>B.R.U</em>' : (hayCafe ? 'Kits de café' : 'Kits de preparación') + ' <em>B.R.U</em>') + '</h1>'
     + '<div class="pa">Preparada para <b>' + para + '</b>' + (contacto ? '<small>' + contacto + '</small>' : '') + '</div>'
-    + '<div class="chips"><span><b>' + esc(x.cantidad) + '</b> ' + plural(n(x.cantidad), 'kit', 'kits') + '</span>' + (nOp > 1 ? '<span><b>' + nOp + '</b> opciones</span>' : '') + (verP ? '<span>Precios unitarios ' + (x.iva ? 'antes de IVA' : 'finales') + '</span>' : '') + '</div></div>'
+    + '<div class="chips">' + (ev ? (nBeb ? '<span><b>' + nBeb.toLocaleString('es-CO') + '</b> bebidas</span>' : '') : '<span><b>' + esc(x.cantidad) + '</b> ' + plural(n(x.cantidad), 'kit', 'kits') + '</span>') + (nOp > 1 ? '<span><b>' + nOp + '</b> opciones</span>' : '') + (ev ? '<span>Valores ' + (x.iva ? 'con IVA' : 'antes de IVA') + '</span>' : verP ? '<span>Precios unitarios ' + (x.iva ? 'antes de IVA' : 'finales') + '</span>' : '') + '</div></div>'
     + '</section>'
     + '<section class="vals">'
-    + (hayCafe ? '<div>' + ico('<path d="M12 2l3 7h7l-5.5 4.5 2 7.5-6.5-4.5L5.5 21l2-7.5L2 9h7z"/>') + '<span><b>Café de competencia</b>Lotes 85+ puntos SCA</span></div>'
+    + (ev ? '<div>' + ico('<path d="M12 2l3 7h7l-5.5 4.5 2 7.5-6.5-4.5L5.5 21l2-7.5L2 9h7z"/>') + '<span><b>Café de especialidad</b>Origen colombiano, tostado por B.R.U</span></div>'
+      + '<div>' + ico('<circle cx="12" cy="7" r="4"/><path d="M4 21v-1a7 7 0 0 1 16 0v1"/>') + '<span><b>Baristas profesionales</b>Operación completa de barra</span></div>'
+      + '<div>' + ico('<path d="M5 6h14l-4 9H9z"/><path d="M9 15v3h6v-3"/><path d="M8 21h8"/>') + '<span><b>Todo incluido</b>Equipos, insumos y montaje</span></div>' : '')
+    + (ev ? '' : hayCafe ? '<div>' + ico('<path d="M12 2l3 7h7l-5.5 4.5 2 7.5-6.5-4.5L5.5 21l2-7.5L2 9h7z"/>') + '<span><b>Café de competencia</b>Lotes 85+ puntos SCA</span></div>'
       + '<div>' + ico('<path d="M8 21h8M12 17v4M7 4h10l-1 13H8z"/><path d="M17 7h2a2 2 0 0 1 0 4h-2"/>') + '<span><b>Tostado sobre pedido</b>Fresco para tu entrega</span></div>'
       : '<div>' + ico('<path d="M12 2l3 7h7l-5.5 4.5 2 7.5-6.5-4.5L5.5 21l2-7.5L2 9h7z"/>') + '<span><b>Equipos seleccionados</b>Elegidos por baristas</span></div>'
       + '<div>' + ico('<path d="M5 6h14l-4 9H9z"/><path d="M9 15v3h6v-3"/><path d="M8 21h8"/>') + '<span><b>Listo para preparar</b>Todo lo que necesitas en casa</span></div>')
-    + (hayCafe && !hayEq ? '<div>' + ico('<path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>') + '<span><b>Trazable</b>De la finca a la taza</span></div>'
+    + (ev ? '' : hayCafe && !hayEq ? '<div>' + ico('<path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>') + '<span><b>Trazable</b>De la finca a la taza</span></div>'
       : hayCafe ? '<div>' + ico('<path d="M5 6h14l-4 9H9z"/><path d="M9 15v3h6v-3"/><path d="M8 21h8"/>') + '<span><b>Todo para preparar</b>Café y método en un solo kit</span></div>'
       : '<div>' + ico('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>') + '<span><b>Te acompañamos</b>Asesoría por WhatsApp</span></div>')
     + '</section>'
-    + '<section class="body"><div class="sec"><h2>' + plural(nOp, 'Nuestra propuesta', 'Elige tu kit') + '</h2><span>Valores en pesos colombianos (COP)</span></div>'
+    + '<section class="body">'
+    + (ev && alc.length ? '<div class="sec"><h2>Alcance del servicio</h2></div><ul class="alc">' + alc.map(function(l){ return '<li>' + esc(l) + '</li>'; }).join('') + '</ul>' : '')
+    + '<div class="sec"><h2>' + plural(nOp, 'Nuestra propuesta', ev ? 'Opciones de servicio' : 'Elige tu kit') + '</h2><span>Valores en pesos colombianos (COP)</span></div>'
     + '<div class="ops">' + cols + '</div>'
     + '<div class="next"><div class="steps"><h4>Cómo seguimos</h4><ol>'
     + '<li><i>1</i><span><b>' + (nOp === 1 ? 'Confirma tu pedido' : 'Elige tu opción') + '</b>Ajustamos cantidades o contenido si lo necesitas.</span></li>'
-    + '<li><i>2</i><span><b>Anticipo del 50%</b>Confirmamos el pedido y separamos ' + queSeparamos + '.</span></li>'
+    + (ev ? '<li><i>2</i><span><b>Separamos la fecha</b>Confirmamos el servicio y el equipo de baristas.</span></li>'
+      + '<li><i>3</i><span><b>Tostamos y alistamos</b>Café recién tostado, equipos e insumos listos.</span></li>'
+      + '<li><i>4</i><span><b>Montaje y servicio</b>Llegamos antes de abrir y operamos la barra todo el evento.</span></li>'
+    : '<li><i>2</i><span><b>Anticipo del 50%</b>Confirmamos el pedido y separamos ' + queSeparamos + '.</span></li>'
     + '<li><i>3</i><span><b>' + (hayCafe ? 'Tostamos y empacamos' : 'Alistamos y empacamos') + '</b>' + (hayCafe && hayEq ? 'Café recién tostado y cada kit armado a mano.' : hayCafe ? 'Café recién tostado, cada kit armado a mano.' : 'Revisamos cada equipo y armamos tu kit a mano.') + '</span></li>'
-    + '<li><i>4</i><span><b>Entrega</b>Coordinamos fecha y lugar contigo.</span></li>'
+    + '<li><i>4</i><span><b>Entrega</b>Coordinamos fecha y lugar contigo.</span></li>')
     + '</ol></div><a class="qr" href="' + esc(waUrl) + '" target="_blank"><img id="qrimg" data-url="' + esc(waUrl) + '" src="' + qr + '" alt="QR WhatsApp" crossorigin="anonymous"><b>Escanea y confirma</b><span>WhatsApp ' + esc(waFmt) + '</span></a></div>'
     + '<div class="nt">' + (x.notas ? '<b>Notas.</b> ' + esc(x.notas) + '\n' : '') + (condiciones ? '<b>Condiciones.</b> ' + esc(condiciones) : '') + '</div>'
     + '</section>'
@@ -704,7 +780,7 @@ function abrirDocumento(){
 
 // =============== INICIO ===============
 window.addEventListener('beforeunload', function(){ if (S.dirty && S.cur) { respaldoLocal(); } });
-cargar().then(function(){ return compactarNumeros().catch(function(){}); }).then(pintarLista).catch(function(e){ $('main').innerHTML = '<div class="card empty">No se pudo cargar: ' + esc(e.message) + '</div>'; });
+cargar().then(function(){ return sembrar().catch(function(){}); }).then(function(){ return compactarNumeros().catch(function(){}); }).then(pintarLista).catch(function(e){ $('main').innerHTML = '<div class="card empty">No se pudo cargar: ' + esc(e.message) + '</div>'; });
 })();
 </script>
 </body>
