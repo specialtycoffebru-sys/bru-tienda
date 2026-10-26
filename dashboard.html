@@ -5947,7 +5947,7 @@ function syncAll() {
 function syncPeds() {
   sbGet('/rest/v1/bru_pedidos?order=created_at.desc&limit=200').then(function(peds) {
     if(peds&&peds.length){
-      peds=peds.filter(function(p){return p.pago!=='pre-pedido';});
+      peds=peds.filter(function(p){return p.pago!=='pre-pedido'&&p.pago!=='cliente';});
       var ld=JSON.parse(localStorage.getItem('bru_d')||'{}');
       ld.peds=peds.map(function(p){return Object.assign({},p,{_sbId:p.id});});
       localStorage.setItem('bru_d',JSON.stringify(ld));
@@ -6109,10 +6109,18 @@ function markPreped(i){
 }
 
 // ═══ CLIENTES (web + manuales) ══════════════════════════════
+/* Clientes registrados en la web (filas de bru_pedidos con pago 'cliente').
+   Protecciones: si la lectura falla NO se vacía la lista; y si un cliente que
+   ya conocíamos ya no está en Supabase (p. ej. se borró sin querer desde
+   Pedidos), se vuelve a subir. Solo se olvida si se elimina desde Clientes. */
+function cliClave(c){ return String((c&&c.email)||'').toLowerCase().trim() || String((c&&c.tel)||'').replace(/\D/g,'').slice(-10); }
 function syncClientes(){
-  sbGet('/rest/v1/bru_pedidos?order=created_at.desc&limit=500').then(function(rows){
-    if(rows && rows.length!==undefined){
+  sbGetInfo('/rest/v1/bru_pedidos?order=created_at.desc&limit=1000').then(function(info){
+    if(!info.ok){ console.error('[BRU] No se pudo leer clientes ('+info.status+'): se conserva la lista actual'); return; }
+    var rows=info.rows;
+    {
       var ld=JSON.parse(localStorage.getItem('bru_d')||'{}');
+      var antes=ld.cliWeb||[], borrados=ld.cliBorrados||[];
       ld.cliWeb=(rows||[]).filter(function(p){return p.pago==='cliente';}).map(function(p){
         var em=p.email||''; var mt='';
         if(p.notas){
@@ -6121,6 +6129,20 @@ function syncClientes(){
         }
         return {_sbId:p.id,nombre:p.cliente||'',tel:p.tel||'',email:em,metodo:mt,fecha:p.created_at||''};
       });
+      var enNube={}; ld.cliWeb.forEach(function(c){ var k=cliClave(c); if(k) enNube[k]=1; });
+      antes.forEach(function(c){
+        var k=cliClave(c);
+        if(!k || enNube[k] || borrados.indexOf(k)>=0) return;
+        enNube[k]=1;
+        ld.cliWeb.push({nombre:c.nombre,tel:c.tel,email:c.email,metodo:c.metodo,fecha:c.fecha,_restaurado:true});
+        fetch(SB+'/rest/v1/bru_pedidos',{method:'POST',headers:sbHead({'Prefer':'return=minimal'}),body:JSON.stringify({
+          cliente:c.nombre||'',tel:c.tel||'',ciudad:'',barrio:'',dir:'',pago:'cliente',email:c.email||'',
+          notas:'Registro web (restaurado)'+(c.metodo?' \u00b7 Prepara con: '+c.metodo:'')+(c.email?' \u00b7 '+c.email:''),
+          items:[],subtotal:0,iva:0,total:0,estado:'Registrado',visto:true,created_at:c.fecha||undefined})})
+          .then(function(r){ if(!r.ok) r.text().then(function(t){ console.error('[BRU] No se pudo restaurar cliente',t); }); })
+          .catch(function(){});
+      });
+      ld.cliWeb.sort(function(a,b){ return String(b.fecha||'').localeCompare(String(a.fecha||'')); });
       // pedidos reales para cruzar compras
       ld.pedTodos=(rows||[]).filter(function(p){return p.pago!=='cliente'&&p.pago!=='pre-pedido';})
         .map(function(p){return {tel:(p.tel||'').replace(/\D/g,''),cliente:p.cliente||'',total:p.total||0};});
@@ -6218,7 +6240,9 @@ function delClienteWeb(i){
   var sbId=c._sbId||c.id;
   function quitarLocal(){
     var ld2=JSON.parse(localStorage.getItem('bru_d')||'{}');
-    if(ld2.cliWeb){ ld2.cliWeb.splice(i,1); localStorage.setItem('bru_d',JSON.stringify(ld2)); }
+    if(ld2.cliWeb){ ld2.cliWeb.splice(i,1); }
+    var kb=cliClave(c); if(kb){ ld2.cliBorrados=ld2.cliBorrados||[]; if(ld2.cliBorrados.indexOf(kb)<0) ld2.cliBorrados.push(kb); }
+    localStorage.setItem('bru_d',JSON.stringify(ld2));
     renderClientes();
   }
   if(!sbId){ quitarLocal(); toast('Cliente eliminado','ok'); return; }
@@ -8967,7 +8991,7 @@ function borrarTodosPedidos(){
     fetch(SB+'/rest/v1/bru_pedidos?select=id,pago&limit=2000',{headers:sbHead()})
       .then(function(r){ return r.ok ? r.json() : []; })
       .then(function(rows){
-        rows = (rows||[]).filter(function(x){ return x.pago !== 'pre-pedido'; });
+        rows = (rows||[]).filter(function(x){ return x.pago !== 'pre-pedido' && x.pago !== 'cliente'; });
         function limpiarLocal(){
           var ld = JSON.parse(localStorage.getItem('bru_d')||'{}');
           ld.peds = [];
