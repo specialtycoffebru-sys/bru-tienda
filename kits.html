@@ -225,7 +225,8 @@ function sigNum(){ var m = 0; S.docs.forEach(function(d){ if (!d.data.eliminada)
 function calcOpcion(o, cant, conIva){
   var costoU = 0, listaU = 0;
   (o.items || []).forEach(function(it){ costoU += n(it.qty) * n(it.costo); listaU += n(it.qty) * n(it.precio); });
-  var precioU = n(o.manual) > 0 ? n(o.manual) : r100(listaU * (1 - n(o.dcto) / 100));
+  // Eventos (o.exacto): el precio es la suma exacta de las líneas, para que cuadre con lo que ve el cliente
+  var precioU = n(o.manual) > 0 ? n(o.manual) : o.exacto ? Math.round(listaU * (1 - n(o.dcto) / 100)) : r100(listaU * (1 - n(o.dcto) / 100));
   var c = Math.max(1, Math.round(n(cant)) || 1);
   var sub = precioU * c, iva = conIva ? Math.round(sub * IVA) : 0;
   var util = precioU - costoU, mg = precioU > 0 ? util / precioU * 100 : 0;
@@ -255,7 +256,7 @@ function nuevaCotEvento(){
   c.id = uid('ke');
   c.data.modo = 'evento'; c.data.iva = false; c.data.evento = ''; c.data.alcance = '';
   c.data.condiciones = 'Valores antes de IVA. Anticipo del 50% para confirmar la fecha del evento y saldo al finalizar. Forma de pago por confirmar.';
-  c.data.opciones = [0, 1].map(function(k){ return { nombre: 'Opción ' + 'AB'.charAt(k), desc: '', items: [], dcto: 0, manual: 0, mg: 35 }; });
+  c.data.opciones = [0, 1].map(function(k){ return { nombre: 'Opción ' + 'AB'.charAt(k), desc: '', items: [], dcto: 0, manual: 0, mg: 35, exacto: true }; });
   return c;
 }
 // Cotización del evento Corferias (11 días). Se crea UNA sola vez con id fijo; si se elimina queda marcada y no vuelve.
@@ -265,13 +266,13 @@ var SEMILLAS = [{ id: 'ke_corferias_2026', fecha: '2026-10-26', data: {
   alcance: 'Corferias, Bogotá · 11 días de evento\n3 estaciones de café, cada una con 2 máquinas KitchenAid KF3\n4 baristas profesionales durante todo el evento\n13.200 bebidas en vaso de 6 oz: 40% americano (5.280) · 30% cappuccino (3.960) · 30% latte (3.960)\nIncluye café de especialidad colombiano (14 g por bebida), leche, agua, vasos y operación de barra',
   notas: '', condiciones: 'Valores en pesos colombianos (COP), antes de IVA. Forma de pago: por confirmar.',
   opciones: [
-    { nombre: 'Opción A · Leche de vaca', desc: 'Servicio completo con leche entera de vaca.', dcto: 0, manual: 39061169, mg: 35, items: [
+    { nombre: 'Opción A · Leche de vaca', desc: 'Servicio completo con leche entera de vaca.', dcto: 0, exacto: true, manual: 39061169, mg: 35, items: [
       { tipo: 'libre', ref: '', cat: 'Café', desc: 'Café de especialidad colombiano', sub: '74 bolsas de 2,5 kg · 14 g por bebida', qty: 1, costo: 11840000, precio: 18215385 },
       { tipo: 'libre', ref: '', cat: 'Persona', desc: 'Baristas profesionales', sub: '4 baristas × 11 días ($180.000 por persona al día)', qty: 1, costo: 7920000, precio: 12184615 },
       { tipo: 'libre', ref: '', cat: 'Taza / vaso', desc: 'Vasos 6 oz', sub: '13.200 unidades', qty: 1, costo: 2640000, precio: 4061538 },
       { tipo: 'libre', ref: '', cat: 'Gota', desc: 'Agua', sub: '43 bidones de 20 L', qty: 1, costo: 344000, precio: 529231 },
       { tipo: 'libre', ref: '', cat: 'Gota', desc: 'Leche de vaca', sub: 'Aprox. 827 L', qty: 1, costo: 2645760, precio: 4070400 } ] },
-    { nombre: 'Opción B · Leche de avena', desc: 'Servicio completo con leche vegetal de avena NUDE.', dcto: 0, manual: 50319754, mg: 35, items: [
+    { nombre: 'Opción B · Leche de avena', desc: 'Servicio completo con leche vegetal de avena NUDE.', dcto: 0, exacto: true, manual: 50319754, mg: 35, items: [
       { tipo: 'libre', ref: '', cat: 'Café', desc: 'Café de especialidad colombiano', sub: '74 bolsas de 2,5 kg · 14 g por bebida', qty: 1, costo: 11840000, precio: 18215385 },
       { tipo: 'libre', ref: '', cat: 'Persona', desc: 'Baristas profesionales', sub: '4 baristas × 11 días ($180.000 por persona al día)', qty: 1, costo: 7920000, precio: 12184615 },
       { tipo: 'libre', ref: '', cat: 'Taza / vaso', desc: 'Vasos 6 oz', sub: '13.200 unidades', qty: 1, costo: 2640000, precio: 4061538 },
@@ -280,6 +281,7 @@ var SEMILLAS = [{ id: 'ke_corferias_2026', fecha: '2026-10-26', data: {
   ] } }];
 function sembrar(){
   var nuevos = [];
+  if (S.offline) return Promise.resolve();
   SEMILLAS.forEach(function(sm){
     var ya = S.byId[sm.id];
     if (ya) {
@@ -293,6 +295,7 @@ function sembrar(){
             if (/^Vasos/.test(it.desc) && n(it.precio) === 4061537) it.precio = 4061538;
           });
           if (n(o.manual) === 34491938 || n(o.manual) === 45750523) o.manual = ref.manual;
+          o.exacto = true;
         });
         ya.data.semillaVer = 2;
         nuevos.push(guardar(ya, true));
@@ -405,6 +408,7 @@ function opcionesItems(){
 }
 function pintarEditor(){
   var d = S.cur, x = d.data, optsHtml = opcionesItems();
+  if (EV(x)) x.opciones.forEach(function(o){ o.exacto = true; });
   var h = '<div class="sticky"><div class="row">'
     + '<button class="btn sm ghost" id="bVolver">← Cotizaciones</button>'
     + '<h1 style="font-size:22px">' + (EV(x) ? 'Cotización de evento #' : 'Cotización de kits #') + esc(x.num) + '</h1><span class="sp"></span>'
@@ -491,7 +495,7 @@ function conectarEditor(){
   $('bWa').onclick = function(){ var tel = String(x.tel || '').replace(/\D/g, ''); if (tel && tel.length === 10) tel = '57' + tel; window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(textoWhatsApp()), '_blank'); if (x.estado === 'Borrador') { x.estado = 'Enviada'; programarGuardado(); pintarEditor(); } };
   if ($('bAuto')) $('bAuto').onclick = function(){ if (x.opciones.some(function(o){ return o.items.length; }) && !confirm('¿Reemplazar los ítems de las 3 opciones por una propuesta automática desde el catálogo?')) return; autollenar(S.cur); programarGuardado(); pintarEditor(); };
   $('fFecha').onchange = function(){ S.cur.fecha = this.value || hoy(); programarGuardado(); };
-  $('bMgTodas').onclick = function(){ var m = n($('mgTodas').value); if (!(m > 0 && m < 95)) { toast('Escribe una utilidad entre 1 y 90%', true); return; } x.opciones.forEach(function(o){ o.mg = m; aplicarUtilidad(o); }); programarGuardado(); pintarEditor(); toast('Utilidad del ' + m + '% aplicada a todas las opciones'); };
+  $('bMgTodas').onclick = function(){ var m = n($('mgTodas').value); if (!(m > 0 && m < 95)) { toast('Escribe una utilidad entre 1 y 90%', true); return; } x.opciones.forEach(function(o){ o.mg = m; aplicarUtilidad(o); if (EV(x)) o.manual = 0; }); programarGuardado(); pintarEditor(); toast('Utilidad del ' + m + '% aplicada a todas las opciones'); };
   if ($('bAddOpt')) $('bAddOpt').onclick = function(){ x.opciones.push({ nombre: EV(x) ? 'Opción ' + 'ABCD'.charAt(x.opciones.length) : 'Kit ' + TIERS[x.opciones.length], desc: '', items: [], dcto: 0, manual: 0 }); programarGuardado(); pintarEditor(); };
   Array.prototype.forEach.call(document.querySelectorAll('[data-f]'), function(el){
     el.addEventListener(el.type === 'checkbox' || el.tagName === 'SELECT' ? 'change' : 'input', function(){
@@ -505,7 +509,7 @@ function conectarEditor(){
     el.addEventListener('input', function(){
       var o = x.opciones[n(el.getAttribute('data-o'))], f = el.getAttribute('data-of');
       o[f] = (f === 'dcto' || f === 'manual' || f === 'mg') ? n(el.value) : el.value;
-      if (f === 'mg') aplicarUtilidad(o);
+      if (f === 'mg') { aplicarUtilidad(o); if (EV(x)) o.manual = 0; }
       programarGuardado(); if (f === 'dcto' || f === 'manual' || f === 'mg') refrescarLuego();
     });
   });
@@ -514,6 +518,7 @@ function conectarEditor(){
       var it = x.opciones[n(el.getAttribute('data-o'))].items[n(el.getAttribute('data-i'))], f = el.getAttribute('data-if');
       var op = x.opciones[n(el.getAttribute('data-o'))];
       it[f] = (f === 'desc' || f === 'sub') ? el.value : n(el.value);
+      if (EV(x) && (f === 'costo' || f === 'precio' || f === 'qty') && n(op.manual)) op.manual = 0;
       if (f === 'precio' && op.mg) op.mg = 0;
       if (f === 'costo' && op.mg) { var pp = precioConUtilidad(it.costo, op.mg); if (pp != null) it.precio = pp; }
       programarGuardado(); if (f !== 'desc' && f !== 'sub') refrescarLuego();
@@ -527,10 +532,11 @@ function conectarEditor(){
       else if (v.charAt(0) === 'e') o.items.push(itemEq(S.eq[n(v.slice(1))]));
       else o.items.push(itemIns(S.ins[n(v.slice(1))]));
       if (o.mg) aplicarUtilidad(o);
+      if (EV(x)) o.manual = 0;
       programarGuardado(); pintarEditor();
     };
   });
-  Array.prototype.forEach.call(document.querySelectorAll('[data-delit]'), function(b){ b.onclick = function(){ var p = b.getAttribute('data-delit').split(':'); x.opciones[n(p[0])].items.splice(n(p[1]), 1); programarGuardado(); pintarEditor(); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-delit]'), function(b){ b.onclick = function(){ var p = b.getAttribute('data-delit').split(':'); x.opciones[n(p[0])].items.splice(n(p[1]), 1); if (EV(x)) x.opciones[n(p[0])].manual = 0; programarGuardado(); pintarEditor(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('[data-delopt]'), function(b){ b.onclick = function(){ var i = n(b.getAttribute('data-delopt')); if (!confirm('¿Quitar "' + x.opciones[i].nombre + '"?')) return; x.opciones.splice(i, 1); if (x.elegida === i) x.elegida = null; else if (x.elegida > i) x.elegida--; programarGuardado(); pintarEditor(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('[data-pick]'), function(b){ b.onclick = function(){ var i = n(b.getAttribute('data-pick')); x.elegida = x.elegida === i ? null : i; if (x.elegida !== null) x.estado = 'Aprobada'; programarGuardado(); pintarEditor(); }; });
   function refrescarLuego(){ clearTimeout(refrescarLuego._t); refrescarLuego._t = setTimeout(function(){ var a = document.activeElement, sel = a && a.getAttribute ? ['data-f', 'data-of', 'data-if', 'data-o', 'data-i'].map(function(k){ return a.getAttribute(k); }) : null, pos = a && a.selectionStart; pintarEditor(); restaurarFoco(sel, pos); }, 450); }
