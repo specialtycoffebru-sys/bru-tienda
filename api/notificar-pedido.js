@@ -64,7 +64,13 @@ module.exports = async function handler(req, res) {
   if (telefono) lineas.push('*Whatsapp:* ' + telefono);
   if (total != null) lineas.push('*Total:* ' + fmtCOP(total));
   if (ciudad) lineas.push('*Ciudad:* ' + ciudad);
+  if (p.barrio) lineas.push('*Barrio:* ' + p.barrio);
   if (direccion) lineas.push('*Dirección:* ' + direccion);
+  // Envio contra entrega: la tienda lo guarda en las notas empezando por el camion
+  var notasTxt = String(p.notas || '');
+  var iEnv = notasTxt.indexOf('🚚');
+  var envTxt = iEnv > -1 ? notasTxt.slice(iEnv).split(' · Cliente registrado')[0] : '';
+  if (envTxt) lineas.push(envTxt.replace(/[*_\x60\[\]]/g, ''));
   if (pago) lineas.push('*Pago:* ' + pago);
   lineas.push('*Estado:* ' + estado);
 

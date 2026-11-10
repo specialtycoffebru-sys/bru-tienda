@@ -8906,6 +8906,23 @@ function renderCots(){
 }
 
 // ═══ PEDIDOS ════════════════════════════════════════════════════════════
+/* Bloque de envio de un pedido web: ciudad, barrio, direccion y el envio
+   (contra entrega). Lee las columnas de envio si existen y, si no, el texto
+   que la tienda guarda en las notas empezando por el camion. */
+function pedEnvioHTML(p){
+  var notas = String(p.notas||''), env = '';
+  var i = notas.indexOf('🚚');
+  if(i > -1){ env = notas.slice(i).split(' · Cliente registrado')[0].split(' · 🎁')[0].split(' · Pago en línea')[0]; }
+  if(!env && (p.envio || p.envioZona || p.envioModo)){
+    env = '🚚 ENVÍO CONTRA ENTREGA' + (p.envioModo ? ': ' + p.envioModo : '') + (p.envioZona ? ' · ' + p.envioZona : '') + (Number(p.envio) ? ' · aprox. ' + fmt(Number(p.envio)) : '');
+  }
+  var lugar = [p.dir, p.barrio ? 'Barrio ' + p.barrio : '', p.ciudad].filter(function(x){ return x; }).join(' · ');
+  if(!env && !lugar) return '';
+  return '<div style="background:rgba(200,168,75,.10);border:.5px solid var(--gold);border-radius:6px;padding:.5rem .7rem;margin-bottom:.55rem;font-size:11px;line-height:1.55;color:var(--cream)">'
+    + (env ? '<div style="font-weight:600;color:var(--gold)">' + env + '</div>' : '<div style="font-weight:600;color:var(--gold)">🚚 Envío contra entrega</div>')
+    + (lugar ? '<div>📍 ' + lugar + '</div>' : '')
+    + '</div>';
+}
 function renderPeds(){
   var el=ge('peds-list');if(!el)return;
   var ld=JSON.parse(localStorage.getItem('bru_d')||'{}');
@@ -8934,7 +8951,7 @@ function renderPeds(){
     var bd=document.createElement('div');bd.className='ped-bd';
     var waLink=p.tel?'<a href="https://wa.me/'+(p.tel||'').replace(/\D/g,'')+'" target="_blank" class="btn btn-g btn-sm" style="border-color:var(--ok);color:var(--ok)">WhatsApp</a>':'';
     var estOpts=['Pendiente','Confirmado','Empacado','Enviado','Entregado','Cancelado'].map(function(e){return '<option'+(p.estado===e?' selected':'')+'>'+e+'</option>';}).join('');
-    bd.innerHTML='<div style="font-size:11px;color:var(--muted);margin-bottom:.55rem;line-height:1.6">'
+    bd.innerHTML=pedEnvioHTML(p)+'<div style="font-size:11px;color:var(--muted);margin-bottom:.55rem;line-height:1.6">'
       +(p.tel?'Teléfono: '+p.tel+'\n':'')+' '+(p.dir?'Dirección: '+p.dir+'  ':'')+' '+(p.pago?'Pago: '+p.pago:'')+(p.notas?'\nNotas: '+p.notas:'')+'</div>'
       +'<div style="display:flex;gap:.3rem;flex-wrap:wrap;align-items:center;margin-bottom:.4rem">'
       +'<select onchange="chgPed('+realI+',this.value)" style="padding:.28rem .5rem;background:var(--bg3);border:.5px solid var(--bd);color:var(--cream);border-radius:var(--r);font-size:11px;outline:none">'+estOpts+'</select>'
@@ -14083,7 +14100,7 @@ function renderPedCard(p, realI, container){
   // Total granel needed
   var totalGranel = (p.items||[]).reduce(function(s,it){ return s + gramsFromLabel(it.tamano)*it.qty; }, 0);
 
-  bd.innerHTML='<div style="font-size:11px;color:var(--muted);margin-bottom:.55rem;line-height:1.6">'
+  bd.innerHTML=pedEnvioHTML(p)+'<div style="font-size:11px;color:var(--muted);margin-bottom:.55rem;line-height:1.6">'
     +(p.tel?'Teléfono: '+p.tel+'  ':'')+(p.dir?'Dirección: '+p.dir+'  ':'')
     +(p.pago?'Pago: '+p.pago:'')+(p.notas?'<br>Notas: '+p.notas:'')+'</div>'
     +'<div style="background:var(--bg2);border-radius:6px;padding:.65rem .85rem;margin-bottom:.6rem">'
