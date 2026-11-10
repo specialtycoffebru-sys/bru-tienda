@@ -8912,7 +8912,7 @@ function renderCots(){
 function pedEnvioHTML(p){
   var notas = String(p.notas||''), env = '';
   var i = notas.indexOf('🚚');
-  if(i > -1){ env = notas.slice(i).split(' · Cliente registrado')[0].split(' · 🎁')[0].split(' · Pago en línea')[0]; }
+  if(i > -1){ env = notas.slice(i).split(' · Cliente registrado')[0].split(' · 🎁')[0].split(' · Pago en línea')[0]; var _k = env.indexOf('al recibir'); if(_k > -1) env = env.slice(0, _k + 10); else if(env.indexOf('ENVÍO GRATIS') > -1){ var _g = env.split(' · '); env = _g.slice(0, 3).join(' · '); } }
   if(!env && (p.envio || p.envioZona || p.envioModo)){
     env = '🚚 ENVÍO CONTRA ENTREGA' + (p.envioModo ? ': ' + p.envioModo : '') + (p.envioZona ? ' · ' + p.envioZona : '') + (Number(p.envio) ? ' · aprox. ' + fmt(Number(p.envio)) : '');
   }
