@@ -384,6 +384,10 @@ textarea.inp{resize:vertical;min-height:60px}
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M11 8v6M8 11h6"/></svg>
       <span>Prospectos</span>
     </div>
+    <div class="sb-a" onclick="go('journal',this)">
+      <svg viewBox="0 0 24 24"><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M18 7h2v13M8 9h6M8 13h6"/></svg>
+      <span>Journal y ventas</span>
+    </div>
     <div class="sb-a" onclick="go('marketing',this)">
       <svg viewBox="0 0 24 24"><path d="M3 11l14-6v14L3 13z"/><path d="M7 13v5a2 2 0 0 0 4 0v-4"/><path d="M20 9v6"/></svg>
       <span>Marketing</span>
@@ -3801,6 +3805,20 @@ function estacionAbrir(){
 }
 </script>
 
+<!-- JOURNAL Y VENTAS (módulo en /journal-admin.html: artículos del Journal, reseñas, ajustes de venta de la tienda y suscriptores; guarda en bru_conta tipos journal/tiendaplus/newsletter, nunca modifica bru_store) -->
+<div class="pg" id="page-journal">
+  <div style="margin:-.25rem 0 0;border:.5px solid var(--bd);border-radius:10px;overflow:hidden;background:var(--bg)">
+    <iframe id="journal-frame" title="Journal y ventas" style="display:block;width:100%;height:calc(100dvh - 92px);min-height:560px;border:0;background:var(--bg)"></iframe>
+  </div>
+  <div style="font-size:10.5px;color:var(--muted);margin-top:.5rem"><a href="/journal-admin.html" target="_blank" style="color:var(--gold)">Abrir en pestaña aparte ↗</a> · <a href="/journal.html" target="_blank" style="color:var(--gold)">Ver el Journal ↗</a></div>
+</div>
+<script>
+function journalAbrir(){
+  var f = document.getElementById('journal-frame');
+  if(f && !f.getAttribute('src')) f.setAttribute('src', '/journal-admin.html?embed=1');
+}
+</script>
+
 <!-- MARKETING (módulo en /marketing.html: lee ventas de bru_store, guarda planes en bru_conta tipos mkt_*, nunca modifica bru_store) -->
 <div class="pg" id="page-marketing">
   <div style="margin:-.25rem 0 0;border:.5px solid var(--bd);border-radius:10px;overflow:hidden;background:var(--bg)">
@@ -5591,7 +5609,7 @@ function mTab(tab,btn,modalId) {
 }
 
 // ═══ NAV ════════════════════════════════════════════════════════════════
-var TITLES = {estacion:'Eventos · estación de café',eventos:'Propuestas de eventos',resumen:'Resumen',pedidos:'Pedidos',prepedidos:'Pre-pedidos',clientes:'Clientes',catalogo:'Catálogo',tienda:'Editor Tienda',
+var TITLES = {journal:'Journal y ventas',estacion:'Eventos · estación de café',eventos:'Propuestas de eventos',resumen:'Resumen',pedidos:'Pedidos',prepedidos:'Pre-pedidos',clientes:'Clientes',catalogo:'Catálogo',tienda:'Editor Tienda',
   finanzas:'Ingresos / Gastos',inventario:'Inventario',ventas:'Ventas',facturas:'Facturas',
   cotizaciones:'Cotizaciones',inversiones:'Inversiones',reportes:'Reportes',
   produccion:'Producción',blends:'Blends & Recetas',inversionistas:'Inversionistas',
@@ -5767,6 +5785,7 @@ function go(page,el) {
   if(page==='prospectos'){ try{ prosAbrir(); }catch(e){} }
   if(page==='contabilidad'){ try{ contaAbrir(); }catch(e){} }
   if(page==='marketing'){ try{ mktAbrir(); }catch(e){} }
+  if(page==='journal'){ try{ journalAbrir(); }catch(e){} }
   if(page==='clases'){ try{ clasesAbrir(); }catch(e){} }
   if(page==='estacion'){ try{ estacionAbrir(); }catch(e){} }
   if(page==='eventos'){ try{ renderEventos(); }catch(e){} }
@@ -14892,7 +14911,7 @@ var UPAGES = [
   {k:'reportes',n:'Reportes'},{k:'costos',n:'Costos y Gastos'},{k:'ganancias',n:'Ganancias'},
   {k:'produccion',n:'Producción'},{k:'blends',n:'Blends & Recetas'},{k:'inversionistas',n:'Inversionistas'},
   {k:'suscripciones',n:'Suscripciones'},{k:'nomina',n:'Nómina'},{k:'insumos',n:'Insumos'},{k:'usuarios',n:'Usuarios y accesos'},
-  {k:'respaldo',n:'Datos y Respaldo'},{k:'empresas',n:'Página Empresas'},{k:'planes',n:'Página Planes'},{k:'leads',n:'Leads / Ferias'},{k:'prospectos',n:'Prospectos'},{k:'contabilidad',n:'Contabilidad'},{k:'marketing',n:'Marketing'},{k:'clases',n:'Clases'},{k:'estacion',n:'Eventos (estación de café)'},{k:'propuestas',n:'Propuestas'},
+  {k:'respaldo',n:'Datos y Respaldo'},{k:'empresas',n:'Página Empresas'},{k:'planes',n:'Página Planes'},{k:'leads',n:'Leads / Ferias'},{k:'prospectos',n:'Prospectos'},{k:'contabilidad',n:'Contabilidad'},{k:'marketing',n:'Marketing'},{k:'journal',n:'Journal y ventas'},{k:'clases',n:'Clases'},{k:'estacion',n:'Eventos (estación de café)'},{k:'propuestas',n:'Propuestas'},
   {k:'config',n:'Configuración / Datos'}
 ];
 
