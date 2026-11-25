@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>B.R.U · Journal y ventas</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,300;9..144,500&display=swap" rel="stylesheet">
+<script>if(/[?&]embed=1/.test(location.search))document.documentElement.className+=' embed';</script>
+<style>
+:root{
+  --bg:#0d0b09;--bg2:#141210;--bg3:#1c1916;--card:#181512;--card2:#1e1b17;
+  --gold:#c9a84c;--gold2:#e8c96a;--gold3:rgba(201,168,76,.12);
+  --txt:#e8e2d8;--mut:#a8a098;--dim:#6a6058;
+  --line:rgba(255,255,255,.08);--line2:rgba(201,168,76,.28);
+  --ok:#5fd394;--bad:#f38b8b;--warn:#f3a96b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+select,option{background:var(--card2);color:var(--txt)}
+a{color:var(--gold)}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:300;margin:0}
+.hide{display:none!important}
+.wrap{max-width:1320px;margin:0 auto;padding:18px 16px 80px}
+html.embed .wrap{padding:12px 12px 60px}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.top h1{font-size:28px}
+html.embed .top h1{display:none}
+.top .sp{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--mut);white-space:nowrap}
+.pill.ok{color:var(--ok);border-color:rgba(95,211,148,.35)}.pill.bad{color:var(--bad);border-color:rgba(243,139,139,.35)}.pill.warn{color:var(--warn);border-color:rgba(243,169,107,.35)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px}
+.tabs button{border:1px solid var(--line);background:transparent;padding:7px 14px;border-radius:999px;cursor:pointer;color:var(--mut);white-space:nowrap;font-size:13px}
+.tabs button.on{background:var(--gold);color:#1a1406;border-color:var(--gold);font-weight:600}
+.btn{border:1px solid var(--line2);background:transparent;color:var(--gold2);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;white-space:nowrap}
+.btn:hover{background:var(--gold3)}
+.btn.p{background:var(--gold);color:#1a1406;border-color:var(--gold);font-weight:600}
+.btn.p:hover{background:var(--gold2)}
+.btn.sm{padding:5px 10px;font-size:12px}
+.btn.bad{border-color:rgba(243,139,139,.35);color:var(--bad)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+.card h3{font-size:19px;margin-bottom:4px}
+.hint{color:var(--mut);font-size:12.5px;margin:2px 0 12px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media(max-width:980px){.grid2{grid-template-columns:1fr}}
+.f{display:flex;flex-direction:column;gap:5px;margin-bottom:11px}
+.f label{font-size:12px;color:var(--mut)}
+.f input,.f select,.f textarea{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:9px 11px;outline:none;width:100%}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--line2)}
+.f textarea{min-height:120px;resize:vertical;line-height:1.55}
+#e-cuerpo{min-height:420px;font-family:ui-monospace,Menlo,monospace;font-size:13px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row .f{flex:1;min-width:150px}
+.chk{display:inline-flex;align-items:center;gap:7px;font-size:13px;cursor:pointer;margin-right:14px}
+.list{display:flex;flex-direction:column;gap:8px}
+.it{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 13px;cursor:pointer}
+.it:hover{border-color:var(--line2)}
+.it.on{border-color:var(--gold)}
+.it .tt{flex:1;min-width:0}
+.it b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.it small{color:var(--mut)}
+.prev{background:#fff;color:#190d19;border-radius:12px;padding:22px 26px;max-height:640px;overflow:auto;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;font-size:15.5px;line-height:1.7}
+.prev h1{font-family:inherit;font-weight:700;font-size:28px;letter-spacing:-.02em;line-height:1.15;margin-bottom:8px}
+.prev h2{font-family:inherit;font-weight:700;font-size:21px;margin:24px 0 8px}
+.prev h3{font-family:inherit;font-weight:600;font-size:17px;margin:18px 0 6px}
+.prev p{margin:0 0 14px}.prev ul,.prev ol{margin:0 0 14px 20px}
+.prev blockquote{margin:18px 0;padding:14px 18px;background:#fdf4ee;border-radius:12px;font-family:Fraunces,Georgia,serif;color:#2b124c}
+.prev img{max-width:100%;border-radius:10px}
+.prev .lead{color:#522b5b;font-size:17px;margin-bottom:18px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{color:var(--mut);font-weight:500;font-size:12px}
+.stars{color:var(--gold2);letter-spacing:2px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--card2);border:1px solid var(--line2);padding:10px 16px;border-radius:10px;opacity:0;transition:.25s;pointer-events:none;z-index:99}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.err{border-color:rgba(243,139,139,.5);color:var(--bad)}
+.md-help{font-size:12px;color:var(--mut);background:var(--card2);border-radius:8px;padding:9px 11px;margin-top:-4px;margin-bottom:11px;line-height:1.6}
+.md-help code{color:var(--gold2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>Journal y ventas</h1>
+    <span class="sp"></span>
+    <span class="pill" id="estado">Conectando…</span>
+    <a class="btn sm" href="/journal.html" target="_blank">Ver el Journal ↗</a>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button data-t="art" class="on">Artículos</button>
+    <button data-t="res">Reseñas</button>
+    <button data-t="aj">Ajustes de venta</button>
+    <button data-t="nl">Suscriptores newsletter</button>
+  </div>
+
+  <!-- ===================== ARTÍCULOS ===================== -->
+  <section id="t-art">
+    <div class="grid2" style="grid-template-columns:320px minmax(0,1fr)">
+      <div>
+        <div class="row" style="margin-bottom:10px">
+          <button class="btn p" id="b-nuevo">+ Nuevo artículo</button>
+          <label class="chk"><input type="checkbox" id="ver-arch"> Ver archivados</label>
+        </div>
+        <div class="list" id="lista"></div>
+        <p class="hint" style="margin-top:12px">Los artículos marcados <b>ejemplo</b> vienen con la página. Ábrelos, edítalos y guárdalos para que queden como tuyos.</p>
+      </div>
+      <div id="editor" class="hide">
+        <div class="grid2">
+          <div class="card">
+            <div class="f"><label>Título</label><input id="e-titulo" maxlength="140"></div>
+            <div class="row">
+              <div class="f"><label>Categoría</label>
+                <select id="e-cat"><option>Guías</option><option>Laboratorio</option><option>Origen</option><option>Industria</option><option>Noticias</option></select>
+              </div>
+              <div class="f"><label>Fecha</label><input id="e-fecha" type="date"></div>
+              <div class="f" style="max-width:110px"><label>Min. lectura</label><input id="e-min" type="number" min="1" max="60"></div>
+            </div>
+            <div class="f"><label>Resumen (aparece en la tarjeta y en Google)</label><textarea id="e-res" style="min-height:70px" maxlength="240"></textarea></div>
+            <div class="f"><label>Imagen de portada (URL de imgbb · enlace directo)</label><input id="e-portada" placeholder="https://i.ibb.co/…"></div>
+            <div class="f"><label>Café recomendado al final del artículo</label><select id="e-prod"><option value="">— Ninguno (botón a todos los cafés) —</option></select></div>
+            <div class="row">
+              <div class="f"><label>Dirección (slug)</label><input id="e-slug" placeholder="se-crea-del-titulo"></div>
+              <div class="f"><label>Autor</label><input id="e-autor"></div>
+            </div>
+            <div style="margin:4px 0 12px">
+              <label class="chk"><input type="checkbox" id="e-pub"> Publicado</label>
+              <label class="chk"><input type="checkbox" id="e-dest"> Destacado arriba</label>
+            </div>
+            <div class="f"><label>Texto del artículo</label><textarea id="e-cuerpo"></textarea></div>
+            <div class="md-help"><code>## Título</code> subtítulo · <code>**negrita**</code> · <code>*cursiva*</code> · <code>- punto</code> lista · <code>1. paso</code> lista numerada · <code>&gt; frase</code> cita destacada · <code>[texto](https://…)</code> enlace · <code>![foto](https://…)</code> imagen</div>
+            <div class="row">
+              <button class="btn p" id="b-guardar">Guardar</button>
+              <button class="btn" id="b-ver">Ver publicado ↗</button>
+              <span class="sp" style="flex:1"></span>
+              <button class="btn bad" id="b-arch">Archivar</button>
+            </div>
+          </div>
+          <div>
+            <div class="hint" style="margin-top:0">Vista previa</div>
+            <div class="prev" id="prev"></div>
+          </div>
+        </div>
+      </div>
+      <div id="editor-vacio" class="card" style="display:flex;align-items:center;justify-content:center;min-height:300px;color:var(--mut)">Elige un artículo o crea uno nuevo.</div>
+    </div>
+  </section>
+
+  <!-- ===================== RESEÑAS ===================== -->
+  <section id="t-res" class="hide">
+    <div class="card">
+      <h3>Reseñas de clientes en la tienda</h3>
+      <p class="hint">Aparecen en el inicio de la tienda como "Lo que dicen de B.R.U". Usa solo reseñas reales, con permiso del cliente (por ejemplo, de WhatsApp o Instagram). Si no hay ninguna, la sección no se muestra.</p>
+      <div class="row">
+        <div class="f"><label>Nombre (o nombre e inicial)</label><input id="r-nom" placeholder="Laura M."></div>
+        <div class="f"><label>Ciudad</label><input id="r-ciu" placeholder="Bogotá"></div>
+        <div class="f" style="max-width:120px"><label>Estrellas</label><select id="r-est"><option>5</option><option>4</option><option>3</option></select></div>
+        <div class="f"><label>Café que compró (opcional)</label><input id="r-caf"></div>
+      </div>
+      <div class="f"><label>Lo que dijo</label><textarea id="r-txt" style="min-height:80px" maxlength="400"></textarea></div>
+      <button class="btn p" id="b-res-add">Agregar reseña</button>
+    </div>
+    <div id="res-lista"></div>
+  </section>
+
+  <!-- ===================== AJUSTES ===================== -->
+  <section id="t-aj" class="hide">
+    <div class="grid2">
+      <div class="card">
+        <h3>Registro y compra</h3>
+        <p class="hint">Cómo se comporta la ventana de "Crea tu cuenta · 10%".</p>
+        <label class="chk" style="margin-bottom:12px"><input type="checkbox" id="a-inv"> Permitir comprar sin crear cuenta (invitado)</label>
+        <div class="row">
+          <div class="f"><label>Mostrar la ventana después de (segundos)</label><input id="a-seg" type="number" min="5" max="600"></div>
+          <div class="f"><label>No volver a mostrarla por (días)</label><input id="a-dias" type="number" min="0" max="60"></div>
+        </div>
+        <p class="hint">También aparece si la persona baja más de la mitad de la página. Nunca aparece encima del carrito ni del pedido.</p>
+      </div>
+      <div class="card">
+        <h3>Carrito</h3>
+        <label class="chk" style="margin-bottom:12px"><input type="checkbox" id="a-barra"> Barra "Te faltan $X para envío gratis"</label>
+        <p class="hint" style="margin-top:-4px">El monto del envío gratis se toma de Editor Tienda → Envíos. Ahora: <b id="a-envg">—</b></p>
+        <div class="f"><label>Productos para sugerir en el carrito ("Agrega también")</label><select id="a-up" multiple size="6"></select></div>
+        <p class="hint">Ctrl/Cmd + clic para elegir varios. Si no eliges ninguno, se sugieren cafés disponibles que aún no estén en el carrito.</p>
+      </div>
+      <div class="card">
+        <h3>Urgencia en las tarjetas</h3>
+        <div class="f"><label>Mostrar "Quedan N bolsas" cuando el stock sea igual o menor a</label><input id="a-urg" type="number" min="0" max="200"></div>
+        <p class="hint">Usa el stock real del catálogo. Pon 0 para no mostrarlo.</p>
+      </div>
+      <div class="card">
+        <h3>Newsletter en la tienda</h3>
+        <label class="chk" style="margin-bottom:12px"><input type="checkbox" id="a-nl"> Mostrar el bloque de newsletter en el inicio</label>
+        <div class="f"><label>Texto del bloque</label><input id="a-nltxt" maxlength="160"></div>
+      </div>
+    </div>
+    <button class="btn p" id="b-aj">Guardar ajustes</button>
+  </section>
+
+  <!-- ===================== NEWSLETTER ===================== -->
+  <section id="t-nl" class="hide">
+    <div class="card">
+      <div class="row"><h3 style="flex:1">Suscriptores <span id="nl-n" style="color:var(--gold2)"></span></h3>
+        <button class="btn" id="b-nl-copy">Copiar correos</button><button class="btn" id="b-nl-csv">Descargar CSV</button></div>
+      <p class="hint">Personas que dejaron su correo en el Journal o en la tienda. Úsalos para tu correo mensual (Gmail, Mailchimp o Brevo importan el CSV).</p>
+      <div id="nl-tabla"></div>
+    </div>
+  </section>
+</div>
+<div id="toast"></div>
+
+<script>
+/* =====================================================================
+   B.R.U · JOURNAL Y VENTAS (admin)
+   Guarda en la tabla bru_conta, igual que Clases y Eventos:
+     · tipo 'journal'    → un artículo por fila (id jr_<slug>)
+     · id   'tiendaplus' → reseñas y ajustes de venta de la tienda
+     · tipo 'newsletter' → correos suscritos (solo lectura aquí)
+   Nunca modifica bru_store. La tabla no permite borrar: "Archivar"
+   oculta el artículo sin perderlo.
+   ===================================================================== */
+var SB_URL = 'https://dzgtyazvqpdmwvwqpvco.supabase.co';
+var SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
+var T = 'bru_conta';
+var S = { arts: {}, seed: [], cur: null, cat: [], cfgTienda: {}, plus: null, nl: [] };
+var PLUS_DEF = { resenas: [], upsell: [], urgencia: 10, popupSeg: 30, popupDias: 3, invitado: true, envioBarra: true, newsletter: true, nlTexto: 'Recibe una guía de preparación al mes y entérate primero de los lotes nuevos.' };
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function hoy(){ return new Date().toISOString().slice(0, 10); }
+function copia(o){ return JSON.parse(JSON.stringify(o)); }
+function fmt(n){ var v = Math.round(Number(n) || 0); return '$' + v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+function toast(t, err){ var e = $('toast'); e.textContent = t; e.classList.toggle('err', !!err); e.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(function(){ e.classList.remove('on'); }, 2600); }
+function sb(path, opts){
+  opts = opts || {};
+  var h = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
+  if (opts.prefer) h.Prefer = opts.prefer;
+  return fetch(SB_URL + '/rest/v1/' + path, { method: opts.method || 'GET', headers: h, cache: 'no-store', body: opts.body ? JSON.stringify(opts.body) : undefined })
+    .then(function(r){ if (!r.ok) return r.text().then(function(t){ throw new Error('Supabase ' + r.status + ': ' + t.slice(0, 140)); }); if (r.status === 201 || r.status === 204) return null; return r.text().then(function(t){ return t ? JSON.parse(t) : null; }); });
+}
+function upsert(fila){ return sb(T + '?on_conflict=id', { method: 'POST', prefer: 'resolution=merge-duplicates,return=minimal', body: [fila] }); }
+function slugify(t){
+  return String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70);
+}
+
+/* Mismo markdown que la página pública */
+function inline(t){
+  t = esc(t);
+  t = t.replace(/!\[([^\]]*)\]\((https?:[^)\s]+)\)/g, '<img src="$2" alt="$1">');
+  t = t.replace(/\[([^\]]+)\]\(((?:https?:|\/|#)[^)\s]*)\)/g, '<a href="$2" target="_blank">$1</a>');
+  t = t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  t = t.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  return t;
+}
+function md(src){
+  var lines = String(src || '').replace(/\r/g, '').split('\n');
+  var out = [], list = null, para = [];
+  function flushP(){ if (para.length){ out.push('<p>' + inline(para.join(' ')) + '</p>'); para = []; } }
+  function flushL(){ if (list){ out.push('<' + list.t + '>' + list.items.map(function(i){ return '<li>' + inline(i) + '</li>'; }).join('') + '</' + list.t + '>'); list = null; } }
+  lines.forEach(function(l){
+    var s = l.trim(), m;
+    if (!s){ flushP(); flushL(); return; }
+    if ((m = s.match(/^(#{2,3})\s+(.*)$/))){ flushP(); flushL(); out.push('<h' + m[1].length + '>' + inline(m[2]) + '</h' + m[1].length + '>'); return; }
+    if ((m = s.match(/^>\s?(.*)$/))){ flushP(); flushL(); out.push('<blockquote>' + inline(m[1]) + '</blockquote>'); return; }
+    if ((m = s.match(/^[-*]\s+(.*)$/))){ flushP(); if (!list || list.t !== 'ul'){ flushL(); list = { t: 'ul', items: [] }; } list.items.push(m[1]); return; }
+    if ((m = s.match(/^\d+[.)]\s+(.*)$/))){ flushP(); if (!list || list.t !== 'ol'){ flushL(); list = { t: 'ol', items: [] }; } list.items.push(m[1]); return; }
+    flushL(); para.push(s);
+  });
+  flushP(); flushL();
+  return out.join('\n');
+}
+
+/* ===================== CARGA ===================== */
+function cargar(){
+  var seed = fetch('/journal-seed.json', { cache: 'no-store' }).then(function(r){ return r.json(); }).catch(function(){ return []; });
+  var arts = sb(T + '?tipo=eq.journal&select=id,fecha,data');
+  var plus = sb(T + '?id=eq.tiendaplus&select=data');
+  var nl = sb(T + '?tipo=eq.newsletter&select=id,fecha,data&order=fecha.desc');
+  var st = sb('bru_store?id=eq.main&select=catalogo,tienda_config').catch(function(){ return []; });
+  return Promise.all([seed, arts, plus, nl, st]).then(function(r){
+    S.seed = r[0] || [];
+    S.arts = {};
+    (r[1] || []).forEach(function(row){ var a = row.data || {}; if (!a.slug) return; a._nube = true; S.arts[a.slug] = a; });
+    S.seed.forEach(function(a){ if (!S.arts[a.slug]){ var c = copia(a); c._ejemplo = true; S.arts[a.slug] = c; } });
+    S.plus = Object.assign(copia(PLUS_DEF), (r[2] && r[2][0] && r[2][0].data) || {});
+    S.nl = (r[3] || []).map(function(x){ return x.data || {}; });
+    S.cat = ((r[4] && r[4][0] && r[4][0].catalogo) || []).filter(function(p){ return p && p.nombre; });
+    S.cfgTienda = (r[4] && r[4][0] && r[4][0].tienda_config) || {};
+    $('estado').className = 'pill ok'; $('estado').textContent = 'Conectado';
+  }).catch(function(e){
+    $('estado').className = 'pill bad'; $('estado').textContent = 'Sin conexión';
+    toast(e.message, true);
+  });
+}
+
+/* ===================== ARTÍCULOS ===================== */
+function listaArts(){
+  var ver = $('ver-arch').checked;
+  return Object.keys(S.arts).map(function(k){ return S.arts[k]; })
+    .filter(function(a){ return ver ? a.archivado : !a.archivado; })
+    .sort(function(x, y){ return String(y.fecha || '').localeCompare(String(x.fecha || '')); });
+}
+function pintarLista(){
+  var L = listaArts();
+  $('lista').innerHTML = L.length ? L.map(function(a){
+    var tags = [];
+    if (a._ejemplo) tags.push('<span class="pill warn">ejemplo</span>');
+    else if (a.publicado === false) tags.push('<span class="pill">borrador</span>');
+    else tags.push('<span class="pill ok">publicado</span>');
+    if (a.destacado) tags.push('<span class="pill">★</span>');
+    return '<div class="it' + (S.cur === a.slug ? ' on' : '') + '" data-s="' + esc(a.slug) + '"><div class="tt"><b>' + esc(a.titulo || '(sin título)') + '</b><small>' + esc(a.cat || '') + ' · ' + esc(a.fecha || '') + '</small></div>' + tags.join('') + '</div>';
+  }).join('') : '<div class="hint">No hay artículos aquí.</div>';
+  Array.prototype.forEach.call(document.querySelectorAll('#lista .it'), function(el){ el.onclick = function(){ abrir(el.getAttribute('data-s')); }; });
+}
+function llenarProductos(){
+  var opts = '<option value="">— Ninguno (botón a todos los cafés) —</option>' + S.cat.map(function(p){ return '<option>' + esc(p.nombre) + '</option>'; }).join('');
+  $('e-prod').innerHTML = opts;
+}
+function abrir(slug){
+  var a = S.arts[slug]; if (!a) return;
+  S.cur = slug;
+  $('editor').classList.remove('hide'); $('editor-vacio').classList.add('hide');
+  $('e-titulo').value = a.titulo || '';
+  $('e-cat').value = a.cat || 'Guías';
+  $('e-fecha').value = a.fecha || hoy();
+  $('e-min').value = a.minutos || '';
+  $('e-res').value = a.resumen || '';
+  $('e-portada').value = a.portada || '';
+  if (a.producto && !S.cat.some(function(p){ return p.nombre === a.producto; })) $('e-prod').insertAdjacentHTML('beforeend', '<option>' + esc(a.producto) + '</option>');
+  $('e-prod').value = a.producto || '';
+  $('e-slug').value = a.slug || '';
+  $('e-slug').disabled = !!a._nube;
+  delete $('e-slug').dataset.manual;
+  $('e-autor').value = a.autor || 'Camilo Baquero · B.R.U';
+  $('e-pub').checked = a.publicado !== false;
+  $('e-dest').checked = !!a.destacado;
+  $('e-cuerpo').value = a.cuerpo || '';
+  $('b-arch').textContent = a.archivado ? 'Restaurar' : 'Archivar';
+  $('b-arch').classList.toggle('hide', !!a._ejemplo && !a._nube);
+  preview(); pintarLista();
+}
+function leerEditor(){
+  var a = S.arts[S.cur] || {};
+  var titulo = $('e-titulo').value.trim();
+  var cuerpo = $('e-cuerpo').value;
+  var palabras = cuerpo.split(/\s+/).filter(Boolean).length;
+  return {
+    titulo: titulo, cat: $('e-cat').value, fecha: $('e-fecha').value || hoy(),
+    minutos: parseInt($('e-min').value, 10) || Math.max(1, Math.round(palabras / 200)),
+    resumen: $('e-res').value.trim(), portada: $('e-portada').value.trim(), producto: $('e-prod').value,
+    slug: a._nube ? a.slug : (slugify($('e-slug').value) || slugify(titulo)),
+    autor: $('e-autor').value.trim(), publicado: $('e-pub').checked, destacado: $('e-dest').checked,
+    cuerpo: cuerpo, archivado: !!a.archivado
+  };
+}
+function preview(){
+  var a = leerEditor();
+  $('prev').innerHTML = (a.portada ? '<img src="' + esc(a.portada) + '" style="width:100%;max-height:220px;object-fit:cover;margin-bottom:14px">' : '') +
+    '<div style="font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#854f6c">' + esc(a.cat) + '</div>' +
+    '<h1>' + esc(a.titulo || 'Título del artículo') + '</h1><div class="lead">' + esc(a.resumen) + '</div>' + md(a.cuerpo);
+}
+function guardarArt(){
+  var a = leerEditor();
+  if (!a.titulo){ toast('Ponle un título', true); return; }
+  if (!a.slug){ toast('Falta la dirección (slug)', true); return; }
+  var viejo = S.cur;
+  if (viejo !== a.slug && S.arts[a.slug] && S.arts[a.slug]._nube){ toast('Ya existe un artículo con esa dirección', true); return; }
+  $('b-guardar').disabled = true; $('b-guardar').textContent = 'Guardando…';
+  upsert({ id: 'jr_' + a.slug, tipo: 'journal', fecha: a.fecha, data: a }).then(function(){
+    if (viejo !== a.slug){
+      var old = S.arts[viejo];
+      /* el ejemplo viejo con otra dirección queda archivado para no duplicarlo */
+      if (old && (old._ejemplo || old._tmp)) delete S.arts[viejo];
+    }
+    a._nube = true; S.arts[a.slug] = a; S.cur = a.slug;
+    toast('Guardado ✓'); abrir(a.slug);
+  }).catch(function(e){ toast(e.message, true); }).then(function(){ $('b-guardar').disabled = false; $('b-guardar').textContent = 'Guardar'; });
+}
+function archivar(){
+  var a = S.arts[S.cur]; if (!a || !a._nube) return;
+  var d = copia(a); delete d._nube; d.archivado = !a.archivado; if (d.archivado) d.publicado = false;
+  upsert({ id: 'jr_' + a.slug, tipo: 'journal', fecha: d.fecha || hoy(), data: d }).then(function(){
+    d._nube = true; S.arts[a.slug] = d; toast(d.archivado ? 'Archivado' : 'Restaurado');
+    S.cur = null; $('editor').classList.add('hide'); $('editor-vacio').classList.remove('hide'); pintarLista();
+  }).catch(function(e){ toast(e.message, true); });
+}
+function nuevo(){
+  var slug = 'borrador-' + Date.now().toString(36);
+  S.arts[slug] = { slug: '', titulo: '', cat: 'Guías', fecha: hoy(), publicado: false, cuerpo: '## Primer subtítulo\n\nEscribe aquí…', autor: 'Camilo Baquero · B.R.U' };
+  S.arts[slug]._tmp = slug;
+  abrir(slug);
+  $('e-slug').value = '';
+  $('e-titulo').focus();
+}
+
+/* ===================== RESEÑAS ===================== */
+function guardarPlus(msg){
+  return upsert({ id: 'tiendaplus', tipo: 'tiendaplus', fecha: hoy(), data: S.plus }).then(function(){ toast(msg || 'Guardado ✓'); }).catch(function(e){ toast(e.message, true); });
+}
+function pintarRes(){
+  var R = S.plus.resenas || [];
+  $('res-lista').innerHTML = R.length ? R.map(function(r, i){
+    return '<div class="card" style="display:flex;gap:14px;align-items:flex-start"><div style="flex:1"><div class="stars">' + new Array((r.estrellas || 5) + 1).join('★') + '</div>' +
+      '<div style="margin:6px 0 6px;font-size:14.5px">"' + esc(r.texto) + '"</div><small style="color:var(--mut)">' + esc([r.nombre, r.ciudad, r.cafe].filter(Boolean).join(' · ')) + '</small></div>' +
+      '<button class="btn sm" data-up="' + i + '">↑</button><button class="btn sm bad" data-del="' + i + '">Quitar</button></div>';
+  }).join('') : '<p class="hint">Aún no hay reseñas. La sección no aparece en la tienda hasta que agregues la primera.</p>';
+  Array.prototype.forEach.call(document.querySelectorAll('[data-del]'), function(b){ b.onclick = function(){
+    if (!confirm('¿Quitar esta reseña de la tienda?')) return;
+    S.plus.resenas.splice(+b.getAttribute('data-del'), 1); guardarPlus('Reseña quitada'); pintarRes(); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-up]'), function(b){ b.onclick = function(){
+    var i = +b.getAttribute('data-up'); if (!i) return; var x = S.plus.resenas.splice(i, 1)[0]; S.plus.resenas.splice(i - 1, 0, x); guardarPlus('Orden guardado'); pintarRes(); }; });
+}
+function agregarRes(){
+  var r = { nombre: $('r-nom').value.trim(), ciudad: $('r-ciu').value.trim(), estrellas: parseInt($('r-est').value, 10) || 5, cafe: $('r-caf').value.trim(), texto: $('r-txt').value.trim(), fecha: hoy() };
+  if (!r.nombre || !r.texto){ toast('Nombre y texto son obligatorios', true); return; }
+  S.plus.resenas = S.plus.resenas || []; S.plus.resenas.unshift(r);
+  guardarPlus('Reseña agregada ✓').then(function(){ ['r-nom', 'r-ciu', 'r-caf', 'r-txt'].forEach(function(id){ $(id).value = ''; }); pintarRes(); });
+}
+
+/* ===================== AJUSTES ===================== */
+function pintarAj(){
+  var P = S.plus;
+  $('a-inv').checked = P.invitado !== false;
+  $('a-seg').value = P.popupSeg;
+  $('a-dias').value = P.popupDias;
+  $('a-barra').checked = P.envioBarra !== false;
+  $('a-urg').value = P.urgencia;
+  $('a-nl').checked = P.newsletter !== false;
+  $('a-nltxt').value = P.nlTexto || '';
+  var eg = parseFloat(S.cfgTienda.envGratis) || 0;
+  $('a-envg').textContent = eg > 0 ? 'desde ' + fmt(eg) : 'no configurado (la barra no se muestra)';
+  $('a-up').innerHTML = S.cat.map(function(p){ return '<option' + ((P.upsell || []).indexOf(p.nombre) >= 0 ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('');
+}
+function guardarAj(){
+  var P = S.plus;
+  P.invitado = $('a-inv').checked;
+  P.popupSeg = Math.max(5, parseInt($('a-seg').value, 10) || 30);
+  P.popupDias = Math.max(0, parseInt($('a-dias').value, 10) || 0);
+  P.envioBarra = $('a-barra').checked;
+  P.urgencia = Math.max(0, parseInt($('a-urg').value, 10) || 0);
+  P.newsletter = $('a-nl').checked;
+  P.nlTexto = $('a-nltxt').value.trim();
+  P.upsell = Array.prototype.filter.call($('a-up').options, function(o){ return o.selected; }).map(function(o){ return o.value; });
+  guardarPlus('Ajustes guardados ✓');
+}
+
+/* ===================== NEWSLETTER ===================== */
+function pintarNl(){
+  var L = S.nl.filter(function(x){ return x.email; });
+  $('nl-n').textContent = '(' + L.length + ')';
+  $('nl-tabla').innerHTML = L.length ? '<table><thead><tr><th>Correo</th><th>Desde</th><th>Fecha</th></tr></thead><tbody>' +
+    L.map(function(x){ return '<tr><td>' + esc(x.email) + '</td><td>' + esc(x.origen || '') + (x.articulo ? ' · ' + esc(x.articulo) : '') + '</td><td>' + esc(String(x.fecha || '').slice(0, 10)) + '</td></tr>'; }).join('') +
+    '</tbody></table>' : '<p class="hint">Todavía no hay suscriptores.</p>';
+}
+function copiarNl(){
+  var t = S.nl.map(function(x){ return x.email; }).filter(Boolean).join(', ');
+  try{ navigator.clipboard.writeText(t).then(function(){ toast('Correos copiados'); }); }catch(e){ prompt('Copia los correos:', t); }
+}
+function csvNl(){
+  var rows = [['email', 'origen', 'articulo', 'fecha']].concat(S.nl.map(function(x){ return [x.email, x.origen || '', x.articulo || '', String(x.fecha || '').slice(0, 10)]; }));
+  var csv = rows.map(function(r){ return r.map(function(c){ return '"' + String(c || '').replace(/"/g, '""') + '"'; }).join(','); }).join('\n');
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'bru-newsletter-' + hoy() + '.csv'; a.click();
+}
+
+/* ===================== INICIO ===================== */
+Array.prototype.forEach.call(document.querySelectorAll('#tabs button'), function(b){
+  b.onclick = function(){
+    Array.prototype.forEach.call(document.querySelectorAll('#tabs button'), function(x){ x.classList.toggle('on', x === b); });
+    ['art', 'res', 'aj', 'nl'].forEach(function(t){ $('t-' + t).classList.toggle('hide', t !== b.getAttribute('data-t')); });
+  };
+});
+['e-titulo', 'e-cat', 'e-res', 'e-portada', 'e-cuerpo'].forEach(function(id){ $(id).addEventListener('input', preview); });
+$('e-titulo').addEventListener('input', function(){ var a = S.arts[S.cur]; if (a && !a._nube && !$('e-slug').dataset.manual) $('e-slug').value = slugify(this.value); });
+$('e-slug').addEventListener('input', function(){ this.dataset.manual = '1'; });
+$('b-nuevo').onclick = nuevo;
+$('b-guardar').onclick = guardarArt;
+$('b-arch').onclick = archivar;
+$('b-ver').onclick = function(){ var a = S.arts[S.cur]; if (a && a.slug) window.open('/journal.html?a=' + encodeURIComponent(a.slug), '_blank'); };
+$('ver-arch').onchange = pintarLista;
+$('b-res-add').onclick = agregarRes;
+$('b-aj').onclick = guardarAj;
+$('b-nl-copy').onclick = copiarNl;
+$('b-nl-csv').onclick = csvNl;
+cargar().then(function(){ llenarProductos(); pintarLista(); pintarRes(); pintarAj(); pintarNl(); });
+</script>
+</body>
+</html>

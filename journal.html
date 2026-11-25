@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Journal · Guías, laboratorio e industria del café · B.R.U</title>
+<meta name="description" id="meta-desc" content="Guías de preparación, notas del laboratorio de catación y noticias de la industria del café de especialidad colombiano, por B.R.U Coffee Roasters.">
+<meta name="theme-color" content="#ffffff">
+<link rel="canonical" id="canon" href="https://www.brucoffeeshop.online/journal.html">
+<meta property="og:type" content="website" id="og-type">
+<meta property="og:site_name" content="B.R.U Coffee Roasters">
+<meta property="og:title" id="og-title" content="Journal · B.R.U Coffee Roasters">
+<meta property="og:description" id="og-desc" content="Guías, laboratorio e industria del café de especialidad.">
+<meta property="og:image" id="og-img" content="">
+<link rel="icon" type="image/svg+xml" href="/bru-logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#190d19;--plum:#2b124c;--plum2:#522b5b;--rose:#854f6c;--blush:#dfb6b2;--cream:#fbe4d8;--cream2:#fdf4ee;
+  --muted:#7c6470;--bd:rgba(25,13,25,.10);--bd2:rgba(25,13,25,.16);
+  --serif:'Fraunces',Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Source Sans 3','Segoe UI',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button,input{font:inherit;color:inherit}
+.hide{display:none!important}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+.narrow{max-width:740px;margin:0 auto;padding:0 22px}
+
+/* NAV */
+header{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.82);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--bd)}
+header .wrap{display:flex;align-items:center;gap:20px;height:58px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo img{height:30px;width:auto}
+.logo b{font-family:var(--serif);font-weight:400;font-size:19px;letter-spacing:.16em}
+header nav{flex:1;display:flex;gap:24px;justify-content:center}
+header nav a{text-decoration:none;font-size:14px;color:var(--ink);opacity:.8}
+header nav a:hover,header nav a.on{opacity:1;color:var(--rose)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:11px 22px;font-size:15px;font-weight:600;text-decoration:none;cursor:pointer;border:none;transition:background .2s,transform .2s}
+.btn-p{background:var(--plum);color:var(--cream)}
+.btn-p:hover{background:var(--plum2)}
+.btn-g{background:transparent;color:var(--plum2);border:1px solid var(--bd2)}
+.btn-g:hover{border-color:var(--plum2)}
+.btn-sm{padding:8px 16px;font-size:13.5px}
+@media(max-width:760px){header nav{display:none}.logo{flex:1}}
+
+/* HERO */
+.hero{background:linear-gradient(160deg,#190d19 0%,#2b124c 55%,#522b5b 100%);color:var(--cream);padding:80px 0 70px;text-align:center;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;inset:auto -10% -60% -10%;height:120%;background:radial-gradient(ellipse at center,rgba(223,182,178,.18),transparent 60%);pointer-events:none}
+.eyebrow{font-size:15px;font-weight:600;color:var(--blush);margin-bottom:10px}
+.hero h1{font-size:clamp(38px,6vw,68px);font-weight:700;letter-spacing:-.03em;line-height:1.04}
+.hero h1 i{font-family:var(--serif);font-weight:300;font-style:italic;letter-spacing:-.01em}
+.hero p{max-width:620px;margin:18px auto 0;font-size:19px;color:rgba(251,228,216,.82)}
+
+/* CHIPS */
+.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:34px 0 8px}
+.chip{border:1px solid var(--bd2);background:#fff;border-radius:999px;padding:8px 16px;font-size:14px;cursor:pointer;color:var(--plum2)}
+.chip.on{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+
+/* CARDS */
+.feat{display:grid;grid-template-columns:1.25fr 1fr;gap:0;border-radius:24px;overflow:hidden;background:var(--cream2);margin:28px 0 30px;cursor:pointer;text-decoration:none;transition:transform .25s}
+.feat:hover{transform:translateY(-3px)}
+.feat .cov{min-height:340px}
+.feat .bd{padding:42px;display:flex;flex-direction:column;justify-content:center;gap:12px}
+.feat h2{font-size:clamp(26px,3vw,38px);line-height:1.12;letter-spacing:-.02em}
+@media(max-width:860px){.feat{grid-template-columns:1fr}.feat .cov{min-height:220px}.feat .bd{padding:26px}}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-bottom:70px}
+@media(max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.grid{grid-template-columns:1fr}}
+.card{display:flex;flex-direction:column;border-radius:20px;overflow:hidden;background:#fff;border:1px solid var(--bd);text-decoration:none;transition:transform .25s,box-shadow .25s}
+.card:hover{transform:translateY(-3px);box-shadow:0 18px 40px rgba(25,13,25,.10)}
+.card .cov{height:190px}
+.card .bd{padding:20px 22px 24px;display:flex;flex-direction:column;gap:8px;flex:1}
+.card h3{font-size:21px;line-height:1.2;letter-spacing:-.01em}
+.card p,.feat p{color:var(--plum2);font-size:15.5px;line-height:1.55}
+.meta{display:flex;gap:10px;align-items:center;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.tag{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--rose)}
+.cov{background:center/cover no-repeat;position:relative}
+.cov.ph{display:flex;align-items:center;justify-content:center}
+.cov.ph svg{width:72px;height:72px;opacity:.9}
+.cov.c-Guías{background-image:linear-gradient(150deg,#fbe4d8,#dfb6b2)}
+.cov.c-Laboratorio{background-image:linear-gradient(150deg,#522b5b,#2b124c)}
+.cov.c-Origen{background-image:linear-gradient(150deg,#dfb6b2,#854f6c)}
+.cov.c-Industria{background-image:linear-gradient(150deg,#2b124c,#190d19)}
+.cov.c-Noticias{background-image:linear-gradient(150deg,#854f6c,#522b5b)}
+.cov.c-otra{background-image:linear-gradient(150deg,#fdf4ee,#fbe4d8)}
+
+/* ARTICLE */
+.art-head{padding:56px 0 26px}
+.back{display:flex;width:max-content;align-items:center;gap:6px;font-size:14px;color:var(--rose);text-decoration:none;margin-bottom:26px;cursor:pointer}
+.art-head h1{font-size:clamp(32px,5vw,52px);line-height:1.08;letter-spacing:-.03em;margin:10px 0 16px}
+.art-head .lead{font-size:20px;color:var(--plum2);line-height:1.5}
+.art-cov{border-radius:24px;height:min(52vw,440px);margin:10px auto 40px;max-width:1040px}
+.art-cov.ph{height:min(34vw,220px)}
+.body{font-size:18.5px;line-height:1.75;color:#2a1a2a}
+.body h2{font-size:27px;letter-spacing:-.02em;line-height:1.2;margin:44px 0 12px;color:var(--ink)}
+.body h3{font-size:21px;margin:32px 0 8px}
+.body p{margin:0 0 20px}
+.body ul,.body ol{margin:0 0 22px 22px}
+.body li{margin:0 0 8px}
+.body strong{color:var(--ink)}
+.body blockquote{margin:30px 0;padding:22px 26px;border-radius:18px;background:var(--cream2);font-family:var(--serif);font-size:20px;line-height:1.5;color:var(--plum)}
+.body img{max-width:100%;border-radius:16px;margin:10px 0 24px}
+.body a{color:var(--rose)}
+.share{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:36px 0;padding:22px 0;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd)}
+.share span{font-size:14px;color:var(--muted);margin-right:4px}
+.cta-box{display:grid;grid-template-columns:150px 1fr;gap:24px;align-items:center;border-radius:22px;background:linear-gradient(160deg,#2b124c,#522b5b);color:var(--cream);padding:26px;margin:40px 0}
+.cta-box .im{width:150px;height:150px;border-radius:16px;background:rgba(251,228,216,.12) center/cover no-repeat}
+.cta-box h3{font-size:24px;letter-spacing:-.01em;margin:4px 0 6px}
+.cta-box p{color:rgba(251,228,216,.82);font-size:15.5px;margin-bottom:14px}
+.cta-box .btn-p{background:var(--cream);color:var(--ink)}
+.cta-box .btn-p:hover{background:#fff}
+@media(max-width:600px){.cta-box{grid-template-columns:1fr}.cta-box .im{width:100%;height:170px}}
+
+/* NEWSLETTER */
+.nl{background:var(--cream2);border-radius:28px;padding:48px 40px;text-align:center;margin:20px 0 80px}
+.nl h2{font-size:clamp(26px,3.4vw,38px);letter-spacing:-.02em;line-height:1.1}
+.nl p{color:var(--plum2);max-width:520px;margin:12px auto 22px}
+.nl form{display:flex;gap:10px;max-width:480px;margin:0 auto;flex-wrap:wrap;justify-content:center}
+.nl input{flex:1;min-width:220px;border:1px solid var(--bd2);border-radius:999px;padding:12px 18px;background:#fff;outline:none}
+.nl input:focus{border-color:var(--rose)}
+.nl small{display:block;margin-top:12px;color:var(--muted);font-size:12.5px}
+.nl .ok{color:#2d7a4b;font-weight:600}
+
+footer{border-top:1px solid var(--bd);padding:36px 0 46px;font-size:14px;color:var(--muted)}
+footer .wrap{display:flex;gap:20px;justify-content:space-between;flex-wrap:wrap}
+footer a{color:var(--plum2);text-decoration:none;margin-right:16px}
+.empty{text-align:center;color:var(--muted);padding:60px 0}
+.skel{background:linear-gradient(90deg,#f6eee9,#fdf4ee,#f6eee9);background-size:200% 100%;animation:sk 1.2s infinite}
+@keyframes sk{to{background-position:-200% 0}}
+.wa-fab{position:fixed;right:18px;bottom:18px;width:54px;height:54px;border-radius:50%;background:#25d366;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 26px rgba(0,0,0,.18);z-index:40}
+.wa-fab svg{width:28px;height:28px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="logo" href="/"><img src="/bru-logo.svg" alt="B.R.U"><b>B.R.U</b></a>
+    <nav>
+      <a href="/">Inicio</a>
+      <a href="/#cafes">Cafés</a>
+      <a href="/journal.html" class="on">Journal</a>
+      <a href="/clases.html">Clases</a>
+      <a href="/#subs">Suscripciones</a>
+    </nav>
+    <a class="btn btn-p btn-sm" href="/#cafes">Comprar café</a>
+  </div>
+</header>
+
+<main id="vista-lista">
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow">Journal B.R.U</div>
+      <h1>Café, explicado <i>desde el laboratorio</i></h1>
+      <p>Guías para preparar mejor en casa, lo que pasa en la mesa de catación y lo que está moviendo la industria del café de especialidad.</p>
+    </div>
+  </section>
+  <div class="wrap">
+    <div class="chips" id="chips"></div>
+    <div id="destacado"></div>
+    <div class="grid" id="grid">
+      <div class="card"><div class="cov skel"></div><div class="bd"><div class="skel" style="height:18px;border-radius:6px"></div></div></div>
+      <div class="card"><div class="cov skel"></div><div class="bd"><div class="skel" style="height:18px;border-radius:6px"></div></div></div>
+      <div class="card"><div class="cov skel"></div><div class="bd"><div class="skel" style="height:18px;border-radius:6px"></div></div></div>
+    </div>
+  </div>
+</main>
+
+<main id="vista-art" class="hide">
+  <div class="narrow art-head">
+    <a class="back" href="/journal.html">← Todo el Journal</a>
+    <div class="tag" id="a-cat"></div>
+    <h1 id="a-tit"></h1>
+    <div class="lead" id="a-res"></div>
+    <div class="meta" id="a-meta" style="margin-top:18px"></div>
+  </div>
+  <div class="wrap"><div class="art-cov cov" id="a-cov"></div></div>
+  <article class="narrow">
+    <div class="body" id="a-body"></div>
+    <div id="a-cta"></div>
+    <div class="share">
+      <span>Compartir</span>
+      <a class="btn btn-g btn-sm" id="sh-wa" target="_blank" rel="noopener">WhatsApp</a>
+      <button class="btn btn-g btn-sm" id="sh-cp" type="button">Copiar enlace</button>
+    </div>
+  </article>
+  <div class="wrap">
+    <h2 style="font-size:28px;letter-spacing:-.02em;margin:30px 0 18px" id="rel-t">Sigue leyendo</h2>
+    <div class="grid" id="rel"></div>
+  </div>
+</main>
+
+<div class="wrap">
+  <section class="nl" id="nl">
+    <div class="eyebrow" style="color:var(--rose)">Newsletter</div>
+    <h2>Una guía nueva cada mes, directo a tu correo</h2>
+    <p>Recetas, lotes nuevos antes que nadie y lo que pasa en el mundo del café. Sin spam: un correo al mes.</p>
+    <form id="nl-form">
+      <input type="email" id="nl-email" placeholder="tu@correo.com" required autocomplete="email">
+      <button class="btn btn-p" type="submit" id="nl-btn">Suscribirme</button>
+    </form>
+    <small id="nl-msg">Puedes darte de baja cuando quieras respondiendo el correo.</small>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div>© <span id="yr"></span> B.R.U · Brew · Respect · Unite · Colombia</div>
+    <div><a href="/">Tienda</a><a href="/#cafes">Cafés</a><a href="/clases.html">Clases</a><a href="https://instagram.com/BruCoffeeRoasters_" target="_blank" rel="noopener">Instagram</a></div>
+  </div>
+</footer>
+
+<a class="wa-fab" id="wa-fab" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.26-.47-2.39-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.06 2.88 1.21 3.08.15.2 2.1 3.2 5.08 4.48.71.31 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35M12.05 21.79h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.89-9.88 2.64 0 5.12 1.03 6.99 2.9a9.82 9.82 0 0 1 2.89 6.99c0 5.45-4.44 9.88-9.88 9.88m8.41-18.29A11.82 11.82 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.31-1.65a11.88 11.88 0 0 0 5.68 1.45h.01c6.55 0 11.89-5.34 11.89-11.89 0-3.18-1.24-6.16-3.49-8.41"/></svg></a>
+
+<script>
+/* =====================================================================
+   B.R.U · JOURNAL (pagina publica)
+   Lee los articulos de Supabase (tabla bru_conta, tipo 'journal').
+   Si la nube no responde o aun no hay articulos, usa journal-seed.json.
+   Un articulo de la nube con el mismo slug reemplaza al de ejemplo.
+   Se edita en Dashboard -> Journal.
+   ===================================================================== */
+var SB_URL = 'https://dzgtyazvqpdmwvwqpvco.supabase.co';
+var SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
+var WA_NUM = '573044927790';
+var SITE = 'https://www.brucoffeeshop.online';
+var ARTS = [], CATALOGO = [], CAT_ON = 'Todos';
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function sb(path, opts){
+  opts = opts || {};
+  var h = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
+  if (opts.prefer) h.Prefer = opts.prefer;
+  return fetch(SB_URL + '/rest/v1/' + path, { method: opts.method || 'GET', headers: h, cache: 'no-store', body: opts.body ? JSON.stringify(opts.body) : undefined })
+    .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); if (r.status === 201 || r.status === 204) return null; return r.json(); });
+}
+function fechaTxt(f){
+  if (!f) return '';
+  var m = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  var p = String(f).slice(0, 10).split('-');
+  if (p.length < 3) return '';
+  return parseInt(p[2], 10) + ' de ' + m[parseInt(p[1], 10) - 1] + ' de ' + p[0];
+}
+
+/* Markdown sencillo: ## titulos, listas, **negrita**, *cursiva*, [link](url), ![img](url), > cita */
+function inline(t){
+  t = esc(t);
+  t = t.replace(/!\[([^\]]*)\]\((https?:[^)\s]+)\)/g, '<img src="$2" alt="$1" loading="lazy">');
+  t = t.replace(/\[([^\]]+)\]\(((?:https?:|\/|#)[^)\s]*)\)/g, '<a href="$2">$1</a>');
+  t = t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  t = t.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  return t;
+}
+function md(src){
+  var lines = String(src || '').replace(/\r/g, '').split('\n');
+  var out = [], list = null, para = [];
+  function flushP(){ if (para.length){ out.push('<p>' + inline(para.join(' ')) + '</p>'); para = []; } }
+  function flushL(){ if (list){ out.push('<' + list.t + '>' + list.items.map(function(i){ return '<li>' + inline(i) + '</li>'; }).join('') + '</' + list.t + '>'); list = null; } }
+  lines.forEach(function(l){
+    var s = l.trim(), m;
+    if (!s){ flushP(); flushL(); return; }
+    if ((m = s.match(/^(#{2,3})\s+(.*)$/))){ flushP(); flushL(); out.push('<h' + m[1].length + '>' + inline(m[2]) + '</h' + m[1].length + '>'); return; }
+    if ((m = s.match(/^>\s?(.*)$/))){ flushP(); flushL(); out.push('<blockquote>' + inline(m[1]) + '</blockquote>'); return; }
+    if ((m = s.match(/^[-*]\s+(.*)$/))){ flushP(); if (!list || list.t !== 'ul'){ flushL(); list = { t: 'ul', items: [] }; } list.items.push(m[1]); return; }
+    if ((m = s.match(/^\d+[.)]\s+(.*)$/))){ flushP(); if (!list || list.t !== 'ol'){ flushL(); list = { t: 'ol', items: [] }; } list.items.push(m[1]); return; }
+    flushL(); para.push(s);
+  });
+  flushP(); flushL();
+  return out.join('\n');
+}
+
+var ICONOS = {
+  'Guías': '<svg viewBox="0 0 24 24" fill="none" stroke="#522b5b" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h12l-2 9a3 3 0 0 1-3 2H10a3 3 0 0 1-3-2z"/><path d="M17 10h1.5a2 2 0 0 1 0 4H16.5"/><path d="M9 3c0 1.5 1 1.5 1 3M13 3c0 1.5 1 1.5 1 3"/></svg>',
+  'Laboratorio': '<svg viewBox="0 0 24 24" fill="none" stroke="#fbe4d8" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M7.5 15h9"/></svg>',
+  'Origen': '<svg viewBox="0 0 24 24" fill="none" stroke="#fbe4d8" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l6-10 4 6 3-4 5 8z"/><circle cx="17" cy="6" r="2"/></svg>',
+  'Industria': '<svg viewBox="0 0 24 24" fill="none" stroke="#fbe4d8" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M5 16l4-5 4 3 6-8"/><path d="M15 6h4v4"/></svg>',
+  'Noticias': '<svg viewBox="0 0 24 24" fill="none" stroke="#fbe4d8" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/></svg>'
+};
+function cover(a, cls){
+  var cat = ICONOS[a.cat] ? a.cat : 'otra';
+  if (a.portada) return '<div class="cov ' + (cls || '') + '" style="background-image:url(\'' + esc(a.portada) + '\')"></div>';
+  return '<div class="cov ph c-' + cat + ' ' + (cls || '') + '">' + (ICONOS[a.cat] || ICONOS['Guías']) + '</div>';
+}
+function urlArt(a){ return '/journal.html?a=' + encodeURIComponent(a.slug); }
+function metaTxt(a){ return [fechaTxt(a.fecha), a.minutos ? a.minutos + ' min de lectura' : ''].filter(Boolean).join(' · '); }
+function cardHTML(a){
+  return '<a class="card" href="' + urlArt(a) + '">' + cover(a) +
+    '<div class="bd"><span class="tag">' + esc(a.cat) + '</span><h3>' + esc(a.titulo) + '</h3><p>' + esc(a.resumen) + '</p>' +
+    '<div class="meta" style="margin-top:auto;padding-top:6px">' + esc(metaTxt(a)) + '</div></div></a>';
+}
+
+function cargar(){
+  var seed = fetch('/journal-seed.json', { cache: 'no-store' }).then(function(r){ return r.json(); }).catch(function(){ return []; });
+  var nube = sb('bru_conta?tipo=eq.journal&select=id,fecha,data').catch(function(){ return []; });
+  var cat = sb('bru_store?id=eq.main&select=catalogo').then(function(r){ return (r && r[0] && r[0].catalogo) || []; }).catch(function(){ return []; });
+  return Promise.all([seed, nube, cat]).then(function(res){
+    var porSlug = {};
+    (res[0] || []).forEach(function(a){ if (a && a.slug) porSlug[a.slug] = a; });
+    (res[1] || []).forEach(function(row){ var a = row.data || {}; if (!a.slug) return; a.fecha = a.fecha || row.fecha; porSlug[a.slug] = a; });
+    ARTS = Object.keys(porSlug).map(function(k){ return porSlug[k]; })
+      .filter(function(a){ return a.publicado !== false && a.titulo; })
+      .sort(function(x, y){ return String(y.fecha || '').localeCompare(String(x.fecha || '')); });
+    CATALOGO = res[2] || [];
+  });
+}
+
+function pintarLista(){
+  var cats = ['Todos'];
+  ARTS.forEach(function(a){ if (a.cat && cats.indexOf(a.cat) < 0) cats.push(a.cat); });
+  $('chips').innerHTML = cats.map(function(c){ return '<button class="chip' + (c === CAT_ON ? ' on' : '') + '" data-c="' + esc(c) + '">' + esc(c) + '</button>'; }).join('');
+  Array.prototype.forEach.call(document.querySelectorAll('.chip'), function(b){
+    b.onclick = function(){ CAT_ON = b.getAttribute('data-c'); pintarLista(); };
+  });
+  var lista = ARTS.filter(function(a){ return CAT_ON === 'Todos' || a.cat === CAT_ON; });
+  if (!lista.length){ $('destacado').innerHTML = ''; $('grid').innerHTML = '<div class="empty" style="grid-column:1/-1">Pronto publicaremos artículos en esta sección.</div>'; return; }
+  var dest = lista.filter(function(a){ return a.destacado; })[0] || lista[0];
+  $('destacado').innerHTML = '<a class="feat" href="' + urlArt(dest) + '">' + cover(dest) +
+    '<div class="bd"><span class="tag">' + esc(dest.cat) + ' · Destacado</span><h2>' + esc(dest.titulo) + '</h2><p>' + esc(dest.resumen) + '</p>' +
+    '<div class="meta">' + esc(metaTxt(dest)) + '</div><span class="btn btn-p btn-sm" style="align-self:flex-start;margin-top:8px">Leer artículo →</span></div></a>';
+  $('grid').innerHTML = lista.filter(function(a){ return a !== dest; }).map(cardHTML).join('');
+}
+
+function productoDe(nombre){
+  if (!nombre) return null;
+  var n = String(nombre).toLowerCase().trim();
+  return CATALOGO.filter(function(p){ return p && p.nombre && String(p.nombre).toLowerCase().trim() === n; })[0] || null;
+}
+
+function setMeta(a){
+  document.title = a.titulo + ' · Journal B.R.U';
+  $('meta-desc').setAttribute('content', a.resumen || '');
+  $('og-title').setAttribute('content', a.titulo);
+  $('og-desc').setAttribute('content', a.resumen || '');
+  $('og-type').setAttribute('content', 'article');
+  if (a.portada) $('og-img').setAttribute('content', a.portada);
+  $('canon').setAttribute('href', SITE + urlArt(a));
+  var ld = document.createElement('script');
+  ld.type = 'application/ld+json';
+  ld.textContent = JSON.stringify({
+    '@context': 'https://schema.org', '@type': 'Article', headline: a.titulo, description: a.resumen || '',
+    datePublished: a.fecha || '', author: { '@type': 'Person', name: a.autor || 'B.R.U' },
+    publisher: { '@type': 'Organization', name: 'B.R.U Coffee Roasters', logo: { '@type': 'ImageObject', url: SITE + '/bru-logo.svg' } },
+    image: a.portada ? [a.portada] : undefined, mainEntityOfPage: SITE + urlArt(a)
+  });
+  document.head.appendChild(ld);
+}
+
+function pintarArticulo(slug){
+  var a = ARTS.filter(function(x){ return x.slug === slug; })[0];
+  if (!a){ location.replace('/journal.html'); return; }
+  $('vista-lista').classList.add('hide');
+  $('vista-art').classList.remove('hide');
+  $('a-cat').textContent = a.cat || '';
+  $('a-tit').textContent = a.titulo;
+  $('a-res').textContent = a.resumen || '';
+  $('a-meta').textContent = [a.autor, metaTxt(a)].filter(Boolean).join(' · ');
+  var cv = $('a-cov');
+  var tmp = document.createElement('div'); tmp.innerHTML = cover(a, 'art-cov');
+  cv.parentNode.replaceChild(tmp.firstChild, cv);
+  $('a-body').innerHTML = md(a.cuerpo);
+
+  var p = productoDe(a.producto);
+  var img = '';
+  if (p){ [p.img].concat(p.fotos || []).forEach(function(u){ if (!img && u && String(u).indexOf('http') === 0) img = u; }); }
+  if (p){
+    $('a-cta').innerHTML = '<div class="cta-box"><div class="im" style="' + (img ? 'background-image:url(\'' + esc(img) + '\')' : '') + '"></div><div>' +
+      '<div class="eyebrow" style="margin:0">Pruébalo en casa</div><h3>' + esc(p.nombre) + '</h3>' +
+      '<p>' + esc([p.origen, p.proceso, p.notas].filter(Boolean).join(' · ')) + '</p>' +
+      '<a class="btn btn-p" href="/#cafes">Ver en la tienda →</a></div></div>';
+  } else {
+    $('a-cta').innerHTML = '<div class="cta-box" style="grid-template-columns:1fr"><div>' +
+      '<div class="eyebrow" style="margin:0">Del laboratorio a tu taza</div><h3>Cafés 85+ SCA, tostados en lotes pequeños</h3>' +
+      '<p>Cada bolsa trae fecha de tueste, notas de cata y su receta sugerida.</p>' +
+      '<a class="btn btn-p" href="/#cafes">Ver los cafés →</a></div></div>';
+  }
+  var url = SITE + urlArt(a);
+  $('sh-wa').href = 'https://wa.me/?text=' + encodeURIComponent(a.titulo + ' · ' + url);
+  $('sh-cp').onclick = function(){
+    var b = this;
+    try{ navigator.clipboard.writeText(url).then(function(){ b.textContent = '¡Copiado!'; setTimeout(function(){ b.textContent = 'Copiar enlace'; }, 1800); }); }catch(e){}
+  };
+  var rel = ARTS.filter(function(x){ return x !== a && x.cat === a.cat; }).concat(ARTS.filter(function(x){ return x !== a && x.cat !== a.cat; })).slice(0, 3);
+  $('rel').innerHTML = rel.map(cardHTML).join('');
+  if (!rel.length) $('rel-t').classList.add('hide');
+  setMeta(a);
+  window.scrollTo(0, 0);
+}
+
+function newsletter(){
+  $('nl-form').onsubmit = function(ev){
+    ev.preventDefault();
+    var email = $('nl-email').value.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return;
+    var btn = $('nl-btn'); btn.disabled = true; btn.textContent = 'Enviando…';
+    var id = 'nl_' + email.replace(/[^a-z0-9]/g, '_').slice(0, 60);
+    var slug = (location.search.match(/[?&]a=([^&]+)/) || [])[1] || '';
+    sb('bru_conta?on_conflict=id', { method: 'POST', prefer: 'resolution=merge-duplicates,return=minimal',
+      body: [{ id: id, tipo: 'newsletter', fecha: new Date().toISOString().slice(0, 10), data: { email: email, origen: 'journal', articulo: decodeURIComponent(slug), fecha: new Date().toISOString() } }] })
+      .then(function(){
+        $('nl-form').classList.add('hide');
+        $('nl-msg').innerHTML = '<span class="ok">¡Listo! Te escribiremos con la próxima guía.</span>';
+        try{ localStorage.setItem('bru_nl', '1'); }catch(e){}
+      })
+      .catch(function(){ btn.disabled = false; btn.textContent = 'Suscribirme'; $('nl-msg').textContent = 'No se pudo guardar. Intenta de nuevo o escríbenos por WhatsApp.'; });
+  };
+  try{ if (localStorage.getItem('bru_nl') === '1'){ $('nl-form').classList.add('hide'); $('nl-msg').innerHTML = '<span class="ok">Ya estás suscrito. ¡Gracias!</span>'; } }catch(e){}
+}
+
+$('yr').textContent = new Date().getFullYear();
+$('wa-fab').href = 'https://wa.me/' + WA_NUM + '?text=' + encodeURIComponent('Hola B.R.U! Vengo del Journal 👋');
+newsletter();
+cargar().then(function(){
+  var slug = (location.search.match(/[?&]a=([^&]+)/) || [])[1];
+  if (slug) pintarArticulo(decodeURIComponent(slug)); else pintarLista();
+});
+</script>
+</body>
+</html>

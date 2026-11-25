@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0d0b09"/>
 
 
-<meta name="description" content="Café colombiano de especialidad. Tostado artesanal en pequeños lotes. Brew · Respect · Unite."/>
+<meta name="description" content="Café colombiano de especialidad 85+ SCA, tostado en pequeños lotes en Bogotá. Trazabilidad de la finca a tu taza, suscripciones, clases y café para empresas."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,500&family=Source+Sans+3:opsz,wght@8..60,300;8..60,400;8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet"/>
@@ -5983,6 +5983,14 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
 }
 </style>
 
+<link rel="canonical" href="https://www.brucoffeeshop.online/"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="B.R.U Coffee Roasters"/>
+<meta property="og:title" content="B.R.U Coffee Roasters · Café de especialidad colombiano"/>
+<meta property="og:description" content="Cafés 85+ SCA del Huila, tostados en lotes pequeños. Trazables de la finca a tu taza. Envíos en Colombia."/>
+<meta property="og:url" content="https://www.brucoffeeshop.online/"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"B.R.U Coffee Roasters","alternateName":"Brew · Respect · Unite","url":"https://www.brucoffeeshop.online/","logo":"https://www.brucoffeeshop.online/bru-logo.svg","sameAs":["https://www.instagram.com/BruCoffeeRoasters_/"],"contactPoint":{"@type":"ContactPoint","telephone":"+57 304 492 7790","contactType":"customer service","areaServed":"CO","availableLanguage":["Spanish","English"]}}</script>
 </head>
 <body>
 
@@ -6018,6 +6026,7 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
     <a href="javascript:void(0)" onclick="navTo('subs')" class="nav-link" id="nav-subs">Suscripciones</a>
     <a href="/clases.html" class="nav-link" id="nav-clases">Clases</a>
     <a href="/eventos.html" class="nav-link" id="nav-eventos">Eventos</a>
+    <a href="/journal.html" class="nav-link" id="nav-journal">Journal</a>
     <a href="javascript:void(0)" onclick="navTo('historia')" class="nav-link" id="nav-historia">Nuestra historia</a>
     <a href="javascript:void(0)" onclick="navTo('proceso')" class="nav-link" id="nav-proceso">Proceso</a>
     <a href="javascript:void(0)" onclick="navTo('empresas')" class="nav-link" id="nav-empresas">Empresas</a>
@@ -6107,6 +6116,13 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
         </span>
         <span class="mg-tx"><b>El proceso</b><i>De la cata a tu taza</i></span>
       </button>
+      <a class="mg-it" href="/journal.html">
+        <span class="mg-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M18 7h2v13M8 9h6M8 13h6"/></svg>
+        </span>
+        <span class="mg-tx"><b>Journal</b><i>Guías, laboratorio e industria</i></span>
+      </a>
       <button class="mg-it" onclick="navTo('empresas');toggleMega()">
         <span class="mg-ic">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -6306,6 +6322,36 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
 
 </div>
 
+
+<!-- bru-ventas · secciones del inicio (se llenan solas; ver módulo bru-ventas) -->
+<div class="bp-sec" id="bp-resenas" style="display:none">
+  <div class="bp-in">
+    <div class="bp-head"><div><div class="bp-eye">Clientes</div><h2 class="bp-h">Lo que dicen <i>de B.R.U</i></h2></div></div>
+    <div class="bp-grid" id="bp-res-grid"></div>
+  </div>
+</div>
+<div class="bp-sec alt" id="bp-journal">
+  <div class="bp-in">
+    <div class="bp-head">
+      <div><div class="bp-eye">Journal</div><h2 class="bp-h">Aprende café <i>desde el laboratorio</i></h2>
+      <p class="bp-sub">Guías de preparación, catación y lo que pasa en la industria del café de especialidad.</p></div>
+      <a class="bp-link" href="/journal.html">Ver todo el Journal →</a>
+    </div>
+    <div class="bp-grid" id="bp-jr-grid"></div>
+  </div>
+</div>
+<div class="bp-sec" id="bp-news">
+  <div class="bp-in">
+    <div class="bp-nl">
+      <div><div class="bp-eye" style="color:#dfb6b2">Newsletter</div><h2 class="bp-h">Café nuevo, <i>antes que nadie</i></h2>
+      <p class="bp-sub" id="bp-nl-sub">Recibe una guía de preparación al mes y entérate primero de los lotes nuevos.</p></div>
+      <div>
+        <form id="bp-nl-form"><input type="email" id="bp-nl-email" placeholder="tu@correo.com" required autocomplete="email"><button type="submit" id="bp-nl-btn">Suscribirme</button></form>
+        <small id="bp-nl-msg">Un correo al mes. Te das de baja cuando quieras.</small>
+      </div>
+    </div>
+  </div>
+</div>
 
 </div><!--/view-home-->
 
@@ -7063,6 +7109,7 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
       <a href="javascript:void(0)" onclick="navTo('historia');toggleMega()">Nuestra historia</a>
       <a href="javascript:void(0)" onclick="navTo('proceso');toggleMega()">Proceso de tueste</a>
       <a href="javascript:void(0)" onclick="navTo('planes')">Planes para empresas</a>
+      <a href="/journal.html">Journal</a>
     </div>
     <div class="foot-col">
       <h4>Contacto</h4>
@@ -7357,6 +7404,7 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
           <div class="au-q"><div class="au-q-t">¿Cómo preparas tu café? <span style="color:var(--muted);text-transform:none;letter-spacing:0;font-size:9.5px">(opcional)</span></div>
             <div class="au-chips" id="aq-metodo"><button class="au-chip" onclick="auChip(this)">V60 / Filtrados</button><button class="au-chip" onclick="auChip(this)">Prensa francesa</button><button class="au-chip" onclick="auChip(this)">Espresso</button><button class="au-chip" onclick="auChip(this)">Cafetera / Greca</button><button class="au-chip au-other" onclick="auChip(this)">Otro</button></div><input class="au-other-inp" id="aq-metodo-otro" type="text" placeholder="¿Cómo lo preparas?" style="display:none"></div>
           <div class="au-err" id="as-err"></div>
+          <button type="button" class="bp-guest" id="as-guest" style="display:none" onclick="bruComprarInvitado()">Continuar sin crear cuenta →</button>
           <button class="btn-confirm" id="as-btn" onclick="authSignup()">Crear mi cuenta</button>
           <p class="au-switch">¿Ya tienes cuenta? <a onclick="authView('login')">Inicia sesión →</a></p>
         </div>
@@ -8956,15 +9004,9 @@ document.addEventListener('DOMContentLoaded',function(){
   if(_hv === 'empresas'){ navTo('empresas'); return; }
   if(_hv === 'planes'){ navTo('planes'); return; }
   if(_hv === 'captura'){ navTo('captura'); leadReintentar(); return; }
-  // Pop-up de bienvenida: aparece en cada visita si no hay sesión iniciada
-  if(!bruUser()){
-    setTimeout(function(){
-      if(bruUser()) return;
-      applyAuthConfig();
-      authView('signup');
-      document.getElementById('au-wrap').classList.add('on');
-    }, 1400);
-  }
+  // Pop-up de bienvenida: lo programa el módulo bru-ventas (una vez cada N días,
+  // después de unos segundos o al bajar media página). Se ajusta en Dashboard → Journal.
+  if(!bruUser() && typeof bruPopupProgramar === 'function') bruPopupProgramar();
 });
 
 // ── CATEGORY TABS ─────────────────────────────────────────────────────────────
@@ -10705,17 +10747,19 @@ function envLlenarCiudades(){
 // ── ORDER ─────────────────────────────────────────────────────────────────────
 function openOrder(){
   if(!cart.length) return;
-  if(!bruUser()){
+  if(!bruUser() && !(typeof bruInvitadoActivo === 'function' && bruInvitadoActivo())){
     _pendingCheckout = true;
     if(document.getElementById('cart-el')&&document.getElementById('cart-el').classList.contains('on')) toggleCart();
     applyAuthConfig();
     authView('signup');
     var err=document.getElementById('as-err');
-    if(err){ err.style.color='var(--gold)'; err.textContent='Crea tu cuenta para completar tu pedido — solo toma un momento.'; }
+    if(err){ err.style.color='var(--gold)'; err.textContent='Crea tu cuenta y recibe 10% de descuento en este pedido.'; }
+    var _gst=document.getElementById('as-guest');
+    if(_gst) _gst.style.display = (window.bruPlus && window.bruPlus.invitado === false) ? 'none' : 'block';
     document.getElementById('au-wrap').classList.add('on');
     return;
   }
-  toggleCart();
+  var _ce=document.getElementById('cart-el'); if(_ce&&_ce.classList.contains('on')) toggleCart();
   var tot=cart.reduce(function(s,c){ return s+c.precio*c.qty; },0);
   document.getElementById('om-sum').innerHTML=
     '<div class="om-sum-title">Resumen</div>'+
@@ -12254,7 +12298,7 @@ function ppStat(btn, clave, i){
 // Mientras PP_DEMO sea true, los cafés que todavía no tengan curva de tostión,
 // productor o video muestran un ejemplo marcado como tal, para ver cómo queda.
 // Cuando termines de cargar los datos reales, pon PP_DEMO = false.
-var PP_DEMO = true;
+var PP_DEMO = false;
 
 // Video de ejemplo para los métodos que aún no tienen el suyo.
 // Si lo dejas vacío, usa un video que ya esté cargado en la página —
@@ -13019,5 +13063,297 @@ function cardQuickAdd(idx){
   fetch('/api/wompi').then(function(r){ return r.json(); }).then(function(j){ if (!j || !j.activo) return; W = j; if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar(); }).catch(function(){});
 })();
 </script>
+<!-- ===================================================================
+     B.R.U · MÓDULO DE VENTAS Y CONTENIDO  (bru-ventas)
+     · Ventana de registro menos invasiva (una vez cada N días)
+     · Compra como invitado
+     · Barra de envío gratis + "Agrega también" en el carrito
+     · "Quedan N bolsas" en las tarjetas
+     · Reseñas, Journal y newsletter en el inicio
+     · Planes de Empresas sincronizados con la página de Planes
+     · Datos estructurados (Google) de los productos
+     Todo se configura en Dashboard → Journal (tabla bru_conta, id
+     'tiendaplus'). Nunca toca bru_store. Para quitarlo: borra este
+     bloque y las 3 secciones con id bp-*.
+     =================================================================== -->
+<style id="bru-ventas-css">
+.bp-sec{padding:clamp(64px,7vw,100px) clamp(18px,4vw,40px);background:#fff;color:#190d19}
+.bp-sec.alt{background:#fdf4ee}
+.bp-in{max-width:1180px;margin:0 auto}
+.bp-eye{font-family:-apple-system,BlinkMacSystemFont,var(--sans),sans-serif;font-size:17px;font-weight:600;color:#7c6470;margin-bottom:8px}
+.bp-h{font-family:-apple-system,BlinkMacSystemFont,var(--sans),sans-serif;font-size:clamp(30px,4vw,48px);font-weight:700;letter-spacing:-.03em;line-height:1.06;color:#190d19;margin:0 0 10px}
+.bp-h i{font-family:var(--serif);font-weight:300;letter-spacing:-.01em}
+.bp-sub{color:#522b5b;font-size:17px;max-width:620px;line-height:1.55}
+.bp-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:30px}
+.bp-link{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(25,13,25,.16);border-radius:999px;padding:10px 20px;font-size:14px;color:#522b5b;text-decoration:none;white-space:nowrap}
+.bp-link:hover{border-color:#522b5b}
+.bp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:980px){.bp-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.bp-grid{grid-template-columns:1fr}}
+.bp-rev{background:#fff;border:1px solid rgba(25,13,25,.08);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:12px}
+.bp-stars{color:#854f6c;letter-spacing:3px;font-size:15px}
+.bp-rev q{font-family:var(--serif);font-size:19px;line-height:1.45;color:#2b124c;quotes:'\201C' '\201D'}
+.bp-rev small{color:#7c6470;font-size:13.5px;margin-top:auto}
+.bp-art{display:flex;flex-direction:column;border-radius:20px;overflow:hidden;background:#fff;border:1px solid rgba(25,13,25,.08);text-decoration:none;color:#190d19;transition:transform .25s,box-shadow .25s}
+.bp-art:hover{transform:translateY(-3px);box-shadow:0 18px 40px rgba(25,13,25,.10)}
+.bp-art .cv{height:170px;background:linear-gradient(150deg,#fbe4d8,#dfb6b2) center/cover no-repeat}
+.bp-art .cv.d{background-image:linear-gradient(150deg,#522b5b,#2b124c)}
+.bp-art .bd{padding:18px 20px 22px;display:flex;flex-direction:column;gap:6px;flex:1}
+.bp-art .tg{font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#854f6c}
+.bp-art h3{font-family:-apple-system,BlinkMacSystemFont,var(--sans),sans-serif;font-size:20px;font-weight:600;line-height:1.22;letter-spacing:-.01em;margin:0}
+.bp-art p{color:#522b5b;font-size:14.5px;line-height:1.5;margin:0}
+.bp-art .mt{font-size:12.5px;color:#7c6470;margin-top:auto;padding-top:6px}
+.bp-nl{background:linear-gradient(160deg,#190d19 0%,#2b124c 55%,#522b5b 100%);color:#fbe4d8;border-radius:28px;padding:clamp(34px,5vw,56px);display:grid;grid-template-columns:1.1fr 1fr;gap:30px;align-items:center}
+@media(max-width:820px){.bp-nl{grid-template-columns:1fr}}
+.bp-nl .bp-h{color:#fbe4d8}
+.bp-nl .bp-sub{color:rgba(251,228,216,.8)}
+.bp-nl form{display:flex;gap:10px;flex-wrap:wrap}
+.bp-nl input{flex:1;min-width:200px;border-radius:999px !important;padding:13px 18px !important;border:1px solid rgba(251,228,216,.35) !important;background:rgba(255,255,255,.08) !important;color:#fbe4d8 !important}
+.bp-nl input::placeholder{color:rgba(251,228,216,.6) !important}
+.bp-nl button{border:none;border-radius:999px;padding:13px 24px;background:#fbe4d8;color:#190d19;font-weight:600;font-size:15px;cursor:pointer}
+.bp-nl small{display:block;margin-top:10px;font-size:12.5px;color:rgba(251,228,216,.65)}
+.bp-nl .ok{color:#fbe4d8;font-weight:600}
+/* Carrito */
+.bp-envio{margin:.2rem 0 .9rem;font-size:13px;color:#522b5b}
+.bp-envio b{color:#190d19}
+.bp-bar{height:6px;border-radius:99px;background:rgba(25,13,25,.08);overflow:hidden;margin-top:7px}
+.bp-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#854f6c,#2b124c);transition:width .4s}
+.bp-up{margin:14px 0 6px;padding:14px;border-radius:16px;background:#fdf4ee}
+.bp-up-t{font-size:13px;font-weight:600;color:#190d19;margin-bottom:10px}
+.bp-up-it{display:flex;align-items:center;gap:10px;padding:6px 0}
+.bp-up-it img,.bp-up-it .ph{width:46px;height:46px;border-radius:10px;object-fit:cover;background:#fbe4d8;flex:none}
+.bp-up-it .tx{flex:1;min-width:0;font-size:13px;line-height:1.3}
+.bp-up-it .tx b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#190d19}
+.bp-up-it .tx span{color:#7c6470}
+.bp-up-it button{border:1px solid rgba(25,13,25,.16);background:#fff;border-radius:999px;padding:6px 12px;font-size:12.5px;cursor:pointer;color:#2b124c;white-space:nowrap}
+.bp-up-it button:hover{background:#2b124c;color:#fbe4d8;border-color:#2b124c}
+/* Tarjetas */
+.bp-quedan{position:absolute;top:12px;left:12px;z-index:3;background:#2b124c;color:#fbe4d8;font-size:11.5px;font-weight:600;padding:5px 10px;border-radius:999px;letter-spacing:.01em}
+/* Invitado */
+.bp-guest{display:block;width:100%;margin-top:.7rem;background:none;border:none;color:#854f6c;font-size:13px;text-decoration:underline;cursor:pointer;padding:.4rem}
+</style>
+
+<script id="bru-ventas">
+(function(){
+  var PLUS = { resenas: [], upsell: [], urgencia: 10, popupSeg: 30, popupDias: 3, invitado: true, envioBarra: true, newsletter: true,
+               nlTexto: 'Recibe una guía de preparación al mes y entérate primero de los lotes nuevos.' };
+  window.bruPlus = PLUS;
+
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function sb(path, opts){
+    opts = opts || {};
+    var h = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
+    if (opts.prefer) h.Prefer = opts.prefer;
+    return fetch(SB_URL + '/rest/v1/' + path, { method: opts.method || 'GET', headers: h, cache: 'no-store', body: opts.body ? JSON.stringify(opts.body) : undefined })
+      .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); if (r.status === 201 || r.status === 204) return null; return r.json(); });
+  }
+  function enColombia(){ try{ return typeof _bruGeo === 'undefined' || !_bruGeo.listo || _bruGeo.modo === 'CO'; }catch(e){ return true; } }
+  function precioTxt(p){
+    try{ var s = getSizes(p); var base = (s[0] && (s[0].price || s[0].precio)) || p.precio; return fmt(fmtIva(base)) + (s[0] && s[0].label ? ' / ' + s[0].label : ''); }
+    catch(e){ return ''; }
+  }
+  function fotoDe(p){ var f = ''; [p.img].concat(p.fotos || []).forEach(function(u){ if (!f && u && String(u).indexOf('http') === 0) f = u; }); return f; }
+  function disponible(p){ try{ var b = getEstadoBadge(p); return !(b && (b.cls === 'badge-agotado' || b.cls === 'badge-preventa')); }catch(e){ return true; } }
+  function modalAbierto(){
+    return ['au-wrap', 'om-wrap', 'pm-wrap'].some(function(id){ var e = $(id); return e && e.classList.contains('on'); }) ||
+      !!(document.getElementById('cart-el') && document.getElementById('cart-el').classList.contains('on'));
+  }
+
+  /* ---------- 1 · VENTANA DE REGISTRO ---------- */
+  var _popupHecho = false, _plusListo = false, _popupPend = false;
+  window.bruPopupProgramar = function(){
+    if (!_plusListo){ _popupPend = true; return; }
+    if (_popupHecho || bruUser()) return;
+    var dias = Number(PLUS.popupDias) || 0, ult = 0;
+    try{ ult = Number(localStorage.getItem('bru_popup_ts')) || 0; }catch(e){}
+    if (ult && dias && (Date.now() - ult) < dias * 864e5) return;
+    try{ if (sessionStorage.getItem('bru_popup_sesion') === '1') return; }catch(e){}
+    var t = null;
+    function mostrar(){
+      if (_popupHecho) return;
+      if (bruUser()) { limpiar(); return; }
+      if (modalAbierto()) { clearTimeout(t); t = setTimeout(mostrar, 8000); return; }
+      _popupHecho = true; limpiar();
+      try{ localStorage.setItem('bru_popup_ts', String(Date.now())); sessionStorage.setItem('bru_popup_sesion', '1'); }catch(e){}
+      try{ applyAuthConfig(); authView('signup'); var g = $('as-guest'); if (g) g.style.display = 'none'; $('au-wrap').classList.add('on'); }catch(e){}
+    }
+    function alScroll(){
+      var h = document.documentElement.scrollHeight - window.innerHeight;
+      if (h > 400 && window.scrollY / h > 0.5) mostrar();
+    }
+    function limpiar(){ clearTimeout(t); window.removeEventListener('scroll', alScroll); }
+    t = setTimeout(mostrar, Math.max(5, Number(PLUS.popupSeg) || 30) * 1000);
+    window.addEventListener('scroll', alScroll, { passive: true });
+  };
+
+  /* ---------- 2 · COMPRA COMO INVITADO ---------- */
+  window.bruInvitadoActivo = function(){
+    if (PLUS.invitado === false) return false;
+    try{ return sessionStorage.getItem('bru_invitado') === '1'; }catch(e){ return false; }
+  };
+  window.bruComprarInvitado = function(){
+    try{ sessionStorage.setItem('bru_invitado', '1'); }catch(e){}
+    closeAuth();
+    setTimeout(function(){ openOrder(); }, 120);
+  };
+  var _openAuth = window.openAuth;
+  window.openAuth = function(){ var g = $('as-guest'); if (g) g.style.display = 'none'; return _openAuth.apply(this, arguments); };
+
+  /* ---------- 3 · CARRITO: ENVÍO GRATIS + AGREGA TAMBIÉN ---------- */
+  function extrasCarrito(){
+    var bot = $('cart-bot'), list = $('cart-list');
+    if (!bot || !list) return;
+    var box = $('bp-envio');
+    if (!box){
+      box = document.createElement('div'); box.id = 'bp-envio'; box.className = 'bp-envio';
+      var btn = bot.querySelector('.btn-order'); bot.insertBefore(box, btn);
+    }
+    var cfg = {}; try{ cfg = getConfig() || {}; }catch(e){}
+    var meta = parseFloat(cfg.envGratis) || 0;
+    var tot = cart.reduce(function(s, c){ return s + c.precio * c.qty; }, 0);
+    if (PLUS.envioBarra !== false && meta > 0 && cart.length && enColombia()){
+      var falta = Math.max(0, meta - tot), pct = Math.min(100, Math.round(tot / meta * 100));
+      box.innerHTML = (falta > 0 ? 'Te faltan <b>' + fmt(falta) + '</b> para el <b>envío gratis</b>' : '🎉 <b>¡Tienes envío gratis!</b>') +
+        '<div class="bp-bar"><i style="width:' + pct + '%"></i></div>';
+      box.style.display = '';
+    } else box.style.display = 'none';
+
+    var old = $('bp-up'); if (old) old.parentNode.removeChild(old);
+    if (!cart.length || typeof catalog === 'undefined' || !catalog.length) return;
+    var enCarro = cart.map(function(c){ return String(c.nombre || '').toLowerCase(); });
+    var cands = catalog.map(function(p, i){ return { p: p, i: i }; }).filter(function(x){
+      return x.p && x.p.nombre && disponible(x.p) && enCarro.indexOf(String(x.p.nombre).toLowerCase()) < 0;
+    });
+    var pref = (PLUS.upsell || []).map(function(n){ return String(n).toLowerCase(); });
+    if (pref.length) cands = cands.filter(function(x){ return pref.indexOf(String(x.p.nombre).toLowerCase()) >= 0; });
+    cands = cands.slice(0, 2);
+    if (!cands.length) return;
+    var up = document.createElement('div'); up.id = 'bp-up'; up.className = 'bp-up';
+    up.innerHTML = '<div class="bp-up-t">Agrega también</div>' + cands.map(function(x){
+      var f = fotoDe(x.p);
+      return '<div class="bp-up-it">' + (f ? '<img src="' + esc(f) + '" alt="">' : '<div class="ph"></div>') +
+        '<div class="tx"><b>' + esc(x.p.nombre) + '</b><span>' + esc(precioTxt(x.p)) + '</span></div>' +
+        '<button type="button" onclick="cardQuickAdd(' + x.i + ')">+ Añadir</button></div>';
+    }).join('');
+    list.appendChild(up);
+  }
+  var _renderCart = window.renderCart;
+  window.renderCart = function(){ var r = _renderCart.apply(this, arguments); try{ extrasCarrito(); }catch(e){ console.warn('bp carrito', e); } return r; };
+
+  /* ---------- 4 · "QUEDAN N" EN LAS TARJETAS ---------- */
+  var _ldHecho = false;
+  function urgencia(){
+    var u = Number(PLUS.urgencia) || 0;
+    if (u > 0 && typeof filtered !== 'undefined'){
+      filtered.forEach(function(p){
+        var idx = catalog.indexOf(p), s = (typeof p.stock === 'number') ? p.stock : null;
+        if (s === null || s <= 0 || s > u || !disponible(p)) return;
+        var pr = $('cprice-' + idx); if (!pr) return;
+        var card = pr.closest('.pcard-onyx'); if (!card) return;
+        var im = card.querySelector('.pcard-onyx-img'); if (!im || im.querySelector('.bp-quedan')) return;
+        var b = document.createElement('span'); b.className = 'bp-quedan';
+        b.textContent = s === 1 ? '¡Última bolsa!' : 'Quedan ' + s + ' bolsas';
+        im.appendChild(b);
+      });
+    }
+    datosGoogle();
+  }
+  var _renderGrid = window.renderGrid;
+  window.renderGrid = function(){ var r = _renderGrid.apply(this, arguments); try{ urgencia(); }catch(e){ console.warn('bp grid', e); } return r; };
+
+  /* ---------- 5 · DATOS ESTRUCTURADOS DE PRODUCTOS (Google) ---------- */
+  function datosGoogle(){
+    if (_ldHecho || typeof catalog === 'undefined' || !catalog.length || !enColombia()) return;
+    _ldHecho = true;
+    var items = catalog.filter(function(p){ return p && p.nombre && p.precio; }).slice(0, 30).map(function(p, i){
+      var f = fotoDe(p), base = p.precio;
+      try{ base = Math.round(fmtIva(p.precio)) || p.precio; }catch(e){}
+      var o = { '@type': 'Product', name: p.nombre, description: p.desc || p.notas || 'Café de especialidad colombiano', brand: { '@type': 'Brand', name: 'B.R.U' },
+        offers: { '@type': 'Offer', priceCurrency: 'COP', price: String(Math.round(Number(String(base).replace(/[^\d.]/g, '')) || p.precio)),
+          availability: disponible(p) ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock', url: 'https://www.brucoffeeshop.online/#cafes' } };
+      if (f) o.image = f;
+      return { '@type': 'ListItem', position: i + 1, item: o };
+    });
+    if (!items.length) return;
+    var s = document.createElement('script'); s.type = 'application/ld+json';
+    s.textContent = JSON.stringify({ '@context': 'https://schema.org', '@type': 'ItemList', name: 'Cafés B.R.U', itemListElement: items });
+    document.head.appendChild(s);
+  }
+
+  /* ---------- 6 · INICIO: RESEÑAS, JOURNAL, NEWSLETTER ---------- */
+  function pintarResenas(){
+    var sec = $('bp-resenas'), R = (PLUS.resenas || []).filter(function(r){ return r && r.texto; });
+    if (!sec) return;
+    if (!R.length){ sec.style.display = 'none'; return; }
+    sec.style.display = '';
+    $('bp-res-grid').innerHTML = R.slice(0, 6).map(function(r){
+      var n = Math.max(1, Math.min(5, r.estrellas || 5));
+      return '<div class="bp-rev"><div class="bp-stars">' + new Array(n + 1).join('★') + '</div><q>' + esc(r.texto) + '</q>' +
+        '<small>' + esc([r.nombre, r.ciudad].filter(Boolean).join(' · ')) + (r.cafe ? ' — compró ' + esc(r.cafe) : '') + '</small></div>';
+    }).join('');
+  }
+  function pintarJournal(){
+    var seed = fetch('/journal-seed.json', { cache: 'no-store' }).then(function(r){ return r.json(); }).catch(function(){ return []; });
+    var nube = sb('bru_conta?tipo=eq.journal&select=fecha,data').catch(function(){ return []; });
+    Promise.all([seed, nube]).then(function(res){
+      var m = {};
+      (res[0] || []).forEach(function(a){ if (a && a.slug) m[a.slug] = a; });
+      (res[1] || []).forEach(function(r){ var a = r.data || {}; if (a.slug){ a.fecha = a.fecha || r.fecha; m[a.slug] = a; } });
+      var L = Object.keys(m).map(function(k){ return m[k]; }).filter(function(a){ return a.publicado !== false && a.titulo; })
+        .sort(function(x, y){ return (y.destacado ? 1 : 0) - (x.destacado ? 1 : 0) || String(y.fecha || '').localeCompare(String(x.fecha || '')); }).slice(0, 3);
+      var sec = $('bp-journal');
+      if (!L.length){ if (sec) sec.style.display = 'none'; return; }
+      $('bp-jr-grid').innerHTML = L.map(function(a){
+        var oscuro = ['Laboratorio', 'Industria', 'Origen', 'Noticias'].indexOf(a.cat) >= 0;
+        return '<a class="bp-art" href="/journal.html?a=' + encodeURIComponent(a.slug) + '"><div class="cv' + (oscuro && !a.portada ? ' d' : '') + '"' +
+          (a.portada ? ' style="background-image:url(\'' + esc(a.portada) + '\')"' : '') + '></div><div class="bd"><span class="tg">' + esc(a.cat || '') + '</span>' +
+          '<h3>' + esc(a.titulo) + '</h3><p>' + esc(a.resumen || '') + '</p><span class="mt">' + (a.minutos ? esc(a.minutos) + ' min de lectura' : '') + '</span></div></a>';
+      }).join('');
+    });
+  }
+  function newsletter(){
+    var sec = $('bp-news'); if (!sec) return;
+    if (PLUS.newsletter === false){ sec.style.display = 'none'; return; }
+    sec.style.display = '';
+    if (PLUS.nlTexto) $('bp-nl-sub').textContent = PLUS.nlTexto;
+    var ya = false; try{ ya = localStorage.getItem('bru_nl') === '1'; }catch(e){}
+    if (ya){ $('bp-nl-form').style.display = 'none'; $('bp-nl-msg').innerHTML = '<span class="ok">Ya estás suscrito. ¡Gracias!</span>'; }
+    $('bp-nl-form').onsubmit = function(ev){
+      ev.preventDefault();
+      var email = $('bp-nl-email').value.trim().toLowerCase();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return;
+      var b = $('bp-nl-btn'); b.disabled = true; b.textContent = 'Enviando…';
+      sb('bru_conta?on_conflict=id', { method: 'POST', prefer: 'resolution=merge-duplicates,return=minimal',
+        body: [{ id: 'nl_' + email.replace(/[^a-z0-9]/g, '_').slice(0, 60), tipo: 'newsletter', fecha: new Date().toISOString().slice(0, 10), data: { email: email, origen: 'tienda', fecha: new Date().toISOString() } }] })
+        .then(function(){ $('bp-nl-form').style.display = 'none'; $('bp-nl-msg').innerHTML = '<span class="ok">¡Listo! Te llega la próxima guía.</span>'; try{ localStorage.setItem('bru_nl', '1'); }catch(e){} })
+        .catch(function(){ b.disabled = false; b.textContent = 'Suscribirme'; $('bp-nl-msg').textContent = 'No se pudo guardar. Intenta de nuevo.'; });
+    };
+  }
+
+  /* ---------- 7 · PLANES DE EMPRESAS = PÁGINA DE PLANES ---------- */
+  function sincronizarPlanes(){
+    [1, 2, 3].forEach(function(i){
+      var n = $('pl-n' + i), f = $('pl-for' + i), ft = $('pl-feat' + i);
+      if (n && $('e-pl' + i + 'n')) $('e-pl' + i + 'n').textContent = n.textContent;
+      if (f && $('e-pl' + i + 'f')) $('e-pl' + i + 'f').textContent = f.textContent;
+      if (ft && $('e-pl' + i + 'feat')) $('e-pl' + i + 'feat').innerHTML = ft.innerHTML;
+    });
+  }
+  ['empApplyConfig', 'planesApplyConfig'].forEach(function(fn){
+    var o = window[fn]; if (typeof o !== 'function') return;
+    window[fn] = function(){ var r = o.apply(this, arguments); try{ if (typeof planesApplyConfig === 'function' && fn === 'empApplyConfig') window.planesApplyConfig(); sincronizarPlanes(); }catch(e){} return r; };
+  });
+
+  /* ---------- ARRANQUE ---------- */
+  function aplicar(){ pintarResenas(); newsletter(); try{ if (cart && cart.length) extrasCarrito(); }catch(e){} }
+  sb('bru_conta?id=eq.tiendaplus&select=data').then(function(r){
+    if (r && r[0] && r[0].data){ var d = r[0].data; for (var k in d){ if (Object.prototype.hasOwnProperty.call(d, k)) PLUS[k] = d[k]; } }
+  }).catch(function(){}).then(function(){ _plusListo = true; aplicar(); if (_popupPend) window.bruPopupProgramar(); });
+  function alListo(){ aplicar(); pintarJournal(); sincronizarPlanes(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', alListo); else alListo();
+})();
+</script>
+
 </body>
 </html>
