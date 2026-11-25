@@ -199,13 +199,13 @@ footer a{color:var(--plum2);text-decoration:none;margin-right:16px}
 <div class="wrap">
   <section class="nl" id="nl">
     <div class="eyebrow" style="color:var(--rose)">Newsletter</div>
-    <h2>Una guía nueva cada mes, directo a tu correo</h2>
-    <p>Recetas, lotes nuevos antes que nadie y lo que pasa en el mundo del café. Sin spam: un correo al mes.</p>
+    <h2>Entérate cuando llegue un lote nuevo</h2>
+    <p>Deja tu correo y te avisamos de lotes nuevos y nuevas guías del Journal. Nada más.</p>
     <form id="nl-form">
       <input type="email" id="nl-email" placeholder="tu@correo.com" required autocomplete="email">
       <button class="btn btn-p" type="submit" id="nl-btn">Suscribirme</button>
     </form>
-    <small id="nl-msg">Puedes darte de baja cuando quieras respondiendo el correo.</small>
+    <small id="nl-msg">Puedes pedir que te borremos cuando quieras.</small>
   </section>
 </div>
 
@@ -283,8 +283,12 @@ var ICONOS = {
   'Industria': '<svg viewBox="0 0 24 24" fill="none" stroke="#fbe4d8" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M5 16l4-5 4 3 6-8"/><path d="M15 6h4v4"/></svg>',
   'Noticias': '<svg viewBox="0 0 24 24" fill="none" stroke="#fbe4d8" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/></svg>'
 };
+function fotoProd(p){ var f = ''; if (p) [p.img].concat(p.fotos || []).forEach(function(u){ if (!f && u && String(u).indexOf('http') === 0) f = u; }); return f; }
+function portadaDe(a){ return a.portada || fotoProd(productoDe(a.producto)); }
 function cover(a, cls){
   var cat = ICONOS[a.cat] ? a.cat : 'otra';
+  var src = portadaDe(a);
+  if (src) return '<div class="cov ' + (cls || '') + '" style="background-image:url(\'' + esc(src) + '\')"></div>';
   if (a.portada) return '<div class="cov ' + (cls || '') + '" style="background-image:url(\'' + esc(a.portada) + '\')"></div>';
   return '<div class="cov ph c-' + cat + ' ' + (cls || '') + '">' + (ICONOS[a.cat] || ICONOS['Guías']) + '</div>';
 }
@@ -339,7 +343,7 @@ function setMeta(a){
   $('og-title').setAttribute('content', a.titulo);
   $('og-desc').setAttribute('content', a.resumen || '');
   $('og-type').setAttribute('content', 'article');
-  if (a.portada) $('og-img').setAttribute('content', a.portada);
+  if (portadaDe(a)) $('og-img').setAttribute('content', portadaDe(a));
   $('canon').setAttribute('href', SITE + urlArt(a));
   var ld = document.createElement('script');
   ld.type = 'application/ld+json';
@@ -347,7 +351,7 @@ function setMeta(a){
     '@context': 'https://schema.org', '@type': 'Article', headline: a.titulo, description: a.resumen || '',
     datePublished: a.fecha || '', author: { '@type': 'Person', name: a.autor || 'B.R.U' },
     publisher: { '@type': 'Organization', name: 'B.R.U Coffee Roasters', logo: { '@type': 'ImageObject', url: SITE + '/bru-logo.svg' } },
-    image: a.portada ? [a.portada] : undefined, mainEntityOfPage: SITE + urlArt(a)
+    image: portadaDe(a) ? [portadaDe(a)] : undefined, mainEntityOfPage: SITE + urlArt(a)
   });
   document.head.appendChild(ld);
 }
@@ -367,13 +371,12 @@ function pintarArticulo(slug){
   $('a-body').innerHTML = md(a.cuerpo);
 
   var p = productoDe(a.producto);
-  var img = '';
-  if (p){ [p.img].concat(p.fotos || []).forEach(function(u){ if (!img && u && String(u).indexOf('http') === 0) img = u; }); }
+  var img = fotoProd(p);
   if (p){
     $('a-cta').innerHTML = '<div class="cta-box"><div class="im" style="' + (img ? 'background-image:url(\'' + esc(img) + '\')' : '') + '"></div><div>' +
       '<div class="eyebrow" style="margin:0">Pruébalo en casa</div><h3>' + esc(p.nombre) + '</h3>' +
       '<p>' + esc([p.origen, p.proceso, p.notas].filter(Boolean).join(' · ')) + '</p>' +
-      '<a class="btn btn-p" href="/#cafes">Ver en la tienda →</a></div></div>';
+      '<a class="btn btn-p" href="/#cafe=' + encodeURIComponent(p.nombre) + '">Ver ' + esc(p.nombre) + ' en la tienda →</a></div></div>';
   } else {
     $('a-cta').innerHTML = '<div class="cta-box" style="grid-template-columns:1fr"><div>' +
       '<div class="eyebrow" style="margin:0">Del laboratorio a tu taza</div><h3>Cafés 85+ SCA, tostados en lotes pequeños</h3>' +
@@ -405,7 +408,7 @@ function newsletter(){
       body: [{ id: id, tipo: 'newsletter', fecha: new Date().toISOString().slice(0, 10), data: { email: email, origen: 'journal', articulo: decodeURIComponent(slug), fecha: new Date().toISOString() } }] })
       .then(function(){
         $('nl-form').classList.add('hide');
-        $('nl-msg').innerHTML = '<span class="ok">¡Listo! Te escribiremos con la próxima guía.</span>';
+        $('nl-msg').innerHTML = '<span class="ok">¡Listo! Te avisamos con el próximo lote.</span>';
         try{ localStorage.setItem('bru_nl', '1'); }catch(e){}
       })
       .catch(function(){ btn.disabled = false; btn.textContent = 'Suscribirme'; $('nl-msg').textContent = 'No se pudo guardar. Intenta de nuevo o escríbenos por WhatsApp.'; });

@@ -193,7 +193,7 @@ th{color:var(--mut);font-weight:500;font-size:12px}
       <div class="card">
         <h3>Newsletter en la tienda</h3>
         <label class="chk" style="margin-bottom:12px"><input type="checkbox" id="a-nl"> Mostrar el bloque de newsletter en el inicio</label>
-        <div class="f"><label>Texto del bloque</label><input id="a-nltxt" maxlength="160"></div>
+        <div class="f"><label>Texto del bloque (vacío = texto por defecto)</label><input id="a-nltxt" maxlength="160" placeholder="Deja tu correo y te avisamos de lotes nuevos y nuevas guías del Journal."></div>
       </div>
     </div>
     <button class="btn p" id="b-aj">Guardar ajustes</button>
@@ -225,7 +225,7 @@ var SB_URL = 'https://dzgtyazvqpdmwvwqpvco.supabase.co';
 var SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
 var T = 'bru_conta';
 var S = { arts: {}, seed: [], cur: null, cat: [], cfgTienda: {}, plus: null, nl: [] };
-var PLUS_DEF = { resenas: [], upsell: [], urgencia: 10, popupSeg: 30, popupDias: 3, invitado: true, envioBarra: true, newsletter: true, nlTexto: 'Recibe una guía de preparación al mes y entérate primero de los lotes nuevos.' };
+var PLUS_DEF = { resenas: [], upsell: [], urgencia: 10, popupSeg: 30, popupDias: 3, invitado: true, envioBarra: true, newsletter: true, nlTexto: '' };
 
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
@@ -358,7 +358,9 @@ function leerEditor(){
 }
 function preview(){
   var a = leerEditor();
-  $('prev').innerHTML = (a.portada ? '<img src="' + esc(a.portada) + '" style="width:100%;max-height:220px;object-fit:cover;margin-bottom:14px">' : '') +
+  var pp = S.cat.filter(function(p){ return p.nombre === a.producto; })[0], ft = a.portada;
+  if (!ft && pp) [pp.img].concat(pp.fotos || []).forEach(function(u){ if (!ft && u && String(u).indexOf('http') === 0) ft = u; });
+  $('prev').innerHTML = (ft ? '<img src="' + esc(ft) + '" style="width:100%;max-height:220px;object-fit:cover;margin-bottom:14px">' : '') +
     '<div style="font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#854f6c">' + esc(a.cat) + '</div>' +
     '<h1>' + esc(a.titulo || 'Título del artículo') + '</h1><div class="lead">' + esc(a.resumen) + '</div>' + md(a.cuerpo);
 }

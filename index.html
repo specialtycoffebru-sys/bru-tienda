@@ -6343,11 +6343,11 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
 <div class="bp-sec" id="bp-news">
   <div class="bp-in">
     <div class="bp-nl">
-      <div><div class="bp-eye" style="color:#dfb6b2">Newsletter</div><h2 class="bp-h">Café nuevo, <i>antes que nadie</i></h2>
-      <p class="bp-sub" id="bp-nl-sub">Recibe una guía de preparación al mes y entérate primero de los lotes nuevos.</p></div>
+      <div><div class="bp-eye" style="color:#dfb6b2">Newsletter</div><h2 class="bp-h">Entérate cuando llegue <i>un lote nuevo</i></h2>
+      <p class="bp-sub" id="bp-nl-sub">Deja tu correo y te avisamos de lotes nuevos y nuevas guías del Journal.</p></div>
       <div>
         <form id="bp-nl-form"><input type="email" id="bp-nl-email" placeholder="tu@correo.com" required autocomplete="email"><button type="submit" id="bp-nl-btn">Suscribirme</button></form>
-        <small id="bp-nl-msg">Un correo al mes. Te das de baja cuando quieras.</small>
+        <small id="bp-nl-msg">Solo avisos de B.R.U. Puedes pedir que te borremos cuando quieras.</small>
       </div>
     </div>
   </div>
@@ -9004,6 +9004,9 @@ document.addEventListener('DOMContentLoaded',function(){
   if(_hv === 'empresas'){ navTo('empresas'); return; }
   if(_hv === 'planes'){ navTo('planes'); return; }
   if(_hv === 'captura'){ navTo('captura'); leadReintentar(); return; }
+  // Enlaces directos desde el Journal y otras páginas: /#cafes, /#subs, /#cafe=NOMBRE
+  if(_hv.indexOf('cafe=') === 0){ navTo('cafes'); if(typeof bruAbrirCafeHash === 'function') bruAbrirCafeHash(decodeURIComponent(_hv.slice(5))); }
+  else if(['cafes','subs','historia','proceso'].indexOf(_hv) >= 0) navTo(_hv);
   // Pop-up de bienvenida: lo programa el módulo bru-ventas (una vez cada N días,
   // después de unos segundos o al bajar media página). Se ajusta en Dashboard → Journal.
   if(!bruUser() && typeof bruPopupProgramar === 'function') bruPopupProgramar();
@@ -13136,7 +13139,7 @@ function cardQuickAdd(idx){
 <script id="bru-ventas">
 (function(){
   var PLUS = { resenas: [], upsell: [], urgencia: 10, popupSeg: 30, popupDias: 3, invitado: true, envioBarra: true, newsletter: true,
-               nlTexto: 'Recibe una guía de preparación al mes y entérate primero de los lotes nuevos.' };
+               nlTexto: '' };
   window.bruPlus = PLUS;
 
   function $(id){ return document.getElementById(id); }
@@ -13296,7 +13299,14 @@ function cardQuickAdd(idx){
   function pintarJournal(){
     var seed = fetch('/journal-seed.json', { cache: 'no-store' }).then(function(r){ return r.json(); }).catch(function(){ return []; });
     var nube = sb('bru_conta?tipo=eq.journal&select=fecha,data').catch(function(){ return []; });
-    Promise.all([seed, nube]).then(function(res){
+    var cat = sb('bru_store?id=eq.main&select=catalogo').then(function(r){ return (r && r[0] && r[0].catalogo) || []; }).catch(function(){ return []; });
+    Promise.all([seed, nube, cat]).then(function(res){
+      function fotoArt(a){
+        if (a.portada) return a.portada;
+        var n = String(a.producto || '').toLowerCase().trim(); if (!n) return '';
+        var p = (res[2] || []).filter(function(x){ return x && String(x.nombre || '').toLowerCase().trim() === n; })[0];
+        return p ? fotoDe(p) : '';
+      }
       var m = {};
       (res[0] || []).forEach(function(a){ if (a && a.slug) m[a.slug] = a; });
       (res[1] || []).forEach(function(r){ var a = r.data || {}; if (a.slug){ a.fecha = a.fecha || r.fecha; m[a.slug] = a; } });
@@ -13306,8 +13316,9 @@ function cardQuickAdd(idx){
       if (!L.length){ if (sec) sec.style.display = 'none'; return; }
       $('bp-jr-grid').innerHTML = L.map(function(a){
         var oscuro = ['Laboratorio', 'Industria', 'Origen', 'Noticias'].indexOf(a.cat) >= 0;
-        return '<a class="bp-art" href="/journal.html?a=' + encodeURIComponent(a.slug) + '"><div class="cv' + (oscuro && !a.portada ? ' d' : '') + '"' +
-          (a.portada ? ' style="background-image:url(\'' + esc(a.portada) + '\')"' : '') + '></div><div class="bd"><span class="tg">' + esc(a.cat || '') + '</span>' +
+        var ft = fotoArt(a);
+        return '<a class="bp-art" href="/journal.html?a=' + encodeURIComponent(a.slug) + '"><div class="cv' + (oscuro && !ft ? ' d' : '') + '"' +
+          (ft ? ' style="background-image:url(\'' + esc(ft) + '\')"' : '') + '></div><div class="bd"><span class="tg">' + esc(a.cat || '') + '</span>' +
           '<h3>' + esc(a.titulo) + '</h3><p>' + esc(a.resumen || '') + '</p><span class="mt">' + (a.minutos ? esc(a.minutos) + ' min de lectura' : '') + '</span></div></a>';
       }).join('');
     });
@@ -13326,7 +13337,7 @@ function cardQuickAdd(idx){
       var b = $('bp-nl-btn'); b.disabled = true; b.textContent = 'Enviando…';
       sb('bru_conta?on_conflict=id', { method: 'POST', prefer: 'resolution=merge-duplicates,return=minimal',
         body: [{ id: 'nl_' + email.replace(/[^a-z0-9]/g, '_').slice(0, 60), tipo: 'newsletter', fecha: new Date().toISOString().slice(0, 10), data: { email: email, origen: 'tienda', fecha: new Date().toISOString() } }] })
-        .then(function(){ $('bp-nl-form').style.display = 'none'; $('bp-nl-msg').innerHTML = '<span class="ok">¡Listo! Te llega la próxima guía.</span>'; try{ localStorage.setItem('bru_nl', '1'); }catch(e){} })
+        .then(function(){ $('bp-nl-form').style.display = 'none'; $('bp-nl-msg').innerHTML = '<span class="ok">¡Listo! Te avisamos con el próximo lote.</span>'; try{ localStorage.setItem('bru_nl', '1'); }catch(e){} })
         .catch(function(){ b.disabled = false; b.textContent = 'Suscribirme'; $('bp-nl-msg').textContent = 'No se pudo guardar. Intenta de nuevo.'; });
     };
   }
@@ -13344,6 +13355,17 @@ function cardQuickAdd(idx){
     var o = window[fn]; if (typeof o !== 'function') return;
     window[fn] = function(){ var r = o.apply(this, arguments); try{ if (typeof planesApplyConfig === 'function' && fn === 'empApplyConfig') window.planesApplyConfig(); sincronizarPlanes(); }catch(e){} return r; };
   });
+
+  /* ---------- 8 · ENLACE DIRECTO A UN CAFÉ (/#cafe=NOMBRE) ---------- */
+  window.bruAbrirCafeHash = function(nombre){
+    var n = String(nombre || '').toLowerCase().trim(), intentos = 0;
+    (function buscar(){
+      var idx = -1;
+      try{ catalog.forEach(function(p, i){ if (idx < 0 && p && String(p.nombre || '').toLowerCase().trim() === n) idx = i; }); }catch(e){}
+      if (idx >= 0){ try{ openDetail(idx); }catch(e){} return; }
+      if (++intentos < 50) setTimeout(buscar, 300);
+    })();
+  };
 
   /* ---------- ARRANQUE ---------- */
   function aplicar(){ pintarResenas(); newsletter(); try{ if (cart && cart.length) extrasCarrito(); }catch(e){} }
