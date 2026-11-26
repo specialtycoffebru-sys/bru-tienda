@@ -231,6 +231,8 @@ var SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
 var WA_NUM = '573044927790';
 var SITE = 'https://www.brucoffeeshop.online';
 var ARTS = [], CATALOGO = [], CAT_ON = 'Todos';
+var IMG_DEF = ["https://res.cloudinary.com/dmksgltis/image/upload/f_auto/q_auto/IMG_7461_z4olsw.jpg", "https://res.cloudinary.com/dmksgltis/image/upload/f_auto/q_auto/0X4A0402_m5vikp", "https://res.cloudinary.com/dmksgltis/image/upload/f_auto/q_auto/IMG_7414_m8wykh", "https://res.cloudinary.com/dmksgltis/image/upload/f_auto/q_auto/0X4A0617_nyc2ln", "https://res.cloudinary.com/dmksgltis/image/upload/f_auto/q_auto/IMG_7432_nfurcf", "https://res.cloudinary.com/dmksgltis/image/upload/f_auto/q_auto/IMG_7433_mrxc6v", "https://res.cloudinary.com/dmksgltis/image/upload/f_auto/q_auto/0X4A3531_kv7qpr", "https://res.cloudinary.com/dmksgltis/image/upload/f_auto/q_auto/IMG_7467_ertg9q.jpg", "https://res.cloudinary.com/dmksgltis/image/upload/f_auto/q_auto/IMG_7457_fg4jjy.jpg"];
+/* Imágenes generales: se cambian en Dashboard → Journal y merch → Ajustes */
 
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
@@ -284,7 +286,7 @@ var ICONOS = {
   'Noticias': '<svg viewBox="0 0 24 24" fill="none" stroke="#fbe4d8" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/></svg>'
 };
 function fotoProd(p){ var f = ''; if (p) [p.img].concat(p.fotos || []).forEach(function(u){ if (!f && u && String(u).indexOf('http') === 0) f = u; }); return f; }
-function portadaDe(a){ return a.portada || fotoProd(productoDe(a.producto)); }
+function portadaDe(a){ if (a.portada) return a.portada; var f = fotoProd(productoDe(a.producto)); if (f) return f; var i = Math.max(0, ARTS.indexOf(a)); return IMG_DEF[i % IMG_DEF.length]; }
 function cover(a, cls){
   var cat = ICONOS[a.cat] ? a.cat : 'otra';
   var src = portadaDe(a);
@@ -303,8 +305,9 @@ function cardHTML(a){
 function cargar(){
   var seed = fetch('/journal-seed.json', { cache: 'no-store' }).then(function(r){ return r.json(); }).catch(function(){ return []; });
   var nube = sb('bru_conta?tipo=eq.journal&select=id,fecha,data').catch(function(){ return []; });
-  var cat = sb('bru_store?id=eq.main&select=catalogo').then(function(r){ return (r && r[0] && r[0].catalogo) || []; }).catch(function(){ return []; });
-  return Promise.all([seed, nube, cat]).then(function(res){
+  var cat = sb('bru_store?id=eq.main&select=catalogo,tienda_config').then(function(r){ var row = (r && r[0]) || {}; var w = ((row.tienda_config || {}).wa || '').replace(/\D/g, ''); if (w) { WA_NUM = w; $('wa-fab').href = 'https://wa.me/' + WA_NUM + '?text=' + encodeURIComponent('Hola B.R.U! Vengo del Journal 👋'); } return row.catalogo || []; }).catch(function(){ return []; });
+  var plus = sb('bru_conta?id=eq.tiendaplus&select=data').then(function(r){ var L = r && r[0] && r[0].data && r[0].data.imgGenerales; if (L && L.length) IMG_DEF = L; }).catch(function(){});
+  return Promise.all([seed, nube, cat, plus]).then(function(res){
     var porSlug = {};
     (res[0] || []).forEach(function(a){ if (a && a.slug) porSlug[a.slug] = a; });
     (res[1] || []).forEach(function(row){ var a = row.data || {}; if (!a.slug) return; a.fecha = a.fecha || row.fecha; porSlug[a.slug] = a; });

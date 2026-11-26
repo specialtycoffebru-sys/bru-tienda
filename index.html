@@ -6028,7 +6028,7 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
     <a href="javascript:void(0)" onclick="navTo('subs')" class="nav-link" id="nav-subs">Suscripciones</a>
     <a href="/clases.html" class="nav-link" id="nav-clases">Clases</a>
     <a href="/eventos.html" class="nav-link" id="nav-eventos">Eventos</a>
-    <a href="javascript:void(0)" onclick="navTo('merch')" class="nav-link" id="nav-merch" style="display:none">Merch</a>
+    <a href="javascript:void(0)" onclick="navTo('merch')" class="nav-link" id="nav-merch">Merch</a>
     <a href="/journal.html" class="nav-link" id="nav-journal">Journal</a>
     <a href="javascript:void(0)" onclick="navTo('historia')" class="nav-link" id="nav-historia">Nuestra historia</a>
     <a href="javascript:void(0)" onclick="navTo('proceso')" class="nav-link" id="nav-proceso">Proceso</a>
@@ -13107,8 +13107,10 @@ function cardQuickAdd(idx){
      =================================================================== -->
 <style id="bru-ventas-css">
 #ig-fab,#track-fab{display:none !important}
-/* Barra minimalista: Menú · Cafés · Merch · Journal. Lo demás vive en el Menú. */
-#nav-home,#nav-subs,#nav-clases,#nav-eventos,#nav-empresas{display:none !important}
+/* El texto bajo la serpiente quedaba tapado por la barra: solo la serpiente */
+.marca-fija .nav-logo-text{display:none !important}
+/* Barra minimalista: Menú · Cafés · Merch. Lo demás (Journal incluido) vive en el Menú. */
+#nav-home,#nav-subs,#nav-clases,#nav-eventos,#nav-empresas,#nav-journal{display:none !important}
 .bp-sec{padding:clamp(64px,7vw,100px) clamp(18px,4vw,40px);background:#fff;color:#190d19}
 .bp-sec.alt{background:#fdf4ee}
 .bp-in{max-width:1180px;margin:0 auto}
@@ -13330,11 +13332,12 @@ function cardQuickAdd(idx){
     var nube = sb('bru_conta?tipo=eq.journal&select=fecha,data').catch(function(){ return []; });
     var cat = sb('bru_store?id=eq.main&select=catalogo').then(function(r){ return (r && r[0] && r[0].catalogo) || []; }).catch(function(){ return []; });
     Promise.all([seed, nube, cat]).then(function(res){
+      var _k = 0;
       function fotoArt(a){
         if (a.portada) return a.portada;
-        var n = String(a.producto || '').toLowerCase().trim(); if (!n) return '';
-        var p = (res[2] || []).filter(function(x){ return x && String(x.nombre || '').toLowerCase().trim() === n; })[0];
-        return p ? fotoDe(p) : '';
+        var n = String(a.producto || '').toLowerCase().trim();
+        var p = n ? (res[2] || []).filter(function(x){ return x && String(x.nombre || '').toLowerCase().trim() === n; })[0] : null;
+        return (p && fotoDe(p)) || imgGen(_k++);
       }
       var m = {};
       (res[0] || []).forEach(function(a){ if (a && a.slug) m[a.slug] = a; });
@@ -13394,6 +13397,43 @@ function cardQuickAdd(idx){
       if (idx >= 0){ try{ openDetail(idx); }catch(e){} return; }
       if (++intentos < 50) setTimeout(buscar, 300);
     })();
+  };
+
+  /* ---------- 9 · IMÁGENES GENERALES ----------
+     Ningún espacio queda sin foto: si en el Editor Tienda un espacio de imagen
+     está vacío, se usa una de las imágenes generales. Lo que cargues en el
+     dashboard siempre tiene prioridad. La lista se cambia en
+     Dashboard → Journal y merch → Ajustes → Imágenes generales. */
+  var IMG_DEF = ["https://res.cloudinary.com/dmksgltis/image/upload/f_auto/q_auto/IMG_7461_z4olsw.jpg", "https://res.cloudinary.com/dmksgltis/image/upload/f_auto/q_auto/0X4A0402_m5vikp", "https://res.cloudinary.com/dmksgltis/image/upload/f_auto/q_auto/IMG_7414_m8wykh", "https://res.cloudinary.com/dmksgltis/image/upload/f_auto/q_auto/0X4A0617_nyc2ln", "https://res.cloudinary.com/dmksgltis/image/upload/f_auto/q_auto/IMG_7432_nfurcf", "https://res.cloudinary.com/dmksgltis/image/upload/f_auto/q_auto/IMG_7433_mrxc6v", "https://res.cloudinary.com/dmksgltis/image/upload/f_auto/q_auto/0X4A3531_kv7qpr", "https://res.cloudinary.com/dmksgltis/image/upload/f_auto/q_auto/IMG_7467_ertg9q.jpg", "https://res.cloudinary.com/dmksgltis/image/upload/f_auto/q_auto/IMG_7457_fg4jjy.jpg"];
+  function imgGen(i){ var L = (PLUS.imgGenerales && PLUS.imgGenerales.length) ? PLUS.imgGenerales : IMG_DEF; return L[i % L.length]; }
+  window.bruImgGeneral = imgGen;
+  function vacio(u){ return !(typeof u === 'string' && /^(https?:\/\/|\/)/.test(u)); }
+  var _getConfig = window.getConfig;
+  window.getConfig = function(){
+    var c = _getConfig.apply(this, arguments) || {};
+    try{
+      c.galeria = c.galeria || {};
+      ['c1', 'c2', 'c3'].forEach(function(k, i){ var g = c.galeria[k] = c.galeria[k] || {}; if (vacio(g.img) && vacio(g.vid)) g.img = imgGen(i); });
+      c.procesoImgs = c.procesoImgs || {};
+      var ordenProc = [3, 4, 4, 5, 6, 5, 7, 2];
+      for (var n = 1; n <= 8; n++){ if (vacio(c.procesoImgs['p' + n])) c.procesoImgs['p' + n] = imgGen(ordenProc[n - 1]); }
+      if (vacio(c.heroBg) && vacio(c.heroVideo)) c.heroBg = imgGen(0);
+      if (vacio(c.ncVideoPoster)) c.ncVideoPoster = imgGen(1);
+      if (vacio(c.procVideoPoster)) c.procVideoPoster = imgGen(5);
+      if (vacio(c.historiaVideoPoster)) c.historiaVideoPoster = imgGen(3);
+    }catch(e){}
+    return c;
+  };
+  /* Bloque "Quién lo cultivó": si hay productor pero no foto, usa una foto del café o una general */
+  var _ppProd = window.ppRenderProductor;
+  if (typeof _ppProd === 'function') window.ppRenderProductor = function(p){
+    try{
+      if (p && (p.fincaProductor || p.productor)){
+        var pr = p.fincaProductor = p.fincaProductor || { nombre: p.productor || '', finca: p.origen || '', altura: p.altitud || '', variedad: p.variedad || '', proceso: p.proceso || '' };
+        if (vacio(pr.img) && vacio(pr.video)){ var fs = [p.img].concat(p.fotos || []).filter(function(u){ return !vacio(u); }); pr.img = fs[fs.length - 1] || imgGen(0); }
+      }
+    }catch(e){}
+    return _ppProd.apply(this, arguments);
   };
 
   /* ---------- ARRANQUE ---------- */
@@ -13509,7 +13549,8 @@ function cardQuickAdd(idx){
     var t = tallas(p); if (!t.length) return false;
     var a = agotadas(p); return t.every(function(x){ return a.indexOf(x.toLowerCase()) >= 0; });
   }
-  function fotos(p){ return (p.fotos || []).filter(function(u){ return u && String(u).indexOf('http') === 0; }); }
+  function fotos(p){ return (p.fotos || []).filter(function(u){ return u && /^(https?:\/\/|\/)/.test(String(u)); }); }
+  function pronto(p){ return p.estado === 'pronto' || !(Number(p.precio) > 0); }
 
   function card(p, i){
     var f = fotos(p), t = tallas(p), a = agotadas(p), ag = agotado(p);
@@ -13519,11 +13560,11 @@ function cardQuickAdd(idx){
         (f[1] ? '<img class="b" src="' + esc(f[1]) + '" alt="" loading="lazy">' : '') +
         (t.length && !ag ? '<div class="bm-sizes">' + t.map(function(x){ return '<span' + (a.indexOf(x.toLowerCase()) >= 0 ? ' class="x"' : '') + '>' + esc(x) + '</span>'; }).join('') + '</div>' : '') +
       '</div>' +
-      '<div class="bm-meta"><b>' + esc(p.nombre) + '</b><span' + (ag ? ' class="bm-agot"' : '') + '>' + (enCO() ? money(p.precio) : '') + '</span></div></a>';
+      '<div class="bm-meta"><b>' + esc(p.nombre) + '</b><span' + (ag || pronto(p) ? ' class="bm-agot"' : '') + '>' + (pronto(p) ? 'Próximamente' : (enCO() ? money(p.precio) : '')) + '</span></div></a>';
   }
   function pintar(){
     var L = M.lista, hay = L.length > 0;
-    ['nav-merch', 'mg-merch', 'foot-merch'].forEach(function(id){ var e = $(id); if (e) e.style.display = hay ? '' : 'none'; });
+    ['mg-merch', 'foot-merch'].forEach(function(id){ var e = $(id); if (e) e.style.display = hay ? '' : 'none'; });
     var g = $('bm-grid');
     if (g) g.innerHTML = hay ? L.map(card).join('') : '<div class="bm-vacio" style="grid-column:1/-1">La primera colección de B.R.U está en camino.</div>';
     var h = $('bm-home');
@@ -13536,8 +13577,12 @@ function cardQuickAdd(idx){
     return fetch(SB_URL + '/rest/v1/bru_conta?id=eq.merchpub&select=data', { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }, cache: 'no-store' })
       .then(function(r){ return r.ok ? r.json() : []; })
       .then(function(r){
-        var ps = (r && r[0] && r[0].data && r[0].data.productos) || [];
-        M.lista = ps.filter(function(p){ return p && p.nombre && p.activo !== false && Number(p.precio) > 0; });
+        /* Si aún no se ha guardado el merch en el dashboard, se muestran los productos de ejemplo */
+        if (r && r[0] && r[0].data) return r[0].data.productos || [];
+        return fetch('/merch-seed.json', { cache: 'no-store' }).then(function(x){ return x.json(); }).catch(function(){ return []; });
+      })
+      .then(function(ps){
+        M.lista = (ps || []).filter(function(p){ return p && p.nombre && p.activo !== false && fotos(p).length; });
         pintar();
       }).catch(function(){ pintar(); });
   }
@@ -13549,7 +13594,7 @@ function cardQuickAdd(idx){
     var libres = t.filter(function(x){ return a.indexOf(x.toLowerCase()) < 0; });
     M.talla = libres.length === 1 ? libres[0] : '';
     $('bm-nom').textContent = p.nombre;
-    $('bm-pr').textContent = enCO() ? money(p.precio) : 'Consúltanos el precio para tu país';
+    $('bm-pr').textContent = pronto(p) ? 'Próximamente' : (enCO() ? money(p.precio) : 'Consúltanos el precio para tu país');
     $('bm-desc').textContent = p.desc || '';
     var det = String(p.detalles || '').split('\n').map(function(x){ return x.trim(); }).filter(Boolean);
     $('bm-det').innerHTML = det.length ? '<ul>' + det.map(function(x){ return '<li>' + esc(x.replace(/^[-•]\s*/, '')) + '</li>'; }).join('') + '</ul>' : '';
@@ -13566,9 +13611,10 @@ function cardQuickAdd(idx){
         $('bm-tlbl').textContent = (p.tituloTallas || 'Talla') + ': ' + M.talla; };
     });
     $('bm-q').textContent = '1'; $('bm-err').textContent = '';
-    var ag = agotado(p);
+    var ag = agotado(p) && !pronto(p);
     $('bm-add').disabled = ag;
-    $('bm-add').textContent = ag ? 'Agotado' : (enCO() ? 'Añadir al carrito' : 'Consultar por WhatsApp');
+    $('bm-add').textContent = ag ? 'Agotado' : (pronto(p) ? 'Avísame cuando llegue' : (enCO() ? 'Añadir al carrito' : 'Consultar por WhatsApp'));
+    document.querySelector('.bm-qty').style.display = pronto(p) ? 'none' : '';
     galeria(p);
     $('bm-ov').classList.add('on'); document.body.style.overflow = 'hidden';
     try{ history.replaceState(null, '', '#merch'); }catch(e){}
@@ -13583,12 +13629,12 @@ function cardQuickAdd(idx){
   window.bruMerchQty = function(d){ M.qty = Math.max(1, Math.min(20, M.qty + d)); $('bm-q').textContent = M.qty; };
   window.bruMerchAgregar = function(){
     var p = M.lista[M.cur]; if (!p) return;
-    if (!enCO()){
+    if (pronto(p) || !enCO()){
       var cfg = {}; try{ cfg = getConfig() || {}; }catch(e){}
-      window.open('https://wa.me/' + ((cfg.wa || WA) + '').replace(/\D/g, '') + '?text=' + encodeURIComponent('Hola B.R.U! Me interesa ' + p.nombre + (M.talla ? ' talla ' + M.talla : '') + '. ¿Precio y envío a mi país?'), '_blank');
+      window.open('https://wa.me/' + ((cfg.wa || WA) + '').replace(/\D/g, '') + '?text=' + encodeURIComponent(pronto(p) ? 'Hola B.R.U! Avísenme cuando llegue ' + p.nombre + (M.talla ? ' (' + M.talla + ')' : '') + ' 🙌' : 'Hola B.R.U! Me interesa ' + p.nombre + (M.talla ? ' talla ' + M.talla : '') + '. ¿Precio y envío a mi país?'), '_blank');
       return;
     }
-    if (tallas(p).length && !M.talla){ $('bm-err').textContent = 'Elige una talla.'; return; }
+    if (tallas(p).length && !M.talla){ $('bm-err').textContent = 'Elige ' + (p.tituloTallas ? p.tituloTallas.toLowerCase() : 'una talla') + '.'; return; }
     var key = 'merch|' + (p.id || p.nombre) + '|' + M.talla;
     var ex = cart.filter(function(c){ return c.cartKey === key; })[0];
     if (ex) ex.qty += M.qty;
