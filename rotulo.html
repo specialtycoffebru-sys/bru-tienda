@@ -95,7 +95,7 @@ select,option{background:var(--card2)}
       <div class="f"><label>N° de guía</label><input id="e-guia"></div></div>
     <div class="row"><div class="f"><label>Referencia del pedido</label><input id="e-ref"></div><div class="f"><label>Peso aprox.</label><input id="e-peso" placeholder="300 g"></div></div>
     <div class="f"><label>Contenido</label><textarea id="e-cont"></textarea></div>
-    <div class="row"><div class="f"><label>Cobrar al recibir ($, vacío = ya pagado)</label><input id="e-cobro" inputmode="numeric"></div><div class="f"><label>Valor declarado ($)</label><input id="e-decl" inputmode="numeric"></div></div>
+    <div class="row"><div class="f"><label>Cobrar al recibir ($, vacío = no se muestra)</label><input id="e-cobro" inputmode="numeric"></div><div class="f"><label>Valor declarado ($)</label><input id="e-decl" inputmode="numeric"></div></div>
     <label class="chk"><input type="checkbox" id="e-fragil" checked> Marcar FRÁGIL · café</label>
     <label class="chk"><input type="checkbox" id="e-barras" checked> Código de barras con el N° de guía o la referencia</label>
 
@@ -185,7 +185,7 @@ function rotuloHTML(){
         ($('e-barras').checked && codigo ? barras(codigo) : '') + '</div>' +
       (cobro && Number(cobro.replace(/\D/g, '')) > 0
         ? '<div class="bloque cobro"><div class="lbl">Cobrar al recibir</div><div class="v">' + money(cobro) + '</div></div>'
-        : '<div class="bloque cobro"><div class="lbl">Estado</div><div class="v" style="font-size:4.6mm">PAGADO</div></div>') +
+        : '') +
     '</div>' +
     (f !== '10x10' ? '<div class="bloque cont"><div class="lbl">Contenido' + (val('e-peso') ? ' · ' + esc(val('e-peso')) : '') + (decl ? ' · Valor declarado ' + money(decl) : '') + '</div>' + esc(val('e-cont')).replace(/\n/g, '<br>') + '</div>' : '') +
     '<div class="bloque de"><div class="lbl">De</div><b>' + esc(val('r-nom')) + '</b>' + (de ? ' · ' + esc(de) : '') + '<br>' + esc([deTel, val('r-web')].filter(Boolean).join(' · ')) + '</div>' +
