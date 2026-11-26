@@ -7322,7 +7322,7 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
       <div class="cart-line"><span>Número de productos</span><span id="c-nprod">0</span></div>
       <div class="cart-total"><span>Total</span><span id="c-total">$0</span></div>
       <button class="btn-order" onclick="openOrder()">Hacer pedido →</button>
-      <div class="cart-note">Envío contra entrega: lo pagas al recibir</div>
+      <div class="cart-note">El envío se calcula con tu ciudad al confirmar el pedido</div>
       <button class="cart-seguir" onclick="toggleCart()">← Seguir comprando</button>
     </aside>
   </div>
@@ -7370,7 +7370,7 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
     <div class="success" id="om-success">
       <div class="success-check">✓</div>
       <div class="success-h">¡Pedido recibido!</div>
-      <p class="success-p">Tu pedido quedó registrado. Te escribiremos por WhatsApp para confirmar los detalles y el pago. El envío es contra entrega: lo pagas al recibir.</p>
+      <p class="success-p">Tu pedido quedó registrado. Te escribiremos por WhatsApp para confirmar los detalles, el pago y el envío.</p>
       <button class="btn-wa" id="btn-wa-final">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
         Chatear por WhatsApp
@@ -7631,9 +7631,23 @@ const SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
 /* Texto del envio (contra entrega) que se guarda dentro de las notas del
    pedido, para que SIEMPRE llegue al dashboard aunque la tabla no tenga
    columnas propias de envio. */
+/* ¿El envío por transportadora se cobra junto con el pedido (como Tiendanube)
+   o contra entrega? Se elige en Dashboard → Editor tienda → Envíos (envCobro). */
+function envCobraEnPedido(){
+  var cfg = {}; try{ cfg = getConfig() || {}; }catch(e){}
+  return String(cfg.envCobro || 'pedido') !== 'contraentrega';
+}
+/* Valor del envío que se suma al total a pagar ahora (0 si es gratis,
+   mensajero, contra entrega o sin tarifa). */
+function envValorCobrado(){
+  var r = window._envioActual, modo = window._envioModo || 'transportadora';
+  if(modo === 'mensajero' || !envCobraEnPedido()) return 0;
+  return (r && r.ok && !r.gratis) ? (r.valor || 0) : 0;
+}
 function bruEnvioTexto(){
   var r = window._envioActual, modo = window._envioModo || 'transportadora';
   var ciudad = ((document.getElementById('o-ciudad')||{}).value || '').trim();
+  if(modo !== 'mensajero' && r && r.ok && !r.gratis && envCobraEnPedido()) return '🚚 ENVÍO PAGADO EN EL PEDIDO: transportadora · ' + r.zona + (r.dias ? ' · ' + r.dias : '') + ' · ' + fmt(r.valor);
   if(modo === 'mensajero') return '🚚 ENVÍO CONTRA ENTREGA: mensajero urbano (Uber/Picap/DiDi)' + (ciudad ? ' · ' + ciudad : '') + ' · lo paga el cliente al recibir';
   if(r && r.ok && r.gratis) return '🚚 ENVÍO GRATIS: transportadora · ' + r.zona + (r.dias ? ' · ' + r.dias : '');
   if(r && r.ok) return '🚚 ENVÍO CONTRA ENTREGA: transportadora · ' + r.zona + (r.dias ? ' · ' + r.dias : '') + ' · aprox. ' + fmt(r.valor) + ' · lo paga el cliente al recibir';
@@ -7641,8 +7655,8 @@ function bruEnvioTexto(){
 }
 function bruEnvioDatos(){
   var r = window._envioActual, modo = window._envioModo || 'transportadora';
-  var val = (modo !== 'mensajero' && r && r.ok && !r.gratis) ? r.valor : 0;
-  return { envio: val, envioZona: (r && r.zona) || '', envioModo: modo, envioTexto: bruEnvioTexto() };
+  var val = envValorCobrado();
+  return { envio: val, envioContraEntrega: (modo !== 'mensajero' && r && r.ok && !r.gratis && !val) ? r.valor : 0, envioZona: (r && r.zona) || '', envioModo: modo, envioTexto: bruEnvioTexto() };
 }
 
 /* Guarda el pedido en Supabase. Si la tabla no tiene alguna columna (por
@@ -10588,6 +10602,12 @@ function envCotizar(ciudad){
       if(l && (c === l || c.indexOf(l) >= 0 || l.indexOf(c) >= 0)) hit = z;
     });
   });
+  // Zona comodín: ciudades "*" o "resto" (o nombre "Resto del país") cubre todo lo demás
+  if(!hit) zonas.forEach(function(z){
+    if(hit) return;
+    var cs = envNorm(z.ciudades), nm = envNorm(z.nombre);
+    if(cs === '*' || cs === 'resto' || cs.indexOf('resto del pais') >= 0 || (!cs && nm.indexOf('resto') >= 0)) hit = z;
+  });
   if(!hit) return {ok:false, msg: cfg.envSinZona || 'Te confirmamos el costo del envío por WhatsApp', peso:peso};
 
   var r = (hit.rangos||[]).slice().sort(function(a,b){ return a.hasta - b.hasta; });
@@ -10710,7 +10730,7 @@ function envActualizar(forzar){
       else t1 = '<div style="display:flex;justify-content:space-between;gap:1rem">'
         + '<span>Transportadora · ' + r.zona + (r.dias ? ' · ' + r.dias : '') + '</span>'
         + '<span>' + fmt(r.valor) + '</span></div>'
-        + '<div style="font-size:10.5px;color:var(--muted);margin-top:.2rem">Contra entrega: lo pagas a la transportadora al recibir</div>'
+        + '<div style="font-size:10.5px;color:var(--muted);margin-top:.2rem">' + (envCobraEnPedido() ? 'Se suma al total y lo pagas con tu pedido' : 'Contra entrega: lo pagas a la transportadora al recibir') + '</div>'
         + (r.falta > 0 ? '<div style="font-size:10.5px;color:var(--gold);margin-top:.25rem">Te faltan ' + fmt(r.falta) + ' para envío gratis</div>' : '');
 
       html += msj
@@ -10742,8 +10762,19 @@ function envPintarTotal(){
   var tot = cart.reduce(function(a,x){ return a + x.precio * x.qty; }, 0);
   var r = window._envioActual;
   var modo = window._envioModo || 'transportadora';
-  var envio = 0, nota = '';
-  if(modo === 'mensajero'){
+  var envio = envValorCobrado(), nota = '';
+  var el2 = document.getElementById('om-envio-linea');
+  if(!el2){ el2 = document.createElement('div'); el2.id = 'om-envio-linea'; el2.style.cssText = 'display:none;justify-content:space-between;font-size:13px;margin:.35rem 0'; el.parentNode.insertBefore(el2, el); }
+  el2.style.display = envio ? 'flex' : 'none';
+  el2.innerHTML = envio ? '<span>Envío · ' + (r.zona || 'transportadora') + '</span><span>' + fmt(envio) + '</span>' : '';
+  if(envio){
+    nota = '';
+  } else if(r && r.ok && r.gratis && modo !== 'mensajero'){
+    nota = '<div style="font-size:10.5px;color:var(--muted);font-weight:400;margin-top:.25rem">Envío gratis incluido</div>';
+  } else if(modo !== 'mensajero' && envCobraEnPedido() && !(r && r.ok)){
+    nota = '<div style="font-size:10.5px;color:var(--muted);font-weight:400;margin-top:.25rem">'
+      + 'Escribe tu ciudad para sumar el envío. Si no tenemos tarifa, te lo confirmamos por WhatsApp</div>';
+  } else if(modo === 'mensajero'){
     nota = '<div style="font-size:10.5px;color:var(--muted);font-weight:400;margin-top:.25rem">'
       + 'Envío contra entrega: el mensajero se paga al recibir, directo a la plataforma</div>';
   } else if(r && r.ok && !r.gratis){
@@ -10828,7 +10859,7 @@ function submitOrder(){
     var _envVal = (_env && _env.ok && !_env.gratis) ? _env.valor : 0;
     var _envTxt = !_env ? '' : (_env.ok ? (_env.gratis ? 'Envío gratis · ' + _env.zona : 'Envío ' + _env.zona + ': ' + fmt(_env.valor)) : 'Envío por confirmar');
     _desc = descPrimeraMonto(tot2);
-    var _envD = bruEnvioDatos(); _envVal = 0;
+    var _envD = bruEnvioDatos(); _envVal = _envD.envio || 0;
     var pedido={cliente:nombre,tel:tel,envio:_envD.envio,envioZona:_envD.envioZona,envioModo:_envD.envioModo,envioTexto:_envD.envioTexto,ciudad:document.getElementById('o-ciudad').value.trim(),barrio:document.getElementById('o-barrio').value.trim(),dir:document.getElementById('o-dir').value.trim(),pago:document.getElementById('o-pago').value,notas:(document.getElementById('o-notas').value.trim()+(bruUser()?' · Cliente registrado: '+bruUser().email:'')+(_desc?' · 🎁 Descuento primera compra '+DESC_PRIMERA_PCT+'%: -'+_desc:'')).trim(),items:cart.map(function(c){ return {nombre:c.nombre,tamano:c.tamano,sku:c.sku||'',qty:c.qty,precio:c.precio}; }),subtotal:sub,iva:0,total:tot2+_envVal-_desc,estado:'Pendiente',visto:false};
     _guardado = bruGuardarPedido(pedido);
     descPrimeraMarcar('web' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), pedido.total, pedido.pago);
@@ -10837,6 +10868,8 @@ function submitOrder(){
   var items=cart.map(function(c){ var info=c.tamano?(c.sku?' '+c.tamano+' ['+c.sku+']':' '+c.tamano):''; return '• '+c.nombre+info+' ×'+c.qty+' — '+fmt(c.precio*c.qty); }).join('\n');
   var sub2=cart.reduce(function(s,c){ return s+c.precio*c.qty; },0), _d2=_desc||0;
   if(_d2){ items += '\n• 🎁 Descuento primera compra ('+DESC_PRIMERA_PCT+' %) — -'+fmt(_d2); sub2 -= _d2; }
+  var _ev2 = 0; try{ _ev2 = envValorCobrado(); }catch(e){}
+  if(_ev2){ items += '\n• 🚚 Envío ('+((window._envioActual||{}).zona||'transportadora')+') — '+fmt(_ev2); sub2 += _ev2; }
   var msg=encodeURIComponent('Hola B.R.U! 👋\nSoy *'+nombre+'*\n\nMi pedido:\n'+items+'\n\n*Total: '+fmt(sub2)+'*\n\nPago: '+document.getElementById('o-pago').options[document.getElementById('o-pago').selectedIndex].text+'\nCiudad: '+(document.getElementById('o-ciudad').value||'Por confirmar')+(document.getElementById('o-barrio').value?' · Barrio: '+document.getElementById('o-barrio').value:'')+'\nDirección: '+(document.getElementById('o-dir').value||'Por confirmar')+(_envTxtWA?'\n'+_envTxtWA:''));
   var cfg=getConfig(); var waNum=cfg.wa||WA;
   document.getElementById('btn-wa-final').onclick=function(){ window.open('https://wa.me/'+waNum+'?text='+msg,'_blank'); };
@@ -11831,7 +11864,7 @@ var BRU_EN = {
  "Subtotal (sin IVA)": "Subtotal (excl. VAT)",
  "IVA 19%": "VAT 19%",
  "Total con IVA": "Total incl. VAT",
- "Envío contra entrega: lo pagas al recibir": "Cash on delivery shipping: you pay it when it arrives",
+ "El envío se calcula con tu ciudad al confirmar el pedido": "Shipping is calculated from your city at checkout",
  "Hacer pedido →": "Place Order →",
  "Mira dónde va tu envío": "See where your order is",
  "Confirmar pedido": "Confirm Order",
@@ -11847,7 +11880,7 @@ var BRU_EN = {
  "Efectivo (en punto de entrega)": "Cash (on delivery)",
  "Notas": "Notes",
  "¡Pedido recibido!": "Order received!",
- "Tu pedido quedó registrado. Te escribiremos por WhatsApp para confirmar los detalles y el pago. El envío es contra entrega: lo pagas al recibir.": "Your order is in. We'll message you on WhatsApp to confirm the details and payment. Shipping is cash on delivery: you pay it when it arrives.",
+ "Tu pedido quedó registrado. Te escribiremos por WhatsApp para confirmar los detalles, el pago y el envío.": "Your order is in. We'll message you on WhatsApp to confirm the details, payment and shipping.",
  "Chatear por WhatsApp": "Chat on WhatsApp",
  "Tu carrito está vacío": "Your cart is empty",
  "Café de competencia, trazable de la finca a tu taza": "Competition coffee, traceable from farm to cup",
@@ -13017,7 +13050,9 @@ function cardQuickAdd(idx){
     var tot = (typeof cart !== 'undefined' ? cart : []).reduce(function(s, c){ return s + c.precio * c.qty; }, 0);
     var e = window._envioActual, ev = (e && e.ok && !e.gratis) ? e.valor : 0;
     var ds = typeof descPrimeraMonto === 'function' ? descPrimeraMonto(tot) : 0;
-    return { productos: tot, descuento: ds, envio: 0, envioContraEntrega: ev, total: tot - ds, envioPorConfirmar: !!(e && !e.ok) };
+    var cob = typeof envValorCobrado === 'function' ? envValorCobrado() : 0;
+    var msj = (window._envioModo === 'mensajero');
+    return { productos: tot, descuento: ds, envio: cob, envioContraEntrega: cob ? 0 : (msj ? 0 : ev), mensajero: msj, total: tot - ds + cob, envioPorConfirmar: !msj && !!(!e || !e.ok) };
   }
   function money(n){ return typeof fmt === 'function' ? fmt(n) : ('$' + Math.round(n).toLocaleString('es-CO')); }
   function nota(){
@@ -13025,7 +13060,7 @@ function cardQuickAdd(idx){
     if (sel.value !== 'wompi') { box.style.display = 'none'; var b0 = document.getElementById('btn-confirm'); if (b0 && !b0.disabled) b0.textContent = 'Confirmar pedido'; return; }
     var t = totalPedido(), g = brutoW(t.total);
     box.style.display = 'block';
-    box.innerHTML = 'Pagas aquí mismo con tarjeta, PSE, Nequi o Bancolombia en la ventana segura de Wompi.' + (g > t.total ? '<br>Pedido ' + money(t.total) + ' + costo del pago en línea ' + money(g - t.total) + ' = <b>' + money(g) + '</b>. Si prefieres no pagar ese costo, elige Nequi, Llave o transferencia.' : '') + '<br>El envío no se cobra aquí: es contra entrega, lo pagas al recibir' + (t.envioContraEntrega ? ' (aprox. ' + money(t.envioContraEntrega) + ').' : '.');
+    box.innerHTML = 'Pagas aquí mismo con tarjeta, PSE, Nequi o Bancolombia en la ventana segura de Wompi.' + (g > t.total ? '<br>Pedido ' + money(t.total) + ' + costo del pago en línea ' + money(g - t.total) + ' = <b>' + money(g) + '</b>. Si prefieres no pagar ese costo, elige Nequi, Llave o transferencia.' : '') + (t.envio ? '<br>Incluye el envío (' + money(t.envio) + ').' : t.mensajero ? '<br>El mensajero se paga al recibir, directo a la plataforma.' : t.envioContraEntrega ? '<br>El envío no se cobra aquí: es contra entrega (aprox. ' + money(t.envioContraEntrega) + ').' : t.envioPorConfirmar ? '<br>Escribe tu ciudad arriba para sumar el envío.' : '');
     var b = document.getElementById('btn-confirm'); if (b && !b.disabled) b.textContent = 'Pagar ' + money(g) + ' en línea';
   }
   function cargar(src){ return new Promise(function(ok, no){ if (window.WidgetCheckout) return ok(); var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = function(){ no(new Error('No se pudo abrir el pago')); }; document.head.appendChild(s); }); }
@@ -13036,7 +13071,7 @@ function cardQuickAdd(idx){
     var ok = document.getElementById('om-success'); ok.style.display = 'block';
     var h = ok.querySelector('.success-h'), p = ok.querySelector('.success-p');
     if (h) h.textContent = '¡Pago recibido!';
-    if (p) p.textContent = 'Pagaste ' + money(monto) + ' en línea. Referencia ' + ref + '. Te escribimos por WhatsApp para coordinar el envío, que es contra entrega (lo pagas al recibir).';
+    if (p) p.textContent = 'Pagaste ' + money(monto) + ' en línea. Referencia ' + ref + '. ' + (window._ultEnvioPagado ? 'El envío ya está pago: te escribimos por WhatsApp con la guía.' : 'Te escribimos por WhatsApp para coordinar el envío.');
     cart = []; try { renderCart(); } catch (e) {}
     try { descPrimeraMarcar(ref, monto, 'wompi'); } catch (e) {}
   }
@@ -13044,6 +13079,12 @@ function cardQuickAdd(idx){
     var nombre = document.getElementById('o-nombre').value.trim(), tel = document.getElementById('o-tel').value.trim();
     if (!nombre || !tel) { toast('Nombre y WhatsApp son obligatorios'); return; }
     if (!cart.length) { toast('Tu carrito está vacío'); return; }
+    var _t0 = totalPedido(), _cfg0 = {}; try { _cfg0 = getConfig() || {}; } catch (e) {}
+    if (_t0.envioPorConfirmar && (_cfg0.envioZonas || []).length && typeof envCobraEnPedido === 'function' && envCobraEnPedido()) {
+      if (!document.getElementById('o-ciudad').value.trim()) { toast('Escribe tu ciudad para calcular el envío'); try { document.getElementById('o-ciudad').focus(); } catch (e) {} return; }
+      toast('No tenemos tarifa para esa ciudad: elige otro medio de pago o pregúntanos el envío por WhatsApp'); return;
+    }
+    window._ultEnvioPagado = !!_t0.envio;
     var btn = document.getElementById('btn-confirm'), msg = document.getElementById('o-pago-wompi-msg');
     btn.disabled = true; btn.textContent = 'Abriendo pago seguro…'; msg.textContent = '';
     var t = totalPedido(), id = 'ped_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), ref = id.replace('ped_', 'PED-').toUpperCase();
@@ -13053,7 +13094,7 @@ function cardQuickAdd(idx){
     var _ed = (typeof bruEnvioDatos === 'function') ? bruEnvioDatos() : { envio: 0, envioZona: '', envioModo: '', envioTexto: '' };
     var pedido = { cliente: nombre, tel: tel, envio: _ed.envio, envioZona: _ed.envioZona, envioModo: _ed.envioModo, envioTexto: _ed.envioTexto, ciudad: ciudad, barrio: barrio, dir: dir, pago: 'wompi', notas: (notas + (u ? ' · Cliente registrado: ' + u.email : '') + (t.descuento ? ' · 🎁 Descuento primera compra 10%: -' + t.descuento : '') + ' · Pago en línea Wompi · Ref ' + ref + ' · ⏳ Pago en línea pendiente').trim(), items: items, subtotal: t.productos, iva: 0, total: t.total, estado: 'Pendiente', visto: false };
     var hoy = new Date(); hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
-    sbPost('bru_conta', [{ id: id, tipo: 'pedido_web', fecha: hoy.toISOString().slice(0, 10), data: { estado: 'pendiente', ref: ref, email: u && u.email ? String(u.email).toLowerCase() : '', total: t.total, productos: t.productos, descuento: t.descuento, envio: 0, envioContraEntrega: t.envioContraEntrega, envioTexto: _ed.envioTexto, items: items, cliente: nombre, tel: tel, dir: dir, ciudad: ciudad, barrio: barrio } }])
+    sbPost('bru_conta', [{ id: id, tipo: 'pedido_web', fecha: hoy.toISOString().slice(0, 10), data: { estado: 'pendiente', ref: ref, email: u && u.email ? String(u.email).toLowerCase() : '', total: t.total, productos: t.productos, descuento: t.descuento, envio: t.envio, envioContraEntrega: t.envioContraEntrega, envioTexto: _ed.envioTexto, items: items, cliente: nombre, tel: tel, dir: dir, ciudad: ciudad, barrio: barrio } }])
       .then(function(r){ if (!r.ok) throw new Error('No se pudo guardar el pedido'); try { bruGuardarPedido(pedido); } catch (e) {} return api({ accion: 'firma', id: id }); })
       .then(function(f){ if (f.error) throw new Error(f.error);
         return cargar('https://checkout.wompi.co/widget.js').then(function(){

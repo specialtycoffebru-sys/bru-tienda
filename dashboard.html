@@ -1547,6 +1547,18 @@ textarea.inp{resize:vertical;min-height:60px}
       </div>
 
       <div class="row">
+        <div class="f" style="flex:2"><label class="fl">¿Cuándo paga el cliente el envío?</label>
+          <select class="inp" id="et-envCobro">
+            <option value="pedido">Con el pedido — se suma al total y se cobra en Wompi (como Tiendanube)</option>
+            <option value="contraentrega">Contra entrega — lo paga al recibir</option>
+          </select>
+        </div>
+      </div>
+      <div style="font-size:9.5px;color:var(--muted);margin:-.35rem 0 .9rem;line-height:1.6">
+        Con el pedido: la tienda calcula la tarifa con la ciudad y el peso y la suma al total. Para que toda ciudad tenga precio,
+        crea una zona llamada <b>Resto del país</b> y en ciudades escribe <b>*</b>. El mensajero urbano siempre se paga al recibir.
+      </div>
+      <div class="row">
         <div class="f"><label class="fl">Envío gratis desde (COP)</label>
           <input class="inp" id="et-envGratis" type="number" placeholder="150000">
         </div>
@@ -8229,7 +8241,7 @@ function envRender(){
         + '<div class="f"><label class="fl">Días de entrega</label><input class="inp" value="' + (z.dias||'') + '" oninput="envSet(' + i + ',\'dias\',this.value)" placeholder="2 a 3 días"></div>'
       + '</div>'
       + '<div class="f"><label class="fl">Ciudades (separadas por coma)</label>'
-        + '<textarea class="inp" rows="2" oninput="envSet(' + i + ',\'ciudades\',this.value)" placeholder="Medellín, Cali, Barranquilla, Bucaramanga">' + (z.ciudades||'') + '</textarea></div>'
+        + '<textarea class="inp" rows="2" oninput="envSet(' + i + ',\'ciudades\',this.value)" placeholder="Medellín, Cali, Barranquilla — o * para el resto del país">' + (z.ciudades||'') + '</textarea></div>'
       + '<div style="font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cream2);margin:.6rem 0 .35rem">Tarifas por peso</div>'
       + z.rangos.map(function(r,j){
           return '<div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.35rem">'
@@ -8265,6 +8277,11 @@ function envCalcular(ciudad, gramos, cfg){
       if(c && (c === lista[i] || c.indexOf(lista[i]) >= 0 || lista[i].indexOf(c) >= 0)){ hit = z; return; }
     }
   });
+  if(!hit) zonas.forEach(function(z){
+    if(hit) return;
+    var cs = norm(z.ciudades), nm = norm(z.nombre);
+    if(cs === '*' || cs === 'resto' || cs.indexOf('resto del pais') >= 0 || (!cs && nm.indexOf('resto') >= 0)) hit = z;
+  });
   if(!hit) return {ok:false, msg: cfg.envSinZona || 'Te confirmamos el envío por WhatsApp'};
   var r = hit.rangos.slice().sort(function(a,b){ return a.hasta-b.hasta; });
   var tarifa = r[r.length-1].valor;
@@ -8281,7 +8298,7 @@ function envProbar(){
   res.textContent = 'Zona ' + r.zona + ' · ' + r.peso + 'g · ' + fmt(r.valor) + (r.dias ? ' · ' + r.dias : '');
 }
 
-var ET_CAMPOS = ['empEyebrow','empTitle','empSub','empCta1','empWaMsg','empStat1n','empStat1l','empStat2n','empStat2l','empStat3n','empStat3l','empS1eyebrow','empS1title','empS1lead','empV1t','empV1p','empV2t','empV2p','empV3t','empV3p','empS2eyebrow','empS2title','empP1t','empP1p','empP2t','empP2p','empP3t','empP3p','empP4t','empP4p','empS3eyebrow','empS3title','empS3lead','empPl1n','empPl1f','empPl1feat','empPl2n','empPl2f','empPl2feat','empPl3n','empPl3f','empPl3feat','empCloseTitle','empCloseSub','paso1n','paso1t','paso1d','paso2n','paso2t','paso2d','paso3n','paso3t','paso3d','paso4n','paso4t','paso4d','procTit','proc1num','proc1tit','proc1desc','proc2num','proc2tit','proc2desc','proc3num','proc3tit','proc3desc','proc4num','proc4tit','proc4desc','histTit1','histTit2','histP1','histP2','val1','val2','val3','val4','footerDesc','heroPoster','historiaVideoOsc','envGratis','envEmpaque','envSinZona','msjOn','msjCiudades','msjValor','msjTitulo','msjTexto'];
+var ET_CAMPOS = ['empEyebrow','empTitle','empSub','empCta1','empWaMsg','empStat1n','empStat1l','empStat2n','empStat2l','empStat3n','empStat3l','empS1eyebrow','empS1title','empS1lead','empV1t','empV1p','empV2t','empV2p','empV3t','empV3p','empS2eyebrow','empS2title','empP1t','empP1p','empP2t','empP2p','empP3t','empP3p','empP4t','empP4p','empS3eyebrow','empS3title','empS3lead','empPl1n','empPl1f','empPl1feat','empPl2n','empPl2f','empPl2feat','empPl3n','empPl3f','empPl3feat','empCloseTitle','empCloseSub','paso1n','paso1t','paso1d','paso2n','paso2t','paso2d','paso3n','paso3t','paso3d','paso4n','paso4t','paso4d','procTit','proc1num','proc1tit','proc1desc','proc2num','proc2tit','proc2desc','proc3num','proc3tit','proc3desc','proc4num','proc4tit','proc4desc','histTit1','histTit2','histP1','histP2','val1','val2','val3','val4','footerDesc','heroPoster','historiaVideoOsc','envGratis','envEmpaque','envSinZona','msjOn','msjCiudades','msjValor','msjTitulo','msjTexto','envCobro'];
 
 function loadET(){
   var s=getTC();
@@ -8325,6 +8342,7 @@ function loadET(){
   });
   // Textos de Empresas, Proceso, Historia y Footer
   ET_CAMPOS.forEach(function(k){ sv('et-'+k, s[k]||''); });
+  if(!s.envCobro) sv('et-envCobro','pedido');
   ET_OFFERS = Array.isArray(s.offerings) ? JSON.parse(JSON.stringify(s.offerings)) : [];
   etOfferRender();
   ENV_ZONAS = Array.isArray(s.envioZonas) ? JSON.parse(JSON.stringify(s.envioZonas)) : [];
