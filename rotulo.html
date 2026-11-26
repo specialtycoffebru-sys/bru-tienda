@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B.R.U · Rótulo de envío</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap" rel="stylesheet">
+<style id="estilo-pagina">
+:root{--bg:#0d0b09;--card:#181512;--card2:#1e1b17;--gold:#c9a84c;--gold2:#e8c96a;--txt:#e8e2d8;--mut:#a8a098;--line:rgba(255,255,255,.08);--line2:rgba(201,168,76,.28);--bad:#f38b8b}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:Inter,system-ui,sans-serif;font-size:14px}
+button,input,select,textarea{font:inherit;color:inherit}
+select,option{background:var(--card2)}
+.app{display:grid;grid-template-columns:400px 1fr;min-height:100vh}
+@media(max-width:900px){.app{grid-template-columns:1fr}}
+.panel{padding:18px;border-right:1px solid var(--line);overflow:auto;max-height:100vh}
+.panel h1{font-family:Fraunces,serif;font-weight:400;font-size:24px;margin:0 0 4px}
+.hint{color:var(--mut);font-size:12px;margin:0 0 12px;line-height:1.45}
+.sec{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:18px 0 8px}
+.f{display:flex;flex-direction:column;gap:4px;margin-bottom:9px}
+.f label{font-size:11.5px;color:var(--mut)}
+.f input,.f select,.f textarea{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;outline:none;width:100%}
+.f input:focus,.f textarea:focus,.f select:focus{border-color:var(--line2)}
+.f textarea{min-height:64px;resize:vertical}
+.row{display:flex;gap:8px}.row .f{flex:1;min-width:0}
+.chk{display:flex;align-items:center;gap:7px;font-size:13px;margin:0 0 7px;cursor:pointer}
+.btn{border:1px solid var(--line2);background:transparent;color:var(--gold2);padding:9px 14px;border-radius:8px;cursor:pointer;font-size:13px}
+.btn.p{background:var(--gold);color:#1a1406;border-color:var(--gold);font-weight:700}
+.btns{display:flex;gap:8px;flex-wrap:wrap;position:sticky;bottom:0;background:var(--bg);padding:12px 0 4px;border-top:1px solid var(--line);margin-top:12px}
+.vista{padding:24px;display:flex;justify-content:center;align-items:flex-start;background:#2a2622;overflow:auto}
+.hoja{background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.45);transform-origin:top center}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--card2);border:1px solid var(--line2);padding:9px 15px;border-radius:9px;opacity:0;transition:.25s;pointer-events:none}
+#toast.on{opacity:1}
+</style>
+<style id="estilo-rotulo">
+/* ====== El rótulo (lo que se imprime) ====== */
+.rot{width:100mm;height:150mm;padding:4.5mm;color:#000;font-family:Inter,Arial,sans-serif;display:flex;flex-direction:column;gap:2.2mm;overflow:hidden;background:#fff;position:relative}
+.rot.t10x10{height:100mm}
+.rot .cab{display:flex;align-items:center;gap:3mm;border-bottom:.6mm solid #000;padding-bottom:2mm}
+.rot .cab img{height:11mm;width:auto}
+.rot .marca{flex:1;min-width:0}
+.rot .marca b{display:block;font-family:Fraunces,Georgia,serif;font-size:6mm;letter-spacing:.12em;line-height:1}
+.rot .marca span{font-size:2.6mm;letter-spacing:.16em;text-transform:uppercase}
+.rot .ref{text-align:right;font-size:2.6mm;line-height:1.3}
+.rot .ref b{display:block;font-size:4mm;letter-spacing:.04em}
+.rot .bloque{border:.4mm solid #000;border-radius:2mm;padding:2mm 2.8mm}
+.rot .lbl{font-size:2.4mm;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:1.2mm}
+.rot .para .nom{font-size:5.6mm;font-weight:800;line-height:1.05;word-break:break-word}
+.rot .para .dir{font-size:3.8mm;font-weight:600;line-height:1.22;margin-top:1.2mm;word-break:break-word}
+.rot .para .ciu{font-size:5mm;font-weight:800;text-transform:uppercase;margin-top:1.2mm;letter-spacing:.02em}
+.rot .para .tel{font-size:4mm;font-weight:700;margin-top:1mm}
+.rot .de{font-size:2.8mm;line-height:1.3}
+.rot .de b{font-size:3.4mm}
+.rot .fila{display:flex;gap:2.5mm}
+.rot .fila > *{flex:1;min-width:0}
+.rot .cobro{background:#000;color:#fff;border-color:#000;text-align:center}
+.rot .cobro .lbl{color:#fff}
+.rot .cobro{display:flex;flex-direction:column;justify-content:center}
+.rot .cobro .v{font-size:5.6mm;font-weight:800}
+.rot .cont{font-size:3mm;line-height:1.35}
+.rot .guia{font-size:3.4mm}
+.rot .guia b{font-size:4.6mm;letter-spacing:.06em}
+.rot .barras{height:8mm;margin-top:1mm;width:100%}
+.rot .pie{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:2mm;font-size:2.5mm;border-top:.3mm dashed #000;padding-top:1.6mm}
+.rot .fragil{white-space:nowrap;font-weight:800;letter-spacing:.14em;border:.4mm solid #000;padding:1mm 2mm;border-radius:1mm}
+.rot.mono .cab img{filter:grayscale(1) contrast(1.6) brightness(.8)}
+/* Hoja carta con dos rótulos */
+.hoja.carta{width:216mm;min-height:279mm;padding:5mm 4mm;display:flex;flex-wrap:wrap;gap:4mm;align-content:flex-start;justify-content:center}
+.hoja.carta .rot{border:.3mm dashed #999}
+</style>
+<style id="estilo-impresion" media="print"></style>
+</head>
+<body>
+<div class="app">
+  <div class="panel">
+    <h1>Rótulo de envío</h1>
+    <p class="hint">Se llena solo desde el pedido. Puedes cambiar cualquier dato antes de imprimir. Imprimir → "Guardar como PDF" para tener el archivo.</p>
+
+    <div class="sec">Pedido</div>
+    <div class="row">
+      <div class="f"><label>Buscar pedido (nombre o teléfono)</label><input id="buscar" placeholder="Escribe para buscar…" list="lista-peds"><datalist id="lista-peds"></datalist></div>
+    </div>
+
+    <div class="sec">Para (destinatario)</div>
+    <div class="f"><label>Nombre</label><input id="p-nom"></div>
+    <div class="row"><div class="f"><label>Teléfono / WhatsApp</label><input id="p-tel"></div><div class="f"><label>Cédula (opcional)</label><input id="p-cc"></div></div>
+    <div class="f"><label>Dirección</label><input id="p-dir"></div>
+    <div class="row"><div class="f"><label>Barrio</label><input id="p-bar"></div><div class="f"><label>Ciudad / Departamento</label><input id="p-ciu"></div></div>
+    <div class="f"><label>Indicaciones de entrega</label><input id="p-ind" placeholder="Apto, torre, portería…"></div>
+
+    <div class="sec">Envío</div>
+    <div class="row"><div class="f"><label>Transportadora</label><input id="e-trans" list="trans-l" placeholder="Servientrega, Interrapidísimo…"><datalist id="trans-l"><option>Servientrega</option><option>Interrapidísimo</option><option>Coordinadora</option><option>Envía</option><option>TCC</option><option>Deprisa</option><option>472</option><option>Mensajero urbano</option></datalist></div>
+      <div class="f"><label>N° de guía</label><input id="e-guia"></div></div>
+    <div class="row"><div class="f"><label>Referencia del pedido</label><input id="e-ref"></div><div class="f"><label>Peso aprox.</label><input id="e-peso" placeholder="300 g"></div></div>
+    <div class="f"><label>Contenido</label><textarea id="e-cont"></textarea></div>
+    <div class="row"><div class="f"><label>Cobrar al recibir ($, vacío = ya pagado)</label><input id="e-cobro" inputmode="numeric"></div><div class="f"><label>Valor declarado ($)</label><input id="e-decl" inputmode="numeric"></div></div>
+    <label class="chk"><input type="checkbox" id="e-fragil" checked> Marcar FRÁGIL · café</label>
+    <label class="chk"><input type="checkbox" id="e-barras" checked> Código de barras con el N° de guía o la referencia</label>
+
+    <div class="sec">De (remitente) · se guarda para la próxima vez</div>
+    <div class="f"><label>Nombre / marca</label><input id="r-nom"></div>
+    <div class="row"><div class="f"><label>Teléfono</label><input id="r-tel"></div><div class="f"><label>NIT / CC (opcional)</label><input id="r-nit"></div></div>
+    <div class="f"><label>Dirección</label><input id="r-dir"></div>
+    <div class="row"><div class="f"><label>Ciudad</label><input id="r-ciu"></div><div class="f"><label>Instagram / web</label><input id="r-web"></div></div>
+    <div class="f"><label>Logo (URL; vacío = serpiente B.R.U)</label><input id="r-logo"></div>
+    <div class="f"><label>Mensaje al pie</label><input id="r-msg"></div>
+
+    <div class="sec">Formato</div>
+    <div class="row">
+      <div class="f"><label>Tamaño</label><select id="fmt"><option value="10x15">Etiqueta 10 × 15 cm (impresora térmica)</option><option value="10x10">Etiqueta 10 × 10 cm</option><option value="carta">Hoja carta (2 rótulos para recortar)</option></select></div>
+      <div class="f"><label>Copias</label><select id="copias"><option>1</option><option>2</option></select></div>
+    </div>
+    <label class="chk"><input type="checkbox" id="mono" checked> Logo en blanco y negro (mejor en térmica)</label>
+
+    <div class="btns">
+      <button class="btn p" id="b-imp">🖨 Imprimir / Guardar PDF</button>
+      <button class="btn" id="b-rem">Guardar remitente</button>
+      <button class="btn" id="b-guia">Guardar N° de guía en el pedido</button>
+    </div>
+  </div>
+  <div class="vista"><div id="hoja" class="hoja"></div></div>
+</div>
+<div id="toast"></div>
+
+<script>
+/* =====================================================================
+   B.R.U · RÓTULO DE ENVÍO
+   /rotulo.html?id=<id de bru_pedidos>  → se llena con el pedido
+   /rotulo.html                         → rótulo manual o buscar pedido
+   Remitente guardado en bru_conta id 'rotulocfg' (editable aquí mismo).
+   Imprimir abre el diálogo del navegador: "Guardar como PDF" o la impresora.
+   ===================================================================== */
+var SB_URL = 'https://dzgtyazvqpdmwvwqpvco.supabase.co';
+var SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
+var REM_DEF = { nom: 'B.R.U Coffee Roasters', tel: '', nit: '', dir: '', ciu: 'Bogotá D.C.', web: '@brucoffeeroasters_', logo: '', msg: 'Gracias por tomar café con nosotros · Brew · Respect · Unite' };
+var PEDS = [], PED = null;
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function money(n){ n = Math.round(Number(String(n).replace(/[^\d.-]/g, '')) || 0); return '$' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+function toast(t){ var e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(function(){ e.classList.remove('on'); }, 2400); }
+function sb(path, opts){
+  opts = opts || {};
+  var h = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
+  if (opts.prefer) h.Prefer = opts.prefer;
+  return fetch(SB_URL + '/rest/v1/' + path, { method: opts.method || 'GET', headers: h, cache: 'no-store', body: opts.body ? JSON.stringify(opts.body) : undefined })
+    .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); if (r.status === 201 || r.status === 204) return null; return r.text().then(function(t){ return t ? JSON.parse(t) : null; }); });
+}
+
+/* Código de barras Code 128 (B) en SVG, sin librerías */
+var C128 = ['212222','222122','222221','121223','121322','131222','122213','122312','132212','221213','221312','231212','112232','122132','122231','113222','123122','123221','223211','221132','221231','213212','223112','312131','311222','321122','321221','312212','322112','322211','212123','212321','232121','111323','131123','131321','112313','132113','132311','211313','231113','231311','112133','112331','132131','113123','113321','133121','313121','211331','231131','213113','213311','213131','311123','311321','331121','312113','312311','332111','314111','221411','431111','111224','111422','121124','121421','141122','141221','112214','112412','122114','122411','142112','142211','241211','221114','413111','241112','134111','111242','121142','121241','114212','124112','124211','411212','421112','421211','212141','214121','412121','111143','111341','131141','114113','114311','411113','411311','113141','114131','311141','411131','211412','211214','211232','2331112'];
+function barras(txt){
+  txt = String(txt || '').replace(/[^\x20-\x7e]/g, '');
+  if (!txt) return '';
+  var cod = [104], sum = 104;
+  for (var i = 0; i < txt.length; i++){ var v = txt.charCodeAt(i) - 32; cod.push(v); sum += v * (i + 1); }
+  cod.push(sum % 103); cod.push(106);
+  var x = 10, rects = '';
+  cod.forEach(function(c){
+    var pat = C128[c];
+    for (var k = 0; k < pat.length; k++){ var w = +pat[k]; if (k % 2 === 0) rects += '<rect x="' + x + '" y="0" width="' + w + '" height="60"/>'; x += w; }
+  });
+  return '<svg class="barras" viewBox="0 0 ' + (x + 10) + ' 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><g fill="#000">' + rects + '</g></svg>';
+}
+
+function val(id){ return $(id).value.trim(); }
+function rotuloHTML(){
+  var f = $('fmt').value, logo = val('r-logo') || '/bru-logo.svg';
+  var ref = val('e-ref'), guia = val('e-guia'), cobro = val('e-cobro'), decl = val('e-decl');
+  var codigo = guia || ref;
+  var de = [val('r-dir'), val('r-ciu')].filter(Boolean).join(' · ');
+  var deTel = [val('r-tel') ? 'Tel ' + val('r-tel') : '', val('r-nit') ? 'NIT/CC ' + val('r-nit') : ''].filter(Boolean).join(' · ');
+  return '<div class="rot' + (f === '10x10' ? ' t10x10' : '') + ($('mono').checked ? ' mono' : '') + '">' +
+    '<div class="cab"><img src="' + esc(logo) + '" alt=""><div class="marca"><b>B·R·U</b><span>Brew · Respect · Unite</span></div>' +
+      '<div class="ref">Pedido<b>' + esc(ref || '—') + '</b>' + esc(new Date().toLocaleDateString('es-CO')) + '</div></div>' +
+    '<div class="bloque para"><div class="lbl">Para</div>' +
+      '<div class="nom">' + esc(val('p-nom') || '—') + '</div>' +
+      '<div class="dir">' + esc(val('p-dir')) + (val('p-bar') ? '<br>Barrio ' + esc(val('p-bar')) : '') + (val('p-ind') ? '<br>' + esc(val('p-ind')) : '') + '</div>' +
+      '<div class="ciu">' + esc(val('p-ciu')) + '</div>' +
+      '<div class="tel">☎ ' + esc(val('p-tel')) + (val('p-cc') ? ' · CC ' + esc(val('p-cc')) : '') + '</div></div>' +
+    '<div class="fila">' +
+      '<div class="bloque guia"><div class="lbl">' + esc(val('e-trans') || 'Envío') + '</div>' + (guia ? 'Guía <b>' + esc(guia) + '</b>' : 'Guía: ____________') +
+        ($('e-barras').checked && codigo ? barras(codigo) : '') + '</div>' +
+      (cobro && Number(cobro.replace(/\D/g, '')) > 0
+        ? '<div class="bloque cobro"><div class="lbl">Cobrar al recibir</div><div class="v">' + money(cobro) + '</div></div>'
+        : '<div class="bloque cobro"><div class="lbl">Estado</div><div class="v" style="font-size:4.6mm">PAGADO</div></div>') +
+    '</div>' +
+    (f !== '10x10' ? '<div class="bloque cont"><div class="lbl">Contenido' + (val('e-peso') ? ' · ' + esc(val('e-peso')) : '') + (decl ? ' · Valor declarado ' + money(decl) : '') + '</div>' + esc(val('e-cont')).replace(/\n/g, '<br>') + '</div>' : '') +
+    '<div class="bloque de"><div class="lbl">De</div><b>' + esc(val('r-nom')) + '</b>' + (de ? ' · ' + esc(de) : '') + '<br>' + esc([deTel, val('r-web')].filter(Boolean).join(' · ')) + '</div>' +
+    '<div class="pie"><span>' + esc(val('r-msg')) + '</span>' + ($('e-fragil').checked ? '<span class="fragil">FRÁGIL · CAFÉ</span>' : '') + '</div>' +
+  '</div>';
+}
+function pintar(){
+  var f = $('fmt').value, n = +$('copias').value, h = $('hoja');
+  var uno = rotuloHTML(), html = '';
+  if (f === 'carta'){ h.className = 'hoja carta'; html = uno + uno; if (n > 1) html += uno + uno; }
+  else { h.className = 'hoja'; for (var i = 0; i < n; i++) html += uno; }
+  h.innerHTML = html;
+  /* Tamaño de página para imprimir / PDF */
+  var page = f === 'carta' ? 'size: letter; margin: 0;' : (f === '10x10' ? 'size: 100mm 100mm; margin: 0;' : 'size: 100mm 150mm; margin: 0;');
+  $('estilo-impresion').textContent = '@page{' + page + '} html,body{background:#fff !important} .panel,#toast{display:none !important} .app{display:block !important} .vista{padding:0 !important;background:#fff !important;display:block !important} .hoja{box-shadow:none !important} .rot{page-break-after:always;break-after:page} .hoja.carta .rot{page-break-after:auto;break-after:auto} *{-webkit-print-color-adjust:exact;print-color-adjust:exact}';
+}
+
+function llenarPedido(p){
+  PED = p;
+  var items = (p.items || []).map(function(it){ return (it.qty || 1) + ' × ' + (it.nombre || '') + (it.tamano ? ' ' + it.tamano : ''); }).join('\n');
+  var gramos = 0; (p.items || []).forEach(function(it){ var t = String(it.tamano || '').toLowerCase(), g = parseFloat(t) || 0; if (t.indexOf('kg') >= 0) g *= 1000; gramos += g * (it.qty || 1); });
+  $('p-nom').value = p.cliente || ''; $('p-tel').value = p.tel || ''; $('p-dir').value = p.dir || '';
+  $('p-bar').value = p.barrio || ''; $('p-ciu').value = p.ciudad || '';
+  $('e-ref').value = 'BRU-' + String(p.id || '').slice(0, 6).toUpperCase();
+  $('e-guia').value = p.guia || '';
+  $('e-cont').value = items + (p.notas ? '\nNota: ' + String(p.notas).split('·')[0].trim() : '');
+  $('e-peso').value = gramos ? (gramos >= 1000 ? (gramos / 1000) + ' kg' : gramos + ' g') : '';
+  $('e-decl').value = p.total || '';
+  /* Los pedidos web se pagan antes de despachar; si el cliente paga al recibir, escribe el valor aquí */
+  $('e-cobro').value = /contra/i.test(String(p.pago || '')) ? (p.total || '') : '';
+  if (p.envioModo === 'mensajero') $('e-trans').value = 'Mensajero urbano';
+  pintar();
+}
+function cargarPedidos(){
+  return sb('bru_pedidos?select=*&order=created_at.desc&limit=200').then(function(r){
+    PEDS = (r || []).filter(function(p){ return p.pago !== 'cliente' && p.pago !== 'pre-pedido'; });
+    $('lista-peds').innerHTML = PEDS.map(function(p, i){ return '<option value="' + esc((p.cliente || 'Sin nombre') + ' · ' + (p.tel || '') + ' · ' + money(p.total) + ' · #' + i) + '">'; }).join('');
+  }).catch(function(){ toast('No se pudieron cargar los pedidos'); });
+}
+function cargarRemitente(){
+  var R = Object.assign({}, REM_DEF);
+  return sb('bru_conta?id=eq.rotulocfg&select=data').then(function(r){ if (r && r[0] && r[0].data) Object.assign(R, r[0].data); })
+    .catch(function(){}).then(function(){
+      return sb('bru_store?id=eq.main&select=tienda_config').then(function(r){
+        var tc = (r && r[0] && r[0].tienda_config) || {};
+        if (!R.tel && tc.wa) R.tel = String(tc.wa).replace(/^57/, '');
+      }).catch(function(){});
+    }).then(function(){
+      ['nom', 'tel', 'nit', 'dir', 'ciu', 'web', 'logo', 'msg'].forEach(function(k){ $('r-' + k).value = R[k] || ''; });
+    });
+}
+
+$('buscar').addEventListener('change', function(){
+  var m = this.value.match(/#(\d+)$/); if (!m) return;
+  var p = PEDS[+m[1]]; if (p){ llenarPedido(p); toast('Pedido cargado'); }
+});
+Array.prototype.forEach.call(document.querySelectorAll('.panel input, .panel textarea, .panel select'), function(el){
+  if (el.id !== 'buscar'){ el.addEventListener('input', pintar); el.addEventListener('change', pintar); }
+});
+$('b-imp').onclick = function(){ pintar(); setTimeout(function(){ window.print(); }, 150); };
+$('b-rem').onclick = function(){
+  var d = {}; ['nom', 'tel', 'nit', 'dir', 'ciu', 'web', 'logo', 'msg'].forEach(function(k){ d[k] = val('r-' + k); });
+  sb('bru_conta?on_conflict=id', { method: 'POST', prefer: 'resolution=merge-duplicates,return=minimal', body: [{ id: 'rotulocfg', tipo: 'rotulocfg', fecha: new Date().toISOString().slice(0, 10), data: d }] })
+    .then(function(){ toast('Remitente guardado ✓'); }).catch(function(){ toast('No se pudo guardar'); });
+};
+$('b-guia').onclick = function(){
+  if (!PED || !PED.id){ toast('Primero carga un pedido'); return; }
+  var g = val('e-guia'); if (!g){ toast('Escribe el N° de guía'); return; }
+  sb('bru_pedidos?id=eq.' + encodeURIComponent(PED.id), { method: 'PATCH', prefer: 'return=minimal', body: { guia: g } })
+    .then(function(){ toast('Guía guardada en el pedido ✓'); })
+    .catch(function(){ toast('No se pudo guardar (¿existe la columna "guia" en bru_pedidos?)'); });
+};
+
+Promise.all([cargarRemitente(), cargarPedidos()]).then(function(){
+  var id = (location.search.match(/[?&]id=([^&]+)/) || [])[1];
+  var p = id ? PEDS.filter(function(x){ return String(x.id) === decodeURIComponent(id); })[0] : null;
+  if (p) llenarPedido(p); else pintar();
+});
+</script>
+</body>
+</html>
