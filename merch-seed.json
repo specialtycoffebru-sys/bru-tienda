@@ -1,0 +1,75 @@
+[
+ {
+  "id": "m-camiseta",
+  "nombre": "Camiseta Brew · Respect · Unite",
+  "precio": 0,
+  "estado": "pronto",
+  "tallas": "S, M, L, XL",
+  "agotadas": "",
+  "etiqueta": "Próximamente",
+  "stock": "",
+  "peso": 250,
+  "fotos": [
+   "/img/merch/camiseta-frente.svg",
+   "/img/merch/camiseta-espalda.svg"
+  ],
+  "desc": "Camiseta negra con el logo B.R.U al frente y el manifiesto Brew · Respect · Unite en la espalda.",
+  "detalles": "Algodón\nCorte oversize unisex\nEstampado frente y espalda",
+  "activo": true
+ },
+ {
+  "id": "m-gorra",
+  "nombre": "Gorra B.R.U",
+  "precio": 0,
+  "estado": "pronto",
+  "tallas": "",
+  "agotadas": "",
+  "etiqueta": "Próximamente",
+  "stock": "",
+  "peso": 150,
+  "fotos": [
+   "/img/merch/gorra-frente.svg",
+   "/img/merch/gorra-lado.svg"
+  ],
+  "desc": "Gorra de seis paneles en morado B.R.U con el logo bordado.",
+  "detalles": "Talla única ajustable\nLogo bordado",
+  "activo": true
+ },
+ {
+  "id": "m-taza",
+  "nombre": "Taza B.R.U",
+  "precio": 0,
+  "estado": "pronto",
+  "tallas": "Blanca, Negra",
+  "tituloTallas": "Color",
+  "agotadas": "",
+  "etiqueta": "Próximamente",
+  "stock": "",
+  "peso": 400,
+  "fotos": [
+   "/img/merch/taza-frente.svg",
+   "/img/merch/taza-lado.svg"
+  ],
+  "desc": "Taza de cerámica para tu café de cada mañana.",
+  "detalles": "Cerámica\nApta para lavavajillas",
+  "activo": true
+ },
+ {
+  "id": "m-tote",
+  "nombre": "Tote bag B.R.U",
+  "precio": 0,
+  "estado": "pronto",
+  "tallas": "",
+  "agotadas": "",
+  "etiqueta": "Próximamente",
+  "stock": "",
+  "peso": 200,
+  "fotos": [
+   "/img/merch/tote-frente.svg",
+   "/img/merch/tote-espalda.svg"
+  ],
+  "desc": "Bolsa de tela para llevar tu café y todo lo demás.",
+  "detalles": "Lona de algodón\nAsas largas",
+  "activo": true
+ }
+]
