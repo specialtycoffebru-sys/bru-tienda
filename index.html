@@ -13111,6 +13111,9 @@ function cardQuickAdd(idx){
 .marca-fija .nav-logo-text{display:none !important}
 /* Barra: todas las secciones menos Journal (Journal vive en el Menú y el footer). */
 #nav-journal{display:none !important}
+/* Todas las secciones visibles en computador (antes Suscripciones y Empresas se escondían en pantallas medianas) */
+@media(min-width:901px){#nav-subs,#nav-empresas{display:flex !important}}
+@media(min-width:901px) and (max-width:1250px){.nav-links .nav-link{padding:.45rem .42rem !important;font-size:11px !important}}
 .bp-sec{padding:clamp(64px,7vw,100px) clamp(18px,4vw,40px);background:#fff;color:#190d19}
 .bp-sec.alt{background:#fdf4ee}
 .bp-in{max-width:1180px;margin:0 auto}
