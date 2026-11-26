@@ -5491,10 +5491,11 @@ function saveD() {
   try {
     // Preservar tc (config de Editor Tienda: hero, galería, proceso, etc.)
     // que vive en el MISMO objeto bru_d pero NO en D — nunca debe perderse al guardar D.
-    var existingTc = null;
+    var existingTc = null, existingAll = {};
     try {
       var existingRaw = JSON.parse(localStorage.getItem('bru_d')||'{}');
       existingTc = existingRaw.tc || null;
+      existingAll = existingRaw || {};
     } catch(e) {}
 
     var copy = JSON.parse(JSON.stringify(D));
@@ -5509,6 +5510,11 @@ function saveD() {
     copy.compras = copy.compras||[];
     var payload = {d:copy, facN:facN, cotN:cotN};
     if(existingTc) payload.tc = existingTc;
+    /* Pedidos, pre-pedidos y clientes web viven en el mismo bru_d pero fuera de D.
+       Antes este guardado los borraba y la pestaña Pedidos quedaba en "No hay pedidos aún". */
+    Object.keys(existingAll).forEach(function(k){
+      if(k !== 'd' && k !== 'facN' && k !== 'cotN' && k !== 'tc' && payload[k] === undefined) payload[k] = existingAll[k];
+    });
 
     var s = JSON.stringify(payload);
     if(s.length < 4800000) {
@@ -5963,13 +5969,15 @@ function syncAll() {
   syncClientes();
 }
 
+var _PEDS_MEM = null;
 function syncPeds() {
   sbGet('/rest/v1/bru_pedidos?order=created_at.desc&limit=200').then(function(peds) {
-    if(peds&&peds.length){
+    if(peds&&peds.length!==undefined){
       peds=peds.filter(function(p){return p.pago!=='pre-pedido'&&p.pago!=='cliente';});
       var ld=JSON.parse(localStorage.getItem('bru_d')||'{}');
       ld.peds=peds.map(function(p){return Object.assign({},p,{_sbId:p.id});});
-      localStorage.setItem('bru_d',JSON.stringify(ld));
+      _PEDS_MEM = ld.peds;
+      try{ localStorage.setItem('bru_d',JSON.stringify(ld)); }catch(e){ console.warn('[BRU] Pedidos: almacenamiento local lleno, se muestran desde la nube', e); }
       renderPeds();
       var n=ld.peds.filter(function(p){return !p.visto;}).length;
       var b=ge('ped-badge'); if(b){b.style.display=n>0?'inline':'none';b.textContent=n;}
@@ -8945,6 +8953,7 @@ function pedEnvioHTML(p){
 function renderPeds(){
   var el=ge('peds-list');if(!el)return;
   var ld=JSON.parse(localStorage.getItem('bru_d')||'{}');
+  if((!ld.peds||!ld.peds.length) && _PEDS_MEM && _PEDS_MEM.length) ld.peds=_PEDS_MEM;
   var peds=(ld.peds||[]).slice().reverse();
   var badge=ge('ped-badge'),cnt=ge('ped-count');
   var nuevos=peds.filter(function(p){return !p.visto;}).length;
