@@ -156,9 +156,9 @@ footer a{color:var(--plum2);text-decoration:none;margin-right:16px}
 <main id="vista-lista">
   <section class="hero">
     <div class="wrap">
-      <div class="eyebrow">Journal B.R.U</div>
-      <h1>Café, explicado <i>desde el laboratorio</i></h1>
-      <p>Guías para preparar mejor en casa, lo que pasa en la mesa de catación y lo que está moviendo la industria del café de especialidad.</p>
+      <div class="eyebrow" data-bt="jp_eye">Journal B.R.U</div>
+      <h1 data-bt="jp_tit">Café, explicado <i>desde el laboratorio</i></h1>
+      <p data-bt="jp_sub">Guías para preparar mejor en casa, lo que pasa en la mesa de catación y lo que está moviendo la industria del café de especialidad.</p>
     </div>
   </section>
   <div class="wrap">
@@ -199,8 +199,8 @@ footer a{color:var(--plum2);text-decoration:none;margin-right:16px}
 <div class="wrap">
   <section class="nl" id="nl">
     <div class="eyebrow" style="color:var(--rose)">Newsletter</div>
-    <h2>Entérate cuando llegue un lote nuevo</h2>
-    <p>Deja tu correo y te avisamos de lotes nuevos y nuevas guías del Journal. Nada más.</p>
+    <h2 data-bt="jn_tit">Entérate cuando llegue un lote nuevo</h2>
+    <p data-bt="jn_sub">Deja tu correo y te avisamos de lotes nuevos y nuevas guías del Journal. Nada más.</p>
     <form id="nl-form">
       <input type="email" id="nl-email" placeholder="tu@correo.com" required autocomplete="email">
       <button class="btn btn-p" type="submit" id="nl-btn">Suscribirme</button>
@@ -306,7 +306,15 @@ function cargar(){
   var seed = fetch('/journal-seed.json', { cache: 'no-store' }).then(function(r){ return r.json(); }).catch(function(){ return []; });
   var nube = sb('bru_conta?tipo=eq.journal&select=id,fecha,data').catch(function(){ return []; });
   var cat = sb('bru_store?id=eq.main&select=catalogo,tienda_config').then(function(r){ var row = (r && r[0]) || {}; var w = ((row.tienda_config || {}).wa || '').replace(/\D/g, ''); if (w) { WA_NUM = w; $('wa-fab').href = 'https://wa.me/' + WA_NUM + '?text=' + encodeURIComponent('Hola B.R.U! Vengo del Journal 👋'); } return row.catalogo || []; }).catch(function(){ return []; });
-  var plus = sb('bru_conta?id=eq.tiendaplus&select=data').then(function(r){ var L = r && r[0] && r[0].data && r[0].data.imgGenerales; if (L && L.length) IMG_DEF = L; }).catch(function(){});
+  var plus = sb('bru_conta?id=eq.tiendaplus&select=data').then(function(r){
+    var d = (r && r[0] && r[0].data) || {}, L = d.imgGenerales; if (L && L.length) IMG_DEF = L;
+    /* Textos editables desde Dashboard → Journal y merch → Ajustes → Textos */
+    var T = d.textos || {};
+    Array.prototype.forEach.call(document.querySelectorAll('[data-bt]'), function(el){
+      var v = T[el.getAttribute('data-bt')];
+      if (typeof v === 'string' && v.trim()) el.innerHTML = esc(v.trim()).replace(/\*([^*]+)\*/g, '<i>$1</i>');
+    });
+  }).catch(function(){});
   return Promise.all([seed, nube, cat, plus]).then(function(res){
     var porSlug = {};
     (res[0] || []).forEach(function(a){ if (a && a.slug) porSlug[a.slug] = a; });

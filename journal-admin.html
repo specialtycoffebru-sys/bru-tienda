@@ -93,7 +93,7 @@ th{color:var(--mut);font-weight:500;font-size:12px}
     <button data-t="art" class="on">Artículos</button>
     <button data-t="me">Merch</button>
     <button data-t="res">Reseñas</button>
-    <button data-t="aj">Ajustes de venta</button>
+    <button data-t="aj">Ajustes de la tienda</button>
     <button data-t="nl">Suscriptores newsletter</button>
   </div>
 
@@ -230,8 +230,24 @@ th{color:var(--mut);font-weight:500;font-size:12px}
       <div class="card">
         <h3>Newsletter en la tienda</h3>
         <label class="chk" style="margin-bottom:12px"><input type="checkbox" id="a-nl"> Mostrar el bloque de newsletter en el inicio</label>
-        <div class="f"><label>Texto del bloque (vacío = texto por defecto)</label><input id="a-nltxt" maxlength="160" placeholder="Deja tu correo y te avisamos de lotes nuevos y nuevas guías del Journal."></div>
+        <p class="hint">Los textos del bloque se editan abajo, en "Textos de la tienda".</p>
       </div>
+    </div>
+    <div class="card">
+      <h3>Barra, secciones y botones</h3>
+      <p class="hint">Qué se muestra en la tienda. Lo que desmarques se oculta; nada se borra.</p>
+      <div class="grid2">
+        <div><div class="hint" style="margin:0 0 6px;color:var(--txt)">Barra de navegación (computador)</div><div id="a-barra-l"></div></div>
+        <div>
+          <div class="hint" style="margin:0 0 6px;color:var(--txt)">Secciones del inicio</div><div id="a-sec-l"></div>
+          <div class="hint" style="margin:14px 0 6px;color:var(--txt)">Botones flotantes</div><div id="a-fab-l"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Textos de la tienda y del Journal</h3>
+      <p class="hint">Vacío = texto original. Para cursiva escribe *entre asteriscos* (ej. <code>Lo que dicen *de B.R.U*</code>).</p>
+      <div class="grid2" id="a-textos"></div>
     </div>
     <div class="card">
       <h3>Imágenes generales</h3>
@@ -475,12 +491,43 @@ function pintarAj(){
   $('a-barra').checked = P.envioBarra !== false;
   $('a-urg').value = P.urgencia;
   $('a-nl').checked = P.newsletter !== false;
-  $('a-nltxt').value = P.nlTexto || '';
   var eg = parseFloat(S.cfgTienda.envGratis) || 0;
   $('a-envg').textContent = eg > 0 ? 'desde ' + fmt(eg) : 'no configurado (la barra no se muestra)';
+  pintarVisibles();
   $('a-imgs').value = (P.imgGenerales && P.imgGenerales.length ? P.imgGenerales : IMG_DEF).join('\n');
   prevImgs();
   $('a-up').innerHTML = S.cat.map(function(p){ return '<option' + ((P.upsell || []).indexOf(p.nombre) >= 0 ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('');
+}
+var BARRA_OPC = [['home','Inicio',true],['cafes','Cafés',true],['subs','Suscripciones',true],['clases','Clases',true],['eventos','Eventos',true],['merch','Merch',true],['empresas','Empresas',true],['journal','Journal',false],['historia','Nuestra historia',false],['proceso','Proceso',false]];
+var SEC_OPC = [['resenas','Reseñas de clientes'],['merch','Merch'],['journal','Journal'],['news','Newsletter']];
+var FAB_OPC = [['wa','WhatsApp'],['ig','Instagram'],['track','Rastrear pedido']];
+var TEXTOS = [
+  ['res_eye','Reseñas · etiqueta','Clientes'],['res_tit','Reseñas · título','Lo que dicen *de B.R.U*'],
+  ['mh_eye','Merch (inicio) · etiqueta','Merch'],['mh_tit','Merch (inicio) · título','Lleva B.R.U *puesto*'],['mh_link','Merch (inicio) · botón','Ver todo el merch →'],
+  ['merch_tit','Página Merch · título','Merch'],['merch_sub','Página Merch · texto','Piezas B.R.U en tirajes cortos. Se despachan junto con tu café.'],['mg_merch','Menú · descripción de Merch','Camisetas y piezas B.R.U'],
+  ['jr_eye','Journal (inicio) · etiqueta','Journal'],['jr_tit','Journal (inicio) · título','Aprende café *desde el laboratorio*'],['jr_sub','Journal (inicio) · texto','Guías de preparación, catación y lo que pasa en la industria del café de especialidad.'],['jr_link','Journal (inicio) · botón','Ver todo el Journal →'],
+  ['nl_eye','Newsletter (inicio) · etiqueta','Newsletter'],['nl_tit','Newsletter (inicio) · título','Entérate cuando llegue *un lote nuevo*'],['nl_sub','Newsletter (inicio) · texto','Deja tu correo y te avisamos de lotes nuevos y nuevas guías del Journal.'],['nl_btn','Newsletter · botón','Suscribirme'],['nl_nota','Newsletter · nota pequeña','Solo avisos de B.R.U. Puedes pedir que te borremos cuando quieras.'],
+  ['jp_eye','Página Journal · etiqueta','Journal B.R.U'],['jp_tit','Página Journal · título','Café, explicado *desde el laboratorio*'],['jp_sub','Página Journal · texto','Guías para preparar mejor en casa, lo que pasa en la mesa de catación y lo que está moviendo la industria del café de especialidad.'],
+  ['jn_tit','Página Journal · título newsletter','Entérate cuando llegue un lote nuevo'],['jn_sub','Página Journal · texto newsletter','Deja tu correo y te avisamos de lotes nuevos y nuevas guías del Journal. Nada más.']
+];
+function chk(id, label, on){ return '<label class="chk" style="display:flex;margin:0 0 7px"><input type="checkbox" id="' + id + '"' + (on ? ' checked' : '') + '> ' + esc(label) + '</label>'; }
+function pintarVisibles(){
+  var P = S.plus, B = P.barra || {}, SE = P.secciones || {}, F = P.botones || {}, T = P.textos || {};
+  $('a-barra-l').innerHTML = BARRA_OPC.map(function(o){ return chk('vb-' + o[0], o[1], B[o[0]] === undefined ? o[2] : B[o[0]]); }).join('');
+  $('a-sec-l').innerHTML = SEC_OPC.map(function(o){ return chk('vs-' + o[0], o[1], SE[o[0]] !== false); }).join('');
+  $('a-fab-l').innerHTML = FAB_OPC.map(function(o){ return chk('vf-' + o[0], o[1], F[o[0]] !== false); }).join('');
+  $('a-textos').innerHTML = TEXTOS.map(function(t){
+    var v = T[t[0]] || (t[0] === 'nl_sub' ? (P.nlTexto || '') : '');
+    return '<div class="f"><label>' + esc(t[1]) + '</label><input id="tx-' + t[0] + '" value="' + esc(v) + '" placeholder="' + esc(t[2]) + '"></div>';
+  }).join('');
+}
+function leerVisibles(){
+  var P = S.plus; P.barra = {}; P.secciones = {}; P.botones = {}; P.textos = {};
+  BARRA_OPC.forEach(function(o){ P.barra[o[0]] = $('vb-' + o[0]).checked; });
+  SEC_OPC.forEach(function(o){ P.secciones[o[0]] = $('vs-' + o[0]).checked; });
+  FAB_OPC.forEach(function(o){ P.botones[o[0]] = $('vf-' + o[0]).checked; });
+  TEXTOS.forEach(function(t){ var v = $('tx-' + t[0]).value.trim(); if (v) P.textos[t[0]] = v; });
+  P.nlTexto = P.textos.nl_sub || '';
 }
 function prevImgs(){
   $('a-imgs-prev').innerHTML = $('a-imgs').value.split('\n').map(function(x){ return x.trim(); }).filter(Boolean)
@@ -488,6 +535,7 @@ function prevImgs(){
 }
 function guardarAj(){
   var P = S.plus;
+  leerVisibles();
   P.imgGenerales = $('a-imgs').value.split('\n').map(function(x){ return x.trim(); }).filter(function(x){ return /^(https?:\/\/|\/)/.test(x); });
   if (!P.imgGenerales.length) P.imgGenerales = IMG_DEF.slice();
   P.invitado = $('a-inv').checked;
@@ -496,7 +544,6 @@ function guardarAj(){
   P.envioBarra = $('a-barra').checked;
   P.urgencia = Math.max(0, parseInt($('a-urg').value, 10) || 0);
   P.newsletter = $('a-nl').checked;
-  P.nlTexto = $('a-nltxt').value.trim();
   P.upsell = Array.prototype.filter.call($('a-up').options, function(o){ return o.selected; }).map(function(o){ return o.value; });
   guardarPlus('Ajustes guardados ✓');
 }
