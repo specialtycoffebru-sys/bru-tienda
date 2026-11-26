@@ -5432,7 +5432,9 @@ function bruPintarGeoBanner(){
       "We don't have prices loaded for your country yet."
     );
   } else {
-    txt.innerHTML = banderaSpan + bruT('Mostrando precios de Colombia (COP).', 'Showing prices for Colombia (COP).');
+    /* En Colombia no hace falta avisar: la tienda ya está en pesos. */
+    caja.style.display = 'none';
+    return;
   }
   btn.textContent = bruT('¿No es tu país? Usar mi ubicación', 'Not your country? Use my location');
   btn.disabled = false;
@@ -6026,6 +6028,7 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
     <a href="javascript:void(0)" onclick="navTo('subs')" class="nav-link" id="nav-subs">Suscripciones</a>
     <a href="/clases.html" class="nav-link" id="nav-clases">Clases</a>
     <a href="/eventos.html" class="nav-link" id="nav-eventos">Eventos</a>
+    <a href="javascript:void(0)" onclick="navTo('merch')" class="nav-link" id="nav-merch" style="display:none">Merch</a>
     <a href="/journal.html" class="nav-link" id="nav-journal">Journal</a>
     <a href="javascript:void(0)" onclick="navTo('historia')" class="nav-link" id="nav-historia">Nuestra historia</a>
     <a href="javascript:void(0)" onclick="navTo('proceso')" class="nav-link" id="nav-proceso">Proceso</a>
@@ -6115,6 +6118,13 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
             <path d="M12 3c2.5 3 4 5 4 7.5a4 4 0 0 1-8 0C8 8 9.5 6 12 3z"/><path d="M12 21c3.5 0 6-1.8 6-4H6c0 2.2 2.5 4 6 4z"/></svg>
         </span>
         <span class="mg-tx"><b>El proceso</b><i>De la cata a tu taza</i></span>
+      </button>
+      <button class="mg-it" id="mg-merch" style="display:none" onclick="navTo('merch');toggleMega()">
+        <span class="mg-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3l-5 3 2 4 2-1v12h10V9l2 1 2-4-5-3a4 4 0 0 1-8 0z"/></svg>
+        </span>
+        <span class="mg-tx"><b>Merch</b><i>Camisetas y piezas B.R.U</i></span>
       </button>
       <a class="mg-it" href="/journal.html">
         <span class="mg-ic">
@@ -6317,17 +6327,18 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
 
 <section class="offerings" id="offerings"></section>
 
-
-
-
-</div>
-
-
 <!-- bru-ventas · secciones del inicio (se llenan solas; ver módulo bru-ventas) -->
 <div class="bp-sec" id="bp-resenas" style="display:none">
   <div class="bp-in">
     <div class="bp-head"><div><div class="bp-eye">Clientes</div><h2 class="bp-h">Lo que dicen <i>de B.R.U</i></h2></div></div>
     <div class="bp-grid" id="bp-res-grid"></div>
+  </div>
+</div>
+<div class="bm-home" id="bm-home" style="display:none">
+  <div class="bp-in">
+    <div class="bp-head"><div><div class="bp-eye">Merch</div><h2 class="bp-h">Lleva B.R.U <i>puesto</i></h2></div>
+      <a class="bp-link" href="javascript:void(0)" onclick="navTo('merch')">Ver todo el merch →</a></div>
+    <div class="bm-grid" id="bm-home-grid"></div>
   </div>
 </div>
 <div class="bp-sec alt" id="bp-journal">
@@ -6353,7 +6364,21 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
   </div>
 </div>
 
+
+
+
+
+</div>
+
+
 </div><!--/view-home-->
+
+<div class="page-view" id="view-merch">
+  <div class="bm-wrap">
+    <div class="bm-top"><h1>Merch</h1><p>Piezas B.R.U en tirajes cortos. Se despachan junto con tu café.</p></div>
+    <div class="bm-grid" id="bm-grid"></div>
+  </div>
+</div>
 
 <div class="page-view" id="view-cafes">
 
@@ -7110,6 +7135,7 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
       <a href="javascript:void(0)" onclick="navTo('proceso');toggleMega()">Proceso de tueste</a>
       <a href="javascript:void(0)" onclick="navTo('planes')">Planes para empresas</a>
       <a href="/journal.html">Journal</a>
+      <a href="javascript:void(0)" id="foot-merch" style="display:none" onclick="navTo('merch')">Merch</a>
     </div>
     <div class="foot-col">
       <h4>Contacto</h4>
@@ -9006,7 +9032,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(_hv === 'captura'){ navTo('captura'); leadReintentar(); return; }
   // Enlaces directos desde el Journal y otras páginas: /#cafes, /#subs, /#cafe=NOMBRE
   if(_hv.indexOf('cafe=') === 0){ navTo('cafes'); if(typeof bruAbrirCafeHash === 'function') bruAbrirCafeHash(decodeURIComponent(_hv.slice(5))); }
-  else if(['cafes','subs','historia','proceso'].indexOf(_hv) >= 0) navTo(_hv);
+  else if(['cafes','subs','historia','proceso','merch'].indexOf(_hv) >= 0) navTo(_hv);
   // Pop-up de bienvenida: lo programa el módulo bru-ventas (una vez cada N días,
   // después de unos segundos o al bajar media página). Se ajusta en Dashboard → Journal.
   if(!bruUser() && typeof bruPopupProgramar === 'function') bruPopupProgramar();
@@ -13080,6 +13106,9 @@ function cardQuickAdd(idx){
      bloque y las 3 secciones con id bp-*.
      =================================================================== -->
 <style id="bru-ventas-css">
+#ig-fab,#track-fab{display:none !important}
+/* Barra minimalista: Menú · Cafés · Merch · Journal. Lo demás vive en el Menú. */
+#nav-home,#nav-subs,#nav-clases,#nav-eventos,#nav-empresas{display:none !important}
 .bp-sec{padding:clamp(64px,7vw,100px) clamp(18px,4vw,40px);background:#fff;color:#190d19}
 .bp-sec.alt{background:#fdf4ee}
 .bp-in{max-width:1180px;margin:0 auto}
@@ -13374,6 +13403,212 @@ function cardQuickAdd(idx){
   }).catch(function(){}).then(function(){ _plusListo = true; aplicar(); if (_popupPend) window.bruPopupProgramar(); });
   function alListo(){ aplicar(); pintarJournal(); sincronizarPlanes(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', alListo); else alListo();
+})();
+</script>
+<!-- ===================================================================
+     B.R.U · MERCH  (bru-merch)
+     Productos en bru_conta id 'merchpub' (Dashboard → Journal y ventas → Merch).
+     Entran al mismo carrito y al mismo pedido (WhatsApp / Wompi) que el café.
+     La vista, el enlace del menú y el bloque del inicio solo aparecen cuando
+     hay al menos un producto activo. Enlace directo: /#merch
+     =================================================================== -->
+<style id="bru-merch-css">
+#view-merch{background:#fff;color:#190d19;min-height:80vh}
+.bm-wrap{max-width:1240px;margin:0 auto;padding:clamp(96px,10vw,132px) clamp(18px,4vw,40px) 90px}
+.bm-top{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;border-bottom:1px solid rgba(25,13,25,.12);padding-bottom:18px;margin-bottom:34px;flex-wrap:wrap}
+.bm-top h1{font-family:-apple-system,BlinkMacSystemFont,var(--sans),sans-serif;font-size:clamp(40px,6vw,72px);font-weight:700;letter-spacing:-.04em;line-height:.95;margin:0;color:#190d19}
+.bm-top p{font-size:15px;color:#7c6470;max-width:420px;margin:0}
+.bm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:46px 18px}
+@media(max-width:900px){.bm-grid{grid-template-columns:repeat(2,1fr);gap:34px 12px}}
+.bm-card{cursor:pointer;display:block;text-decoration:none;color:inherit}
+.bm-ph{position:relative;aspect-ratio:1/1;background:#f4f1ee;overflow:hidden}
+.bm-ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .45s ease,transform .8s ease}
+.bm-ph img.b{opacity:0}
+.bm-card:hover .bm-ph img.b{opacity:1}
+.bm-card:hover .bm-ph img.a.solo{transform:scale(1.03)}
+.bm-tag{position:absolute;top:12px;left:12px;z-index:2;background:#190d19;color:#fbe4d8;font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px}
+.bm-sizes{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;gap:6px;justify-content:center;padding:12px;background:linear-gradient(transparent,rgba(255,255,255,.92));opacity:0;transform:translateY(6px);transition:.3s}
+.bm-card:hover .bm-sizes{opacity:1;transform:none}
+.bm-sizes span{font-size:11px;letter-spacing:.08em;padding:4px 7px;border:1px solid rgba(25,13,25,.25);background:#fff}
+.bm-sizes span.x{opacity:.35;text-decoration:line-through}
+.bm-meta{display:flex;justify-content:space-between;gap:12px;margin-top:14px;font-size:13px;letter-spacing:.09em;text-transform:uppercase}
+.bm-meta b{font-weight:500}
+.bm-meta span{white-space:nowrap}
+.bm-agot{color:#7c6470}
+.bm-vacio{text-align:center;padding:70px 0;color:#7c6470;font-size:15px}
+/* Ficha */
+.bm-ov{position:fixed;inset:0;z-index:9000;background:rgba(25,13,25,.45);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px}
+.bm-ov.on{display:flex}
+.bm-pd{background:#fff;width:min(1080px,100%);max-height:94dvh;overflow:auto;display:grid;grid-template-columns:1.1fr 1fr;position:relative}
+@media(max-width:820px){.bm-pd{grid-template-columns:1fr}}
+.bm-x{position:absolute;top:14px;right:14px;z-index:3;width:38px;height:38px;border-radius:50%;border:none;background:#fff;font-size:20px;cursor:pointer;color:#190d19;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.bm-gal{background:#f4f1ee}
+.bm-gal .m{aspect-ratio:1/1;background:#f4f1ee center/cover no-repeat}
+.bm-th{display:flex;gap:8px;padding:10px;overflow-x:auto}
+.bm-th button{width:62px;height:62px;flex:none;border:1px solid transparent;background:#eee center/cover no-repeat;cursor:pointer;padding:0}
+.bm-th button.on{border-color:#190d19}
+.bm-info{padding:clamp(26px,4vw,48px);display:flex;flex-direction:column;gap:16px}
+.bm-eye{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#7c6470}
+.bm-info h2{font-family:-apple-system,BlinkMacSystemFont,var(--sans),sans-serif;font-size:clamp(28px,3vw,38px);font-weight:700;letter-spacing:-.03em;line-height:1.05;margin:0;color:#190d19}
+.bm-pr{font-size:20px}
+.bm-lbl{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#190d19;margin-bottom:8px}
+.bm-tallas{display:flex;gap:8px;flex-wrap:wrap}
+.bm-tallas button{min-width:48px;padding:11px 12px;border:1px solid rgba(25,13,25,.2);background:#fff;font-size:13px;letter-spacing:.06em;cursor:pointer;color:#190d19}
+.bm-tallas button.on{border-color:#190d19;background:#190d19;color:#fff}
+.bm-tallas button:disabled{opacity:.35;text-decoration:line-through;cursor:not-allowed}
+.bm-buy{display:flex;gap:10px;align-items:stretch}
+.bm-qty{display:flex;border:1px solid rgba(25,13,25,.2)}
+.bm-qty button{width:40px;border:none;background:#fff;font-size:18px;cursor:pointer;color:#190d19}
+.bm-qty span{width:34px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.bm-add{flex:1;border:none;background:#190d19;color:#fff;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;padding:16px;cursor:pointer;transition:background .2s}
+.bm-add:hover{background:#2b124c}
+.bm-add:disabled{background:#b9adb3;cursor:not-allowed}
+.bm-desc{font-size:15px;line-height:1.65;color:#522b5b;white-space:pre-line}
+.bm-det{border-top:1px solid rgba(25,13,25,.1);padding-top:14px;font-size:14px;color:#3a2a3a;line-height:1.7}
+.bm-det li{margin-left:18px}
+.bm-err{font-size:13px;color:#9c2a1c;min-height:16px}
+@media(max-width:600px){.bm-meta{flex-direction:column;gap:3px;font-size:12px}}
+/* Bloque del inicio */
+.bm-home{padding:clamp(64px,7vw,100px) clamp(18px,4vw,40px);background:#fff}
+.bm-home .bm-grid{grid-template-columns:repeat(4,1fr);gap:18px}
+@media(max-width:900px){.bm-home .bm-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+
+<div class="bm-ov" id="bm-ov" onclick="if(event.target===this)bruMerchCerrar()">
+  <div class="bm-pd" role="dialog" aria-modal="true" aria-label="Producto">
+    <button class="bm-x" onclick="bruMerchCerrar()" aria-label="Cerrar">×</button>
+    <div class="bm-gal"><div class="m" id="bm-main"></div><div class="bm-th" id="bm-th"></div></div>
+    <div class="bm-info">
+      <div class="bm-eye">B.R.U · Merch</div>
+      <h2 id="bm-nom"></h2>
+      <div class="bm-pr" id="bm-pr"></div>
+      <div id="bm-tallas-box"><div class="bm-lbl" id="bm-tlbl">Talla</div><div class="bm-tallas" id="bm-tallas"></div></div>
+      <div class="bm-buy">
+        <div class="bm-qty"><button onclick="bruMerchQty(-1)" aria-label="Menos">−</button><span id="bm-q">1</span><button onclick="bruMerchQty(1)" aria-label="Más">+</button></div>
+        <button class="bm-add" id="bm-add" onclick="bruMerchAgregar()">Añadir al carrito</button>
+      </div>
+      <div class="bm-err" id="bm-err"></div>
+      <div class="bm-desc" id="bm-desc"></div>
+      <div class="bm-det" id="bm-det"></div>
+    </div>
+  </div>
+</div>
+
+<script id="bru-merch">
+(function(){
+  var M = { lista: [], cur: null, talla: '', qty: 1, foto: 0 };
+  window.bruMerch = M;
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function money(n){ return '$' + Math.round(Number(n) || 0).toLocaleString('es-CO'); }
+  function enCO(){ try{ return typeof _bruGeo === 'undefined' || !_bruGeo.listo || _bruGeo.modo === 'CO'; }catch(e){ return true; } }
+  function tallas(p){ return String(p.tallas || '').split(',').map(function(t){ return t.trim(); }).filter(Boolean); }
+  function agotadas(p){ return String(p.agotadas || '').split(',').map(function(t){ return t.trim().toLowerCase(); }).filter(Boolean); }
+  function agotado(p){
+    if (p.stock !== '' && p.stock != null && Number(p.stock) <= 0) return true;
+    var t = tallas(p); if (!t.length) return false;
+    var a = agotadas(p); return t.every(function(x){ return a.indexOf(x.toLowerCase()) >= 0; });
+  }
+  function fotos(p){ return (p.fotos || []).filter(function(u){ return u && String(u).indexOf('http') === 0; }); }
+
+  function card(p, i){
+    var f = fotos(p), t = tallas(p), a = agotadas(p), ag = agotado(p);
+    return '<a class="bm-card" onclick="bruMerchAbrir(' + i + ')">' +
+      '<div class="bm-ph">' + (p.etiqueta ? '<span class="bm-tag">' + esc(p.etiqueta) + '</span>' : (ag ? '<span class="bm-tag">Agotado</span>' : '')) +
+        (f[0] ? '<img class="a' + (f[1] ? '' : ' solo') + '" src="' + esc(f[0]) + '" alt="' + esc(p.nombre) + '" loading="lazy">' : '') +
+        (f[1] ? '<img class="b" src="' + esc(f[1]) + '" alt="" loading="lazy">' : '') +
+        (t.length && !ag ? '<div class="bm-sizes">' + t.map(function(x){ return '<span' + (a.indexOf(x.toLowerCase()) >= 0 ? ' class="x"' : '') + '>' + esc(x) + '</span>'; }).join('') + '</div>' : '') +
+      '</div>' +
+      '<div class="bm-meta"><b>' + esc(p.nombre) + '</b><span' + (ag ? ' class="bm-agot"' : '') + '>' + (enCO() ? money(p.precio) : '') + '</span></div></a>';
+  }
+  function pintar(){
+    var L = M.lista, hay = L.length > 0;
+    ['nav-merch', 'mg-merch', 'foot-merch'].forEach(function(id){ var e = $(id); if (e) e.style.display = hay ? '' : 'none'; });
+    var g = $('bm-grid');
+    if (g) g.innerHTML = hay ? L.map(card).join('') : '<div class="bm-vacio" style="grid-column:1/-1">La primera colección de B.R.U está en camino.</div>';
+    var h = $('bm-home');
+    if (h){
+      h.style.display = hay ? '' : 'none';
+      if (hay) $('bm-home-grid').innerHTML = L.slice(0, 4).map(card).join('');
+    }
+  }
+  function cargar(){
+    return fetch(SB_URL + '/rest/v1/bru_conta?id=eq.merchpub&select=data', { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }, cache: 'no-store' })
+      .then(function(r){ return r.ok ? r.json() : []; })
+      .then(function(r){
+        var ps = (r && r[0] && r[0].data && r[0].data.productos) || [];
+        M.lista = ps.filter(function(p){ return p && p.nombre && p.activo !== false && Number(p.precio) > 0; });
+        pintar();
+      }).catch(function(){ pintar(); });
+  }
+
+  window.bruMerchAbrir = function(i){
+    var p = M.lista[i]; if (!p) return;
+    M.cur = i; M.qty = 1; M.foto = 0;
+    var t = tallas(p), a = agotadas(p);
+    var libres = t.filter(function(x){ return a.indexOf(x.toLowerCase()) < 0; });
+    M.talla = libres.length === 1 ? libres[0] : '';
+    $('bm-nom').textContent = p.nombre;
+    $('bm-pr').textContent = enCO() ? money(p.precio) : 'Consúltanos el precio para tu país';
+    $('bm-desc').textContent = p.desc || '';
+    var det = String(p.detalles || '').split('\n').map(function(x){ return x.trim(); }).filter(Boolean);
+    $('bm-det').innerHTML = det.length ? '<ul>' + det.map(function(x){ return '<li>' + esc(x.replace(/^[-•]\s*/, '')) + '</li>'; }).join('') + '</ul>' : '';
+    $('bm-det').style.display = det.length ? '' : 'none';
+    $('bm-tallas-box').style.display = t.length ? '' : 'none';
+    $('bm-tlbl').textContent = (p.tituloTallas || 'Talla') + (M.talla ? ': ' + M.talla : '');
+    $('bm-tallas').innerHTML = t.map(function(x){
+      var off = a.indexOf(x.toLowerCase()) >= 0;
+      return '<button type="button"' + (off ? ' disabled' : '') + (x === M.talla ? ' class="on"' : '') + ' data-t="' + esc(x) + '">' + esc(x) + '</button>';
+    }).join('');
+    Array.prototype.forEach.call($('bm-tallas').querySelectorAll('button'), function(b){
+      b.onclick = function(){ M.talla = b.getAttribute('data-t'); $('bm-err').textContent = '';
+        Array.prototype.forEach.call($('bm-tallas').querySelectorAll('button'), function(x){ x.classList.toggle('on', x === b); });
+        $('bm-tlbl').textContent = (p.tituloTallas || 'Talla') + ': ' + M.talla; };
+    });
+    $('bm-q').textContent = '1'; $('bm-err').textContent = '';
+    var ag = agotado(p);
+    $('bm-add').disabled = ag;
+    $('bm-add').textContent = ag ? 'Agotado' : (enCO() ? 'Añadir al carrito' : 'Consultar por WhatsApp');
+    galeria(p);
+    $('bm-ov').classList.add('on'); document.body.style.overflow = 'hidden';
+    try{ history.replaceState(null, '', '#merch'); }catch(e){}
+  };
+  function galeria(p){
+    var f = fotos(p);
+    $('bm-main').style.backgroundImage = f[M.foto] ? 'url(\'' + f[M.foto] + '\')' : '';
+    $('bm-th').innerHTML = f.length > 1 ? f.map(function(u, k){ return '<button type="button" class="' + (k === M.foto ? 'on' : '') + '" style="background-image:url(\'' + esc(u) + '\')" data-k="' + k + '" aria-label="Foto ' + (k + 1) + '"></button>'; }).join('') : '';
+    Array.prototype.forEach.call($('bm-th').querySelectorAll('button'), function(b){ b.onclick = function(){ M.foto = +b.getAttribute('data-k'); galeria(p); }; });
+  }
+  window.bruMerchCerrar = function(){ $('bm-ov').classList.remove('on'); document.body.style.overflow = ''; };
+  window.bruMerchQty = function(d){ M.qty = Math.max(1, Math.min(20, M.qty + d)); $('bm-q').textContent = M.qty; };
+  window.bruMerchAgregar = function(){
+    var p = M.lista[M.cur]; if (!p) return;
+    if (!enCO()){
+      var cfg = {}; try{ cfg = getConfig() || {}; }catch(e){}
+      window.open('https://wa.me/' + ((cfg.wa || WA) + '').replace(/\D/g, '') + '?text=' + encodeURIComponent('Hola B.R.U! Me interesa ' + p.nombre + (M.talla ? ' talla ' + M.talla : '') + '. ¿Precio y envío a mi país?'), '_blank');
+      return;
+    }
+    if (tallas(p).length && !M.talla){ $('bm-err').textContent = 'Elige una talla.'; return; }
+    var key = 'merch|' + (p.id || p.nombre) + '|' + M.talla;
+    var ex = cart.filter(function(c){ return c.cartKey === key; })[0];
+    if (ex) ex.qty += M.qty;
+    else cart.push({ idx: -1, cartKey: key, nombre: p.nombre, precio: Math.round(Number(p.precio) || 0), tamano: M.talla, sku: p.sku || '', img: fotos(p)[0] || null, qty: M.qty, merch: true, pesoG: Number(p.peso) || 0 });
+    bruMerchCerrar();
+    renderCart();
+    try{ toast(p.nombre + (M.talla ? ' — ' + M.talla : '') + ' agregado'); }catch(e){}
+    if (!$('cart-el').classList.contains('on')) toggleCart();
+  };
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && $('bm-ov').classList.contains('on')) bruMerchCerrar(); });
+
+  /* El peso de la ropa cuenta para la tarifa de envío */
+  var _peso = window.envPesoCarrito;
+  if (typeof _peso === 'function') window.envPesoCarrito = function(){
+    var g = _peso.apply(this, arguments);
+    cart.forEach(function(c){ if (c.merch) g += (Number(c.pesoG) || 0) * (c.qty || 1); });
+    return g;
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', cargar); else cargar();
 })();
 </script>
 
