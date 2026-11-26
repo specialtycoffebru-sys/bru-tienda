@@ -6124,7 +6124,7 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
             <path d="M8 3l-5 3 2 4 2-1v12h10V9l2 1 2-4-5-3a4 4 0 0 1-8 0z"/></svg>
         </span>
-        <span class="mg-tx"><b>Merch</b><i>Camisetas y piezas B.R.U</i></span>
+        <span class="mg-tx"><b>Merch</b><i data-bt="mg_merch">Camisetas y piezas B.R.U</i></span>
       </button>
       <a class="mg-it" href="/journal.html">
         <span class="mg-ic">
@@ -6330,23 +6330,23 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
 <!-- bru-ventas · secciones del inicio (se llenan solas; ver módulo bru-ventas) -->
 <div class="bp-sec" id="bp-resenas" style="display:none">
   <div class="bp-in">
-    <div class="bp-head"><div><div class="bp-eye">Clientes</div><h2 class="bp-h">Lo que dicen <i>de B.R.U</i></h2></div></div>
+    <div class="bp-head"><div><div class="bp-eye" data-bt="res_eye">Clientes</div><h2 class="bp-h" data-bt="res_tit">Lo que dicen <i>de B.R.U</i></h2></div></div>
     <div class="bp-grid" id="bp-res-grid"></div>
   </div>
 </div>
 <div class="bm-home" id="bm-home" style="display:none">
   <div class="bp-in">
-    <div class="bp-head"><div><div class="bp-eye">Merch</div><h2 class="bp-h">Lleva B.R.U <i>puesto</i></h2></div>
-      <a class="bp-link" href="javascript:void(0)" onclick="navTo('merch')">Ver todo el merch →</a></div>
+    <div class="bp-head"><div><div class="bp-eye" data-bt="mh_eye">Merch</div><h2 class="bp-h" data-bt="mh_tit">Lleva B.R.U <i>puesto</i></h2></div>
+      <a class="bp-link" href="javascript:void(0)" onclick="navTo('merch')" data-bt="mh_link">Ver todo el merch →</a></div>
     <div class="bm-grid" id="bm-home-grid"></div>
   </div>
 </div>
 <div class="bp-sec alt" id="bp-journal">
   <div class="bp-in">
     <div class="bp-head">
-      <div><div class="bp-eye">Journal</div><h2 class="bp-h">Aprende café <i>desde el laboratorio</i></h2>
-      <p class="bp-sub">Guías de preparación, catación y lo que pasa en la industria del café de especialidad.</p></div>
-      <a class="bp-link" href="/journal.html">Ver todo el Journal →</a>
+      <div><div class="bp-eye" data-bt="jr_eye">Journal</div><h2 class="bp-h" data-bt="jr_tit">Aprende café <i>desde el laboratorio</i></h2>
+      <p class="bp-sub" data-bt="jr_sub">Guías de preparación, catación y lo que pasa en la industria del café de especialidad.</p></div>
+      <a class="bp-link" href="/journal.html" data-bt="jr_link">Ver todo el Journal →</a>
     </div>
     <div class="bp-grid" id="bp-jr-grid"></div>
   </div>
@@ -6354,11 +6354,11 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
 <div class="bp-sec" id="bp-news">
   <div class="bp-in">
     <div class="bp-nl">
-      <div><div class="bp-eye" style="color:#dfb6b2">Newsletter</div><h2 class="bp-h">Entérate cuando llegue <i>un lote nuevo</i></h2>
+      <div><div class="bp-eye" style="color:#dfb6b2" data-bt="nl_eye">Newsletter</div><h2 class="bp-h" data-bt="nl_tit">Entérate cuando llegue <i>un lote nuevo</i></h2>
       <p class="bp-sub" id="bp-nl-sub">Deja tu correo y te avisamos de lotes nuevos y nuevas guías del Journal.</p></div>
       <div>
-        <form id="bp-nl-form"><input type="email" id="bp-nl-email" placeholder="tu@correo.com" required autocomplete="email"><button type="submit" id="bp-nl-btn">Suscribirme</button></form>
-        <small id="bp-nl-msg">Solo avisos de B.R.U. Puedes pedir que te borremos cuando quieras.</small>
+        <form id="bp-nl-form"><input type="email" id="bp-nl-email" placeholder="tu@correo.com" required autocomplete="email"><button type="submit" id="bp-nl-btn" data-bt="nl_btn">Suscribirme</button></form>
+        <small id="bp-nl-msg" data-bt="nl_nota">Solo avisos de B.R.U. Puedes pedir que te borremos cuando quieras.</small>
       </div>
     </div>
   </div>
@@ -6375,7 +6375,7 @@ html.bru-exterior [data-solo-colombia]{display:none !important}
 
 <div class="page-view" id="view-merch">
   <div class="bm-wrap">
-    <div class="bm-top"><h1>Merch</h1><p>Piezas B.R.U en tirajes cortos. Se despachan junto con tu café.</p></div>
+    <div class="bm-top"><h1 data-bt="merch_tit">Merch</h1><p data-bt="merch_sub">Piezas B.R.U en tirajes cortos. Se despachan junto con tu café.</p></div>
     <div class="bm-grid" id="bm-grid"></div>
   </div>
 </div>
@@ -13438,8 +13438,38 @@ function cardQuickAdd(idx){
     return _ppProd.apply(this, arguments);
   };
 
+  /* ---------- 10 · TEXTOS, SECCIONES, BARRA Y BOTONES (todo desde el dashboard) ----------
+     PLUS.textos[clave]  → reemplaza el texto del elemento con data-bt="clave" (*texto* = cursiva)
+     PLUS.secciones[id]  → false oculta la sección del inicio (resenas, merch, journal, news)
+     PLUS.barra[id]      → true/false muestra u oculta cada enlace de la barra
+     PLUS.botones[id]    → false oculta el botón flotante (wa, ig, track) */
+  function fmtTxt(t){ return esc(t).replace(/\*([^*]+)\*/g, '<i>$1</i>').replace(/\n/g, '<br>'); }
+  function aplicarTextos(){
+    var T = PLUS.textos || {};
+    Array.prototype.forEach.call(document.querySelectorAll('[data-bt]'), function(el){
+      var k = el.getAttribute('data-bt'), v = T[k];
+      if (typeof v === 'string' && v.trim()) el.innerHTML = fmtTxt(v.trim());
+    });
+    if (!T.nl_sub && PLUS.nlTexto) { var ns = $('bp-nl-sub'); if (ns) ns.textContent = PLUS.nlTexto; }
+    else if (T.nl_sub) { var ns2 = $('bp-nl-sub'); if (ns2) ns2.innerHTML = fmtTxt(T.nl_sub); }
+  }
+  var BARRA_IDS = { home: 'nav-home', cafes: 'nav-cafes', subs: 'nav-subs', clases: 'nav-clases', eventos: 'nav-eventos', merch: 'nav-merch', journal: 'nav-journal', empresas: 'nav-empresas', historia: 'nav-historia', proceso: 'nav-proceso' };
+  var BOTON_IDS = { wa: 'wa-fab', ig: 'ig-fab', track: 'track-fab' };
+  var SEC_IDS = { resenas: 'bp-resenas', merch: 'bm-home', journal: 'bp-journal', news: 'bp-news' };
+  function aplicarVisibles(){
+    var css = '', B = PLUS.barra || {}, F = PLUS.botones || {}, S = PLUS.secciones || {};
+    Object.keys(BARRA_IDS).forEach(function(k){
+      if (B[k] === false) css += 'html body #' + BARRA_IDS[k] + '{display:none !important}';
+      else if (B[k] === true) css += '@media(min-width:901px){html body #' + BARRA_IDS[k] + '{display:flex !important}}';
+    });
+    Object.keys(BOTON_IDS).forEach(function(k){ if (F[k] === false) css += 'html body #' + BOTON_IDS[k] + '{display:none !important}'; });
+    Object.keys(SEC_IDS).forEach(function(k){ if (S[k] === false) css += 'html body #' + SEC_IDS[k] + '{display:none !important}'; });
+    var st = $('bru-visibles'); if (!st){ st = document.createElement('style'); st.id = 'bru-visibles'; document.head.appendChild(st); }
+    st.textContent = css;
+  }
+
   /* ---------- ARRANQUE ---------- */
-  function aplicar(){ pintarResenas(); newsletter(); try{ if (cart && cart.length) extrasCarrito(); }catch(e){} }
+  function aplicar(){ aplicarTextos(); aplicarVisibles(); pintarResenas(); newsletter(); try{ if (cart && cart.length) extrasCarrito(); }catch(e){} }
   sb('bru_conta?id=eq.tiendaplus&select=data').then(function(r){
     if (r && r[0] && r[0].data){ var d = r[0].data; for (var k in d){ if (Object.prototype.hasOwnProperty.call(d, k)) PLUS[k] = d[k]; } }
   }).catch(function(){}).then(function(){ _plusListo = true; aplicar(); if (_popupPend) window.bruPopupProgramar(); });
