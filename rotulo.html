@@ -93,7 +93,7 @@ select,option{background:var(--card2)}
     <div class="sec">Envío</div>
     <div class="row"><div class="f"><label>Referencia del pedido</label><input id="e-ref"></div><div class="f"><label>Peso aprox.</label><input id="e-peso" placeholder="300 g"></div></div>
     <div class="f"><label>Contenido</label><textarea id="e-cont"></textarea></div>
-    <div class="row"><div class="f"><label>Cobrar al recibir ($, vacío = no se muestra)</label><input id="e-cobro" inputmode="numeric"></div><div class="f"><label>Valor declarado ($)</label><input id="e-decl" inputmode="numeric"></div></div>
+    <div class="f"><label>Cobrar al recibir ($, vacío = no se muestra)</label><input id="e-cobro" inputmode="numeric"></div>
     <label class="chk"><input type="checkbox" id="e-fragil" checked> Marcar FRÁGIL · café</label>
 
     <div class="sec">De (remitente) · se guarda para la próxima vez</div>
@@ -148,7 +148,7 @@ function sb(path, opts){
 function val(id){ return $(id).value.trim(); }
 function rotuloHTML(){
   var f = $('fmt').value, logo = val('r-logo') || '/bru-logo.svg';
-  var ref = val('e-ref'), cobro = val('e-cobro'), decl = val('e-decl');
+  var ref = val('e-ref'), cobro = val('e-cobro');
   var de = [val('r-dir'), val('r-ciu')].filter(Boolean).join(' · ');
   var deTel = [val('r-tel') ? 'Tel ' + val('r-tel') : '', val('r-nit') ? 'NIT/CC ' + val('r-nit') : ''].filter(Boolean).join(' · ');
   return '<div class="rot' + (f === '10x10' ? ' t10x10' : '') + ($('mono').checked ? ' mono' : '') + '">' +
@@ -160,7 +160,7 @@ function rotuloHTML(){
       '<div class="ciu">' + esc(val('p-ciu')) + '</div>' +
       '<div class="tel">☎ ' + esc(val('p-tel')) + (val('p-cc') ? ' · CC ' + esc(val('p-cc')) : '') + '</div></div>' +
     (cobro && Number(cobro.replace(/\D/g, '')) > 0 ? '<div class="bloque cobro"><div class="lbl">Cobrar al recibir</div><div class="v">' + money(cobro) + '</div></div>' : '') +
-    (f !== '10x10' ? '<div class="bloque cont"><div class="lbl">Contenido' + (val('e-peso') ? ' · ' + esc(val('e-peso')) : '') + (decl ? ' · Valor declarado ' + money(decl) : '') + '</div>' + esc(val('e-cont')).replace(/\n/g, '<br>') + '</div>' : '') +
+    (f !== '10x10' ? '<div class="bloque cont"><div class="lbl">Contenido' + (val('e-peso') ? ' · ' + esc(val('e-peso')) : '') + '</div>' + esc(val('e-cont')).replace(/\n/g, '<br>') + '</div>' : '') +
     '<div class="bloque de"><div class="lbl">De</div><b>' + esc(val('r-nom')) + '</b>' + (de ? ' · ' + esc(de) : '') + '<br>' + esc([deTel, val('r-web')].filter(Boolean).join(' · ')) + '</div>' +
     '<div class="pie"><span>' + esc(val('r-msg')) + '</span>' + ($('e-fragil').checked ? '<span class="fragil">FRÁGIL · CAFÉ</span>' : '') + '</div>' +
   '</div>';
@@ -185,7 +185,6 @@ function llenarPedido(p){
   $('e-ref').value = 'BRU-' + String(p.id || '').slice(0, 6).toUpperCase();
   $('e-cont').value = items + (p.notas ? '\nNota: ' + String(p.notas).split('·')[0].trim() : '');
   $('e-peso').value = gramos ? (gramos >= 1000 ? (gramos / 1000) + ' kg' : gramos + ' g') : '';
-  $('e-decl').value = p.total || '';
   /* Los pedidos web se pagan antes de despachar; si el cliente paga al recibir, escribe el valor aquí */
   $('e-cobro').value = /contra/i.test(String(p.pago || '')) ? (p.total || '') : '';
   pintar();
