@@ -46,11 +46,12 @@ select,option{background:var(--card2)}
 .rot .ref{text-align:right;font-size:2.6mm;line-height:1.3}
 .rot .ref b{display:block;font-size:4mm;letter-spacing:.04em}
 .rot .bloque{border:.4mm solid #000;border-radius:2mm;padding:2mm 2.8mm}
+.rot .para{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;padding:3mm 3.5mm}
 .rot .lbl{font-size:2.4mm;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:1.2mm}
-.rot .para .nom{font-size:5.6mm;font-weight:800;line-height:1.05;word-break:break-word}
-.rot .para .dir{font-size:3.8mm;font-weight:600;line-height:1.22;margin-top:1.2mm;word-break:break-word}
-.rot .para .ciu{font-size:5mm;font-weight:800;text-transform:uppercase;margin-top:1.2mm;letter-spacing:.02em}
-.rot .para .tel{font-size:4mm;font-weight:700;margin-top:1mm}
+.rot .para .nom{font-size:7mm;font-weight:800;line-height:1.05;word-break:break-word}
+.rot .para .dir{font-size:4.6mm;font-weight:600;line-height:1.25;margin-top:2mm;word-break:break-word}
+.rot .para .ciu{font-size:6.4mm;font-weight:800;text-transform:uppercase;margin-top:2.5mm;letter-spacing:.02em}
+.rot .para .tel{font-size:5mm;font-weight:700;margin-top:2mm}
 .rot .de{font-size:2.8mm;line-height:1.3}
 .rot .de b{font-size:3.4mm}
 .rot .fila{display:flex;gap:2.5mm}
@@ -59,16 +60,16 @@ select,option{background:var(--card2)}
 .rot .cobro .lbl{color:#fff}
 .rot .cobro{display:flex;flex-direction:column;justify-content:center}
 .rot .cobro .v{font-size:5.6mm;font-weight:800}
-.rot .cont{font-size:3mm;line-height:1.35}
+.rot .cont{font-size:3.4mm;line-height:1.4}
 .rot .guia{font-size:3.4mm}
 .rot .guia b{font-size:4.6mm;letter-spacing:.06em}
 .rot .barras{height:8mm;margin-top:1mm;width:100%}
-.rot .pie{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:2mm;font-size:2.5mm;border-top:.3mm dashed #000;padding-top:1.6mm}
+.rot .pie{margin-top:0;display:flex;justify-content:space-between;align-items:center;gap:2mm;font-size:2.5mm;border-top:.3mm dashed #000;padding-top:1.6mm}
 .rot .fragil{white-space:nowrap;font-weight:800;letter-spacing:.14em;border:.4mm solid #000;padding:1mm 2mm;border-radius:1mm}
 .rot.mono .cab img{filter:grayscale(1) contrast(1.6) brightness(.8)}
 /* Hoja carta con dos rótulos */
-.hoja.carta{width:216mm;min-height:279mm;padding:5mm 4mm;display:flex;flex-wrap:wrap;gap:4mm;align-content:flex-start;justify-content:center}
-.hoja.carta .rot{border:.3mm dashed #999}
+.hoja.carta{width:216mm;height:279mm;padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hoja.carta .rot{zoom:1.82}
 </style>
 <style id="estilo-impresion" media="print"></style>
 </head>
@@ -106,7 +107,7 @@ select,option{background:var(--card2)}
 
     <div class="sec">Formato</div>
     <div class="row">
-      <div class="f"><label>Tamaño</label><select id="fmt"><option value="10x15">Etiqueta 10 × 15 cm (impresora térmica)</option><option value="10x10">Etiqueta 10 × 10 cm</option><option value="carta">Hoja carta (2 rótulos para recortar)</option></select></div>
+      <div class="f"><label>Tamaño</label><select id="fmt"><option value="10x15">Etiqueta 10 × 15 cm (impresora térmica)</option><option value="10x10">Etiqueta 10 × 10 cm</option><option value="carta">Hoja carta (rótulo grande, toda la hoja)</option></select></div>
       <div class="f"><label>Copias</label><select id="copias"><option>1</option><option>2</option></select></div>
     </div>
     <label class="chk"><input type="checkbox" id="mono" checked> Logo en blanco y negro (mejor en térmica)</label>
@@ -168,12 +169,14 @@ function rotuloHTML(){
 function pintar(){
   var f = $('fmt').value, n = +$('copias').value, h = $('hoja');
   var uno = rotuloHTML(), html = '';
-  if (f === 'carta'){ h.className = 'hoja carta'; html = uno + uno; if (n > 1) html += uno + uno; }
-  else { h.className = 'hoja'; for (var i = 0; i < n; i++) html += uno; }
+  if (f === 'carta'){
+    h.className = 'hoja carta-wrap'; h.style.background = 'transparent'; h.style.boxShadow = 'none';
+    for (var c = 0; c < n; c++) html += '<div class="hoja carta" style="margin-bottom:8mm;page-break-after:always;break-after:page">' + uno + '</div>';
+  } else { h.className = 'hoja'; h.style.background = ''; h.style.boxShadow = ''; for (var i = 0; i < n; i++) html += uno; }
   h.innerHTML = html;
   /* Tamaño de página para imprimir / PDF */
   var page = f === 'carta' ? 'size: letter; margin: 0;' : (f === '10x10' ? 'size: 100mm 100mm; margin: 0;' : 'size: 100mm 150mm; margin: 0;');
-  $('estilo-impresion').textContent = '@page{' + page + '} html,body{background:#fff !important} .panel,#toast{display:none !important} .app{display:block !important} .vista{padding:0 !important;background:#fff !important;display:block !important} .hoja{box-shadow:none !important} .rot{page-break-after:always;break-after:page} .hoja.carta .rot{page-break-after:auto;break-after:auto} *{-webkit-print-color-adjust:exact;print-color-adjust:exact}';
+  $('estilo-impresion').textContent = '@page{' + page + '} html,body{background:#fff !important} .panel,#toast{display:none !important} .app{display:block !important} .vista{padding:0 !important;background:#fff !important;display:block !important} .hoja{box-shadow:none !important} .rot{page-break-after:always;break-after:page} .hoja.carta .rot{page-break-after:auto;break-after:auto} .hoja.carta{margin:0 !important} *{-webkit-print-color-adjust:exact;print-color-adjust:exact}';
 }
 
 function llenarPedido(p){
