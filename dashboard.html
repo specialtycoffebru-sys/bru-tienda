@@ -661,6 +661,7 @@ textarea.inp{resize:vertical;min-height:60px}
   <div class="sh">
     <div><div class="sh-t">Pedidos</div><div class="sh-s">Sincronizado con Supabase</div></div>
     <div class="sh-a">
+      <button class="btn btn-g btn-sm" onclick="abrirRotulo('')">🏷 Rótulo manual</button>
       <button class="btn btn-g btn-sm" onclick="syncPeds()">↻ Actualizar</button>
       <button class="btn btn-g btn-sm" onclick="limpiarVistos()">Limpiar vistos</button>
       <button class="btn btn-r btn-sm" onclick="borrarTodosPedidos()">🗑 Borrar todos</button>
@@ -5970,6 +5971,8 @@ function syncAll() {
 }
 
 var _PEDS_MEM = null;
+/* Rótulo de envío imprimible (PDF) para pegar en el paquete: /rotulo.html */
+function abrirRotulo(id){ window.open('/rotulo.html' + (id ? '?id=' + encodeURIComponent(id) : ''), '_blank'); }
 function syncPeds() {
   sbGet('/rest/v1/bru_pedidos?order=created_at.desc&limit=200').then(function(peds) {
     if(peds&&peds.length!==undefined){
@@ -8983,7 +8986,8 @@ function renderPeds(){
       +(p.tel?'Teléfono: '+p.tel+'\n':'')+' '+(p.dir?'Dirección: '+p.dir+'  ':'')+' '+(p.pago?'Pago: '+p.pago:'')+(p.notas?'\nNotas: '+p.notas:'')+'</div>'
       +'<div style="display:flex;gap:.3rem;flex-wrap:wrap;align-items:center;margin-bottom:.4rem">'
       +'<select onchange="chgPed('+realI+',this.value)" style="padding:.28rem .5rem;background:var(--bg3);border:.5px solid var(--bd);color:var(--cream);border-radius:var(--r);font-size:11px;outline:none">'+estOpts+'</select>'
-      +waLink+'<button class="btn btn-g btn-sm" onclick="markPed('+realI+')">✓ Visto</button></div>'
+      +waLink+'<button class="btn btn-g btn-sm" onclick="markPed('+realI+')">✓ Visto</button>'
+      +'<button class="btn btn-g btn-sm" onclick="abrirRotulo(\''+(p._sbId||p.id||'')+'\')">🏷 Rótulo / guía</button></div>'
       +'<div style="display:flex;gap:.3rem;flex-wrap:wrap">'
       +'<input class="inp" value="'+(p.guia||'')+'" placeholder="N° de guía" style="max-width:160px;font-size:11px;padding:.3rem .5rem" '
       +'onchange="chgPedGuia('+realI+',this.value)">'
@@ -14145,6 +14149,7 @@ function renderPedCard(p, realI, container){
     +(( p.estado==='Enviado')
         ? '<button class="btn btn-p btn-sm" onclick="chgPed('+realI+',\'Entregado\')">✅ Se entregó</button>' : '')
     +'<button class="btn btn-g btn-sm" onclick="markPed('+realI+')">✓ Visto</button>'
+    +'<button class="btn btn-g btn-sm" onclick="abrirRotulo(\''+(p._sbId||p.id||'')+'\')">🏷 Rótulo / guía</button>'
     +'<button class="btn btn-r btn-sm" onclick="delPedido('+realI+')">🗑 Eliminar</button>'
     +'</div>'
     +'<div style="display:flex;gap:.3rem;flex-wrap:wrap">'
