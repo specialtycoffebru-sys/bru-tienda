@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>B.R.U · Journal y ventas</title>
+<title>B.R.U · Journal, merch y ventas</title>
 <meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,300;9..144,500&display=swap" rel="stylesheet">
@@ -83,7 +83,7 @@ th{color:var(--mut);font-weight:500;font-size:12px}
 <body>
 <div class="wrap">
   <div class="top">
-    <h1>Journal y ventas</h1>
+    <h1>Journal, merch y ventas</h1>
     <span class="sp"></span>
     <span class="pill" id="estado">Conectando…</span>
     <a class="btn sm" href="/journal.html" target="_blank">Ver el Journal ↗</a>
@@ -91,6 +91,7 @@ th{color:var(--mut);font-weight:500;font-size:12px}
 
   <div class="tabs" id="tabs">
     <button data-t="art" class="on">Artículos</button>
+    <button data-t="me">Merch</button>
     <button data-t="res">Reseñas</button>
     <button data-t="aj">Ajustes de venta</button>
     <button data-t="nl">Suscriptores newsletter</button>
@@ -148,6 +149,38 @@ th{color:var(--mut);font-weight:500;font-size:12px}
     </div>
   </section>
 
+  <!-- ===================== MERCH ===================== -->
+  <section id="t-me" class="hide">
+    <div class="grid2" style="grid-template-columns:320px minmax(0,1fr)">
+      <div>
+        <div class="row" style="margin-bottom:10px"><button class="btn p" id="m-nuevo">+ Nuevo producto</button><a class="btn sm" href="/#merch" target="_blank">Ver la página ↗</a></div>
+        <div class="list" id="m-lista"></div>
+        <p class="hint" style="margin-top:12px">La sección Merch, su enlace en el menú y el bloque del inicio aparecen solos cuando hay al menos un producto activo con precio.</p>
+      </div>
+      <div id="m-form" class="card hide">
+        <div class="row">
+          <div class="f" style="flex:2"><label>Nombre</label><input id="m-nom" maxlength="80" placeholder="Camiseta Brew · Respect · Unite"></div>
+          <div class="f"><label>Precio final (COP, con IVA)</label><input id="m-pre" type="number" min="0" step="1000"></div>
+        </div>
+        <div class="row">
+          <div class="f"><label>Tallas (separadas por coma; vacío si no aplica)</label><input id="m-tal" placeholder="S, M, L, XL"></div>
+          <div class="f"><label>Tallas agotadas</label><input id="m-ago" placeholder="XL"></div>
+        </div>
+        <div class="row">
+          <div class="f"><label>Etiqueta (opcional)</label><input id="m-eti" maxlength="24" placeholder="Edición limitada"></div>
+          <div class="f"><label>Stock total (vacío = sin control)</label><input id="m-stk" type="number" min="0"></div>
+          <div class="f"><label>Peso para el envío (g)</label><input id="m-pes" type="number" min="0" placeholder="250"></div>
+        </div>
+        <div class="f"><label>Fotos (una URL por línea; la 2ª aparece al pasar el mouse)</label><textarea id="m-fot" style="min-height:80px" placeholder="https://res.cloudinary.com/…"></textarea></div>
+        <div class="f"><label>Descripción</label><textarea id="m-des" style="min-height:90px"></textarea></div>
+        <div class="f"><label>Detalles (uno por línea: material, corte, cuidados…)</label><textarea id="m-det" style="min-height:90px" placeholder="Algodón 100 %&#10;Corte oversize unisex&#10;Lavar al revés en agua fría"></textarea></div>
+        <label class="chk" style="margin-bottom:12px"><input type="checkbox" id="m-act"> Visible en la tienda</label>
+        <div class="row"><button class="btn p" id="m-guardar">Guardar</button><span style="flex:1"></span><button class="btn sm" id="m-subir">↑ Subir</button><button class="btn bad" id="m-borrar">Eliminar</button></div>
+      </div>
+      <div id="m-vacio" class="card" style="display:flex;align-items:center;justify-content:center;min-height:240px;color:var(--mut)">Elige un producto o crea uno nuevo.</div>
+    </div>
+  </section>
+
   <!-- ===================== RESEÑAS ===================== -->
   <section id="t-res" class="hide">
     <div class="card">
@@ -193,7 +226,7 @@ th{color:var(--mut);font-weight:500;font-size:12px}
       <div class="card">
         <h3>Newsletter en la tienda</h3>
         <label class="chk" style="margin-bottom:12px"><input type="checkbox" id="a-nl"> Mostrar el bloque de newsletter en el inicio</label>
-        <div class="f"><label>Texto del bloque</label><input id="a-nltxt" maxlength="160"></div>
+        <div class="f"><label>Texto del bloque (vacío = texto por defecto)</label><input id="a-nltxt" maxlength="160" placeholder="Deja tu correo y te avisamos de lotes nuevos y nuevas guías del Journal."></div>
       </div>
     </div>
     <button class="btn p" id="b-aj">Guardar ajustes</button>
@@ -225,7 +258,7 @@ var SB_URL = 'https://dzgtyazvqpdmwvwqpvco.supabase.co';
 var SB_KEY = 'sb_publishable_oWYjmVo0OBg5XbV4BDaSWQ_hOWH6czB';
 var T = 'bru_conta';
 var S = { arts: {}, seed: [], cur: null, cat: [], cfgTienda: {}, plus: null, nl: [] };
-var PLUS_DEF = { resenas: [], upsell: [], urgencia: 10, popupSeg: 30, popupDias: 3, invitado: true, envioBarra: true, newsletter: true, nlTexto: 'Recibe una guía de preparación al mes y entérate primero de los lotes nuevos.' };
+var PLUS_DEF = { resenas: [], upsell: [], urgencia: 10, popupSeg: 30, popupDias: 3, invitado: true, envioBarra: true, newsletter: true, nlTexto: '' };
 
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
@@ -358,7 +391,9 @@ function leerEditor(){
 }
 function preview(){
   var a = leerEditor();
-  $('prev').innerHTML = (a.portada ? '<img src="' + esc(a.portada) + '" style="width:100%;max-height:220px;object-fit:cover;margin-bottom:14px">' : '') +
+  var pp = S.cat.filter(function(p){ return p.nombre === a.producto; })[0], ft = a.portada;
+  if (!ft && pp) [pp.img].concat(pp.fotos || []).forEach(function(u){ if (!ft && u && String(u).indexOf('http') === 0) ft = u; });
+  $('prev').innerHTML = (ft ? '<img src="' + esc(ft) + '" style="width:100%;max-height:220px;object-fit:cover;margin-bottom:14px">' : '') +
     '<div style="font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#854f6c">' + esc(a.cat) + '</div>' +
     '<h1>' + esc(a.titulo || 'Título del artículo') + '</h1><div class="lead">' + esc(a.resumen) + '</div>' + md(a.cuerpo);
 }
@@ -467,11 +502,67 @@ function csvNl(){
   a.download = 'bru-newsletter-' + hoy() + '.csv'; a.click();
 }
 
+/* ===================== MERCH ===================== */
+/* Un solo documento: bru_conta id 'merchpub' → { productos: [...] } */
+S.merch = []; S.mcur = -1;
+function cargarMerch(){
+  return sb(T + '?id=eq.merchpub&select=data').then(function(r){ S.merch = (r && r[0] && r[0].data && r[0].data.productos) || []; }).catch(function(e){ toast(e.message, true); });
+}
+function guardarMerchDoc(msg){
+  return upsert({ id: 'merchpub', tipo: 'merch', fecha: hoy(), data: { productos: S.merch } }).then(function(){ toast(msg || 'Guardado ✓'); }).catch(function(e){ toast(e.message, true); throw e; });
+}
+function pintarMerch(){
+  $('m-lista').innerHTML = S.merch.length ? S.merch.map(function(p, i){
+    var f = (p.fotos || [])[0];
+    return '<div class="it' + (i === S.mcur ? ' on' : '') + '" data-i="' + i + '">' +
+      (f ? '<img src="' + esc(f) + '" style="width:40px;height:40px;object-fit:cover;border-radius:6px">' : '<div style="width:40px;height:40px;border-radius:6px;background:var(--card2)"></div>') +
+      '<div class="tt"><b>' + esc(p.nombre || '(sin nombre)') + '</b><small>' + fmt(p.precio) + (p.tallas ? ' · ' + esc(p.tallas) : '') + '</small></div>' +
+      (p.activo === false ? '<span class="pill">oculto</span>' : '<span class="pill ok">visible</span>') + '</div>';
+  }).join('') : '<div class="hint">Todavía no hay productos.</div>';
+  Array.prototype.forEach.call(document.querySelectorAll('#m-lista .it'), function(el){ el.onclick = function(){ abrirMerch(+el.getAttribute('data-i')); }; });
+}
+function abrirMerch(i){
+  var p = S.merch[i]; if (!p) return;
+  S.mcur = i;
+  $('m-form').classList.remove('hide'); $('m-vacio').style.display = 'none';
+  $('m-nom').value = p.nombre || ''; $('m-pre').value = p.precio || '';
+  $('m-tal').value = p.tallas || ''; $('m-ago').value = p.agotadas || '';
+  $('m-eti').value = p.etiqueta || ''; $('m-stk').value = (p.stock === '' || p.stock == null) ? '' : p.stock; $('m-pes').value = p.peso || '';
+  $('m-fot').value = (p.fotos || []).join('\n'); $('m-des').value = p.desc || ''; $('m-det').value = p.detalles || '';
+  $('m-act').checked = p.activo !== false;
+  pintarMerch();
+}
+function leerMerch(){
+  var p = S.merch[S.mcur] || {};
+  return { id: p.id || ('m' + Date.now().toString(36)), nombre: $('m-nom').value.trim(), precio: Math.round(Number($('m-pre').value) || 0),
+    tallas: $('m-tal').value.split(',').map(function(x){ return x.trim(); }).filter(Boolean).join(', '),
+    agotadas: $('m-ago').value.split(',').map(function(x){ return x.trim(); }).filter(Boolean).join(', '),
+    etiqueta: $('m-eti').value.trim(), stock: $('m-stk').value === '' ? '' : Math.max(0, parseInt($('m-stk').value, 10) || 0),
+    peso: Math.max(0, parseInt($('m-pes').value, 10) || 0),
+    fotos: $('m-fot').value.split('\n').map(function(x){ return x.trim(); }).filter(function(x){ return /^https?:\/\//.test(x); }),
+    desc: $('m-des').value.trim(), detalles: $('m-det').value.trim(), activo: $('m-act').checked };
+}
+$('m-nuevo').onclick = function(){ S.merch.push({ id: 'm' + Date.now().toString(36), nombre: '', precio: 0, activo: false, fotos: [] }); abrirMerch(S.merch.length - 1); $('m-nom').focus(); };
+$('m-guardar').onclick = function(){
+  var p = leerMerch();
+  if (!p.nombre){ toast('Ponle un nombre', true); return; }
+  if (p.activo && !p.precio){ toast('Para mostrarlo en la tienda necesita precio', true); return; }
+  if (p.activo && !p.fotos.length){ toast('Agrega al menos una foto (URL)', true); return; }
+  S.merch[S.mcur] = p; guardarMerchDoc().then(pintarMerch);
+};
+$('m-subir').onclick = function(){ var i = S.mcur; if (i < 1) return; var x = S.merch.splice(i, 1)[0]; S.merch.splice(i - 1, 0, x); S.mcur = i - 1; guardarMerchDoc('Orden guardado').then(pintarMerch); };
+$('m-borrar').onclick = function(){
+  var p = S.merch[S.mcur]; if (!p) return;
+  if (!confirm('¿Eliminar "' + (p.nombre || 'este producto') + '" del merch? No se puede deshacer.')) return;
+  S.merch.splice(S.mcur, 1); S.mcur = -1; $('m-form').classList.add('hide'); $('m-vacio').style.display = 'flex';
+  guardarMerchDoc('Producto eliminado').then(pintarMerch);
+};
+
 /* ===================== INICIO ===================== */
 Array.prototype.forEach.call(document.querySelectorAll('#tabs button'), function(b){
   b.onclick = function(){
     Array.prototype.forEach.call(document.querySelectorAll('#tabs button'), function(x){ x.classList.toggle('on', x === b); });
-    ['art', 'res', 'aj', 'nl'].forEach(function(t){ $('t-' + t).classList.toggle('hide', t !== b.getAttribute('data-t')); });
+    ['art', 'me', 'res', 'aj', 'nl'].forEach(function(t){ $('t-' + t).classList.toggle('hide', t !== b.getAttribute('data-t')); });
   };
 });
 ['e-titulo', 'e-cat', 'e-res', 'e-portada', 'e-cuerpo'].forEach(function(id){ $(id).addEventListener('input', preview); });
@@ -486,6 +577,7 @@ $('b-res-add').onclick = agregarRes;
 $('b-aj').onclick = guardarAj;
 $('b-nl-copy').onclick = copiarNl;
 $('b-nl-csv').onclick = csvNl;
+cargarMerch().then(pintarMerch);
 cargar().then(function(){ llenarProductos(); pintarLista(); pintarRes(); pintarAj(); pintarNl(); });
 </script>
 </body>
